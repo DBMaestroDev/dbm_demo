@@ -1,2 +1,4 @@
 # hr_demo
-SampleHR
+Sample HR Scripts for database deployment
+
+BJB - 10-13-17
