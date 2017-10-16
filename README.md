@@ -9,5 +9,6 @@ Reset to version HRS-01
 Update
 =======
 BJB - 10-17-17 Updated for Release V1.0.2 now
+Update for release
 
 
