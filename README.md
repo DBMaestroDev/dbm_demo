@@ -2,6 +2,7 @@
 Sample HR Scripts for database deployment
 
 ### Place scripts in folders named for Jira tickets.
+rename to unique file names
 BJB - 10-13-17
 
 
