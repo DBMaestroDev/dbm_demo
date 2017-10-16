@@ -7,6 +7,6 @@ Sample HR Scripts for database deployment
 rename to unique file names
 Reset to version HRS-01
 BJB - 10-13-17
-
+Update
 
 
