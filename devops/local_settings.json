@@ -1,0 +1,26 @@
+{
+  "### Instructions ###": 
+    "Enter the local settings items for your installation",
+  "connections" : {
+    "repository" : {
+      "user" : "twmanagedb",
+      "password_enc" : "YldGdVlXZGxJekl3TURrPV9fc2o4a2wzTE03N2c5MDN1Z2JuX0tHPQ==",
+      "connect" : "52.168.121.135:1521/orcl"
+    },
+    "remote" : {
+      "user" : "dbmaestro_teamwork",
+      "password_enc" : "Remote#2009",
+      "connect" : "52.168.121.135:1521/orcl"
+    },
+    "remote__mp_hr__qa" : {
+      "user" : "dbmaestro_teamwork",
+      "password_enc" : "Remote#2009",
+      "connect" : "localhost:1521/orcl"
+    }
+  },
+  "base_schema_map" : {
+    "MP_Dev" : "MP_Dev", 
+    "MP_Dev2" : "MP_Dev2", 
+    "MP_Release" : "MP_SIT"
+  }
+}

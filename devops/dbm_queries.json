@@ -1,0 +1,107 @@
+{
+  "monitored_dbs" : {
+    "name" : "Monitored Databases",
+    "usage" : "dbm_api.bat action=monitored_dbs",
+    "queries" : 
+    [
+		{"connection" : "repo",
+		"query": "select d.id, i.oracledbid, i.servermachinename, d.dbname, d.serverinstanceid, i.serviceinstancename from TBLMONITOREDDATABASES d INNER JOIN TBLMONITOREDSERVERINSTANCES i on i.INSTANCEID = d.SERVERINSTANCEID",
+		"output": {
+			"DBName": 3,
+			"InstanceName": 5,
+			"Machine": 2,
+			"DBID": 1 
+			}
+		}
+	  ]
+  },
+  "checked_out_objects" : {
+    "name" : "Remote Databases",
+    "usage" : "dbm_api.bat action=remote_dbs ARG1='<remote_connection>' (like this: @dbmtemplate:1521/orcl)",
+    "queries" : 
+    [
+		{"connection" : "remote",
+		"query": "select schemaname, objectname, SCHEMACHECKEDOUTOSUSER, objecttype from DBMAESTRO_TEAMWORK.TBLLOCKINGDATA where schemacheckedoutosuser is NOT NULL",
+		"output": {
+			"SchemaName": 0,
+			"ObjectName": 1,
+			"CheckoutUser": 2,
+			"Type": 3 
+			}
+		}
+	  ]
+  },
+  "packages" : {
+      "name" : "Package History for Pipeline",
+      "usage" : "dbm_api.bat action=packages ARG1=<pipeline_name> ARG2=<path_to_target_json>",
+    "queries" : 
+    [
+  		{ "connection" : "repo",
+  		"query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY'), s.name as script, s.SCRIPT_ID, v.IS_ENABLED as enabled, v.WAS_DEPLOYED as deployed from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.name, jt.excution_order",
+  		"post_process" : "create_control_json",
+  		"output": {
+        "ID": [0,4],
+  		  "Version": [1,20],
+  		  "CreatedAt": [2,15],
+  		  "Script": [3,35],
+		  "ScriptID" : [4,5],
+      "enabled" : [5,5],
+      "deployed" : [6,5]
+  		  }
+  		}
+  	]
+  },
+    "package_export" : {
+      "name" : "Exports script content from one pipeline to another. Uses export_control.json file which should be in target staging folder",
+      "usage" : "dbm_api.bat action=package_export ARG1=<source_pipeline> ARG2=<target_pipeline>",
+    "queries" : 
+    [
+  		{ "connection" : "repo",
+  		"query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY') as created_at, s.name as script, s.SCRIPT_ID, s.script_sorce_data_reference, p.FLOWNAME, jt.excution_order, v.IS_ENABLED as enabled, v.WAS_DEPLOYED as deployed from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.name, jt.excution_order",
+  		"post_process" : "export_packages",
+  		"output": {
+        "ID": [0,4],
+  		  "Version": [1,20],
+  		  "CreatedAt": [2,15],
+  		  "Script": [3,25],
+		  "ScriptID" : [4,5],
+      "enabled" : [5,5],
+      "deployed" : [6,5]
+  		  }
+  		}
+  	]
+  }, 
+    "package_content" : {
+      "name" : "Script content enter Pipeline, Version and target path",
+      "usage" : "dbm_api.bat action=package_content ARG1=<pipeline> ARG2=<Version>",
+  	"queries" : 
+    [
+  		{ "connection" : "repo",
+  		  "query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY') as created_at, s.name as script, s.SCRIPT_ID, s.script_sorce_data_reference, p.FLOWNAME, jt.excution_order from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.name = 'ARG2' order by v.name, jt.excution_order",
+  		  "post_process" : "show_script",
+  		  "output": {
+            "ID": [0,4],
+  		    "Version": [1,20],
+  		    "CreatedAt": [2,15],
+  		    "Script": [3,25],
+		    "ScriptID" : [4,5]
+  		  }
+  		}
+  	]
+  },
+    "pipline_script_path" : {
+      "name" : "Project info enter Pipeline/Project name",
+      "usage" : "dbm_api.bat action=pipeline_script_path ARG1=<pipeline>",
+  	"queries" : 
+    [
+  		{ "connection" : "repo",
+  		  "query": "select f.flowid, f.flowname,s.scriptoutputfolder from TWMANAGEDB.TBL_FLOW f inner join TWMANAGEDB.TBL_FLOW_SETTINGS s on f.flowid = s.flowid where f.flowname = 'ARG1'",
+  		  "output": {
+            "ID": [0,4],
+  		    "Name": [1,20],
+  		    "ScriptPath": [2,35]
+  		  }
+  		}
+  	]
+  }
+}
