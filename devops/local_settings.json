@@ -1,16 +1,21 @@
 {
   "### Instructions ###": 
     "Enter the local settings items for your installation",
-  "connections" : {
+    "paths" : {
+      "base_path" : "C:\\Automation",
+      "automation_path" : "\"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+      "staging_path" : ""
+    },
+    "connections" : {
     "repository" : {
       "user" : "twmanagedb",
-      "password_enc" : "YldGdVlXZGxJekl3TURrPV9fc2o4a2wzTE03N2c5MDN1Z2JuX0tHPQ==",
-      "connect" : "52.168.121.135:1521/orcl"
+      "password_enc" : "manage#2009",
+      "connect" : "pocintegration:1521/orcl"
     },
     "remote" : {
       "user" : "dbmaestro_teamwork",
       "password_enc" : "Remote#2009",
-      "connect" : "52.168.121.135:1521/orcl"
+      "connect" : "localhost:1521/orcl"
     },
     "remote__mp_hr__qa" : {
       "user" : "dbmaestro_teamwork",
@@ -18,9 +23,33 @@
       "connect" : "localhost:1521/orcl"
     }
   },
-  "base_schema_map" : {
-    "MP_Dev" : "MP_Dev", 
-    "MP_Dev2" : "MP_Dev2", 
-    "MP_Release" : "MP_SIT"
+  "branch_map" : {
+    "release" : [
+      {
+      "pipeline" : "MP_RELEASE",
+      "base_env" : "SIT",
+      "base_schema" : "MP_SIT"
+      }
+    ],
+    "develop" : [
+      {
+      "pipeline" : "MP_DEV",
+      "base_env" : "DEV",
+      "base_schema" : "MP_DEV"
+      },
+      {
+      "pipeline" : "MP_DEV2",
+      "base_env" : "DEV",
+      "base_schema" : "MP_DEV2"
+      }
+    ],        
+    "hotfix" : [
+      {
+      "pipeline" : "MP_RELEASE",
+      "base_env" : "SIT",
+      "base_schema" : "MP_SIT"
+      }
+    ]
   }
 }
+

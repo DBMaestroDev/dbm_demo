@@ -1,5 +1,5 @@
-# hr_demo
-Sample HR Scripts for database deployment
+# dbm_demo
+Sample Scripts and devops code for database deployment
 
 ### Place scripts in folders named for Versions in Versions
 ### Place scripts in folders named for Jira tickets in Issues
@@ -15,4 +15,5 @@ Update for release
 BJB 1/10/18 Reorg directories for multi-appilication
 Added package directory
 
+BJB 1/11/18 Reorg folders for multiple apps
 
