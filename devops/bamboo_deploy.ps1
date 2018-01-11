@@ -35,6 +35,6 @@ $java_cmd -$dbm_task -ProjectName $pipeline -EnvName $env -Server $server -packa
 write-Host "#=> Running: $dbm_cmd"
 [ScriptBlock]$script = [ScriptBlock]::Create($dbm_cmd)
 Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock $script -ErrorVariable errmsg
-if ($LASTEXITCODE -ne 0) {
-  exit(1)
-}
+#if ($LASTEXITCODE -ne 0) {
+#  exit(1)
+#}
