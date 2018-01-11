@@ -10,3 +10,6 @@ $version = $Env:bamboo_dbm_version
 $cmd = "$automation_dir\\bamboo_groovy.bat"
 
 & $cmd action=$action
+if ($LASTEXITCODE -ne 0) {
+  exit(1)
+}

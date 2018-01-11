@@ -17,9 +17,9 @@ arg_map = [:]
 file_contents = [:]
 contents = [:]
 local_settings = [:]
-curl_cmd = "C:\\Automation\\Utility\\curl.exe"
+curl_cmd = "C:\\Automation\\dbm_demo\\devops\\lib\\curl.exe"
 sep = "\\" //FIXME Reset for windows
-version_file = "C:\\Automation\\Utility\\${pipeline}_version.txt"
+version_file = "C:\\Automation\\dbm_demo\\devops\\${pipeline}_version.txt"
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")
@@ -205,7 +205,7 @@ def get_git_version(repo_dir) {
   def git_reg = ~/.*\[Version: (.*)\].*/
   def git_cmd = "@cd ${repo_dir} && @git log -1 HEAD --pretty=format:%s"
   println "Executing: ${git_cmd}"
-  def version = ""
+  def version = "NONE"
   def git_message = "cmd /c ${git_cmd}".execute().text
 	println "git OUTPUT\r\n${git_message}"
   def result = git_message.replaceFirst(git_reg, '$1')
