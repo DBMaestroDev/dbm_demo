@@ -75,7 +75,7 @@ def package_version_folder(){
   }
   set_version_properties(version)
   def zip_file = package_path_from_version(version, source_dir)
-  create_zip_file(zip_file, "${source_dir}${sep}versions${sep}${version}")
+  create_zip_file(zip_file, "${source_dir}${sep}${app_name}${sep}versions${sep}${version}")
   
 }
 
