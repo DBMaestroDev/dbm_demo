@@ -17,9 +17,11 @@ arg_map = [:]
 file_contents = [:]
 contents = [:]
 local_settings = [:]
-curl_cmd = "C:\\Automation\\dbm_demo\\devops\\lib\\curl.exe"
+java_cmd = "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\""
+automation_dir = "C:\\Automation\\dbm_demo\\devops"
+curl_cmd = "${automation_dir}\\lib\\curl.exe"
 sep = "\\" //FIXME Reset for windows
-version_file = "C:\\Automation\\dbm_demo\\devops\\${pipeline}_version.txt"
+version_file = "${automation_dir}\\${pipeline}_version.txt"
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")
@@ -58,6 +60,8 @@ def package_version_folder(){
 	def git_info = System.getenv("bamboo_repository_git_branch")
 	def pipeline = System.getenv("bamboo_dbm_pipeline")
   def build_info = System.getenv("bamboo_buildPlanName")
+  def dbm_base_path = System.getenv("bamboo_dbm_base_path")
+  def dbm_base_schema = System.getenv("bamboo_dbm_base_schema")
 	def version = System.getenv("bamboo_dbm_version")
 	def source_dir = System.getenv("bamboo_working_directory")
   def git_message = ""
@@ -76,7 +80,7 @@ def package_version_folder(){
   set_version_properties(version)
   def zip_file = package_path_from_version(version, source_dir)
   create_zip_file(zip_file, "${source_dir}${sep}${app_name}${sep}versions${sep}${version}")
-  
+  dbm_package_and_deploy(zip_file)
 }
 
 def upload_artifact() {
@@ -108,6 +112,16 @@ def upload_artifact() {
 	println "git OUTPUT\r\n${result}"
   
 
+}
+
+def dbm_package_and_deploy(file_path){
+	def pipeline = System.getenv("bamboo_dbm_pipeline")
+  def dbm_base_schema = System.getenv("bamboo_dbm_base_schema")
+  def script_file = "${automation_dir}\\bamboo_deploy.ps1"
+  def ps_cmd = "cd ${automation_dir} && powershell.exe -executionpolicy bypass -file $script_file"
+  println "Executing: ${ps_cmd}"
+  def outtxt = "cmd /c ${ps_cmd} 2>&1".execute().text
+  println "Powershell Output:\r\n${outtxt}"
 }
 
 // #--------- UTILITY ROUTINES ------------#
