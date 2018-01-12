@@ -23,6 +23,7 @@ automation_dir = "C:\\Automation\\dbm_demo\\devops"
 curl_cmd = "${automation_dir}\\lib\\curl.exe"
 sep = "\\" //FIXME Reset for windows
 version_file = "${automation_dir}\\${pipeline}_version.txt"
+package_version_path = ""
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")
@@ -81,7 +82,7 @@ def package_version_folder(){
   set_version_properties(version)
   def zip_file = package_path_from_version(version, source_dir)
   create_zip_file(zip_file, "${source_dir}${sep}${app_name}${sep}versions${sep}${version}")
-  //dbm_package_and_deploy(zip_file)
+  dbm_package_and_deploy(zip_file)
 }
 
 def upload_artifact() {
@@ -111,20 +112,23 @@ def upload_artifact() {
   }
   def result = "cmd /c ${cmd}".execute().text
 	println "git OUTPUT\r\n${result}"
-  
-
 }
 
 def dbm_package_and_deploy(file_path){
 	def pipeline = System.getenv("bamboo_dbm_pipeline")
   def dbm_base_schema = System.getenv("bamboo_dbm_base_schema")
-  def script_file = "${automation_dir}\\bamboo_deploy.ps1"
-  def ps_cmd = "cd ${automation_dir} && powershell.exe -executionpolicy bypass -file $script_file"
+  def script_file = "${automation_dir}\\copy_remote_file.ps1"
+  def ps_cmd = "cd ${automation_dir} && powershell.exe -executionpolicy bypass -file $script_file $file_path $dbm_base_schema"
   println "Executing: ${ps_cmd}"
   def outtxt = "cmd /c ${ps_cmd} 2>&1".execute().text
   println "Powershell Output:\r\n${outtxt}"
 }
 
+def scp_file_xfer(file_path, target_path){
+  // Uses scp installed on pocintegration
+  def scp = "C:\\Automation\\OpenSSH-Win64\\scp.exe"
+  
+}
 // #--------- UTILITY ROUTINES ------------#
 def out_vals(val_obj){
   def val = ""
@@ -241,7 +245,8 @@ def set_version_properties(version){
 
 def package_path_from_version(version, path){
   def zip_file = "V${version}.zip"
-  return "${path}${sep}package${sep}${zip_file}"  
+  package_version_path = "${path}${sep}package${sep}${zip_file}"  
+  return(package_version_path)
 }
 
 def path_from_pipeline(pipe_name){
