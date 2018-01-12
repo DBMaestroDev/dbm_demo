@@ -13,6 +13,7 @@ def base_path = new File(getClass().protectionDomain.codeSource.location.path).p
 def jsonSlurper = new JsonSlurper()
 def settings_file = "local_settings.json"
 def pipeline = "HumanResources"
+app_name = "hr_demo"
 arg_map = [:]
 file_contents = [:]
 contents = [:]
