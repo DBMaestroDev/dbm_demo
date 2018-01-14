@@ -9,7 +9,8 @@ param (
 $localuser = "dbmguest"
 $server = "10.0.0.12"
 $domain = "DBMTemplate"
-$username = "$domain\$env:bamboo_dbm_username"
+$user = "$env:bamboo_dbm_username"
+$username = "$domain\$user"
 $password = "$env:bamboo_dbm_password"
 $auto_path = "$env:bamboo_dbm_base_path"
 $automation_path = "$env:bamboo_dbm_automation_dir"
@@ -27,11 +28,11 @@ $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($us
 
 write-Host "#----- Release $env:Bamboo_deploy_version -----#"
 write-Host "# Copying file: $scp_package_source"
-write-Host "#           To: \\$server:$auto_path\$base_schema"
+write-Host "#           To: \\${$server}:${$auto_path}\$base_schema"
 [String]$dbm_cmd = @"
 C:;
 cd $auto_path\$base_schema
-C:\Automation\OpenSSH-Win64\scp.exe $username@pocintegration:/$scp_package_source .
+C:\Automation\OpenSSH-Win64\scp.exe $user@pocintegration:/$scp_package_source .
 "@
 # invoke
 write-Host "#=> Running: $dbm_cmd"
