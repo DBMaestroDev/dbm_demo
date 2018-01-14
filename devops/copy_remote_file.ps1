@@ -1,10 +1,10 @@
-#  Copy files and validate
-# Must run as administrator
-Enable-PsRemoting -Force
 param (
   [string]$version_path,
   [string]$schema_path
 )
+#  Copy files and validate
+# Must run as administrator
+Enable-PsRemoting -Force
 # Build a credential - you can do this in another file for security
 $localuser = "dbmguest"
 $server = "10.0.0.12"
