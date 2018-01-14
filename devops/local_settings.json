@@ -2,7 +2,7 @@
   "### Instructions ###": 
     "Enter the local settings items for your installation",
     "paths" : {
-      "base_path" : "C:\\Automation",
+      "base_path" : "C:\\Automation\\dbm_demo",
       "automation_path" : "\"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
       "staging_path" : ""
     },
@@ -10,46 +10,29 @@
     "repository" : {
       "user" : "twmanagedb",
       "password_enc" : "manage#2009",
-      "connect" : "pocintegration:1521/orcl"
+      "connect" : "dbmtemplate:1521/orcl"
     },
     "remote" : {
       "user" : "dbmaestro_teamwork",
       "password_enc" : "Remote#2009",
-      "connect" : "localhost:1521/orcl"
-    },
-    "remote__mp_hr__qa" : {
-      "user" : "dbmaestro_teamwork",
-      "password_enc" : "Remote#2009",
-      "connect" : "localhost:1521/orcl"
+      "connect" : "dbmtemplate:1521/orcl"
     }
   },
   "branch_map" : {
     "release" : [
       {
-      "pipeline" : "MP_RELEASE",
-      "base_env" : "SIT",
-      "base_schema" : "MP_SIT"
+      "pipeline" : "HumanResources",
+      "base_env" : "HR_INT",
+      "base_schema" : "HR_INTEGRATION"
       }
     ],
     "develop" : [
       {
-      "pipeline" : "MP_DEV",
-      "base_env" : "DEV",
-      "base_schema" : "MP_DEV"
-      },
-      {
-      "pipeline" : "MP_DEV2",
-      "base_env" : "DEV",
-      "base_schema" : "MP_DEV2"
+      "pipeline" : "HR_CI",
+      "base_env" : "DIT",
+      "base_schema" : "HR_INFRA"
       }
     ],        
-    "hotfix" : [
-      {
-      "pipeline" : "MP_RELEASE",
-      "base_env" : "SIT",
-      "base_schema" : "MP_SIT"
-      }
-    ]
   }
 }
 

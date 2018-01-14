@@ -3,8 +3,10 @@
 
 # Static Variables
 pipeline=HumanResources
-base_path=C:\\pipelinescript\\HumanResources
+base_path=C:\\pipelinescript
 base_schema=HR_INTEGRATION
+ci_pipeline=HR_CI
+ci_base_schema=HR_INFRA
 artifactory_url=http://pocintegration:8081/artifactory/dbm_devops
 artifactory_user=admin
 username=dbmguest

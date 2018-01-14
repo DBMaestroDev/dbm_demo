@@ -12,15 +12,15 @@ $domain = "DBMTemplate"
 $user = "$env:bamboo_dbm_username"
 $username = "$domain\$user"
 $password = "$env:bamboo_dbm_password"
-$auto_path = "$env:bamboo_dbm_base_path"
+$pipeline = "$env:bamboo_dbm_ci_pipeline"
+$auto_path = "$env:bamboo_dbm_base_path\$pipeline"
 $automation_path = "$env:bamboo_dbm_automation_dir"
 $java_cmd = "$env:bamboo_dbm_java_cmd"
-$pipeline = "$env:bamboo_dbm_pipeline"
 $dbm_task = "Package"
 $version = "$env:bamboo_dbm_version"
 $env = "$env:bamboo_dbm_environment"
 $scp_package_source = ($version_path -replace "\\", "/")
-$base_schema = "HR_INTEGRATION"
+$base_schema = "$env:bamboo_dbm_ci_base_schema"
 write-host "#=> Changing user to $username"
 
 $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($username,(ConvertTo-SecureString -String $password -AsPlainText -Force))
@@ -28,7 +28,7 @@ $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($us
 
 write-Host "#----- Release $env:Bamboo_deploy_version -----#"
 write-Host "# Copying file: $scp_package_source"
-write-Host "#           To: \\${$server}:${$auto_path}\$base_schema"
+write-Host "#           To: \\$($server):$($auto_path)\$base_schema"
 [String]$dbm_cmd = @"
 C:;
 cd $auto_path\$base_schema

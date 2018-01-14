@@ -115,8 +115,9 @@ def upload_artifact() {
 }
 
 def dbm_package_and_deploy(file_path){
-	def pipeline = System.getenv("bamboo_dbm_pipeline")
-  def dbm_base_schema = System.getenv("bamboo_dbm_base_schema")
+  // Package for the CI deploy
+	def pipeline = System.getenv("bamboo_dbm_ci_pipeline")
+  def dbm_base_schema = System.getenv("bamboo_dbm_ci_base_schema")
   def script_file = "${automation_dir}\\copy_remote_file.ps1"
   def ps_cmd = "cd ${automation_dir} && powershell.exe -executionpolicy bypass -file $script_file $file_path $dbm_base_schema"
   message_box("Deploying to CI Pipeline")
