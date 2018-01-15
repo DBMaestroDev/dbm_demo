@@ -1,7 +1,7 @@
 #  Copy files and validate
 # Must run as administrator
 Enable-PsRemoting -Force
-write-Host "#----- Release $env:Bamboo_deploy_version -----#"
+write-Host "#----- DBmaestro Deploy Version: $env:bamboo_dbm_version -----#"
 
 # Build a credential - you can do this in another file for security
 $localuser = "dbmguest"
