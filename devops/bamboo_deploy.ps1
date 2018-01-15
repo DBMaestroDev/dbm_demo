@@ -1,20 +1,28 @@
 #  Copy files and validate
 # Must run as administrator
 Enable-PsRemoting -Force
+$ci_deploy = $False
 write-Host "#----- DBmaestro Deploy Version: $env:bamboo_dbm_version -----#"
-
+if (-not (Test-Path env:bamboo_buildKey)) { $ci_deploy = $True }
 # Build a credential - you can do this in another file for security
 $localuser = "dbmguest"
 $server = "10.0.0.12"
 $domain = "DBMTemplate"
 $username = "$domain\$env:bamboo_dbm_username"
 $password = "$env:bamboo_dbm_password"
-$pipeline = "$env:bamboo_dbm_pipeline"
-$auto_path = "$env:bamboo_dbm_base_path\$pipeline"
+if ($ci_deploy){
+  $pipeline = "$env:bamboo_dbm_ci_pipeline"
+  $base_path = "$env:bamboo_dbm_ci_base_path"
+  $env = "$env:bamboo_dbm_ci_environment"
+}else{
+  $pipeline = "$env:bamboo_dbm_pipeline"
+  $base_path = "$env:bamboo_dbm_base_path"
+  $env = "$env:bamboo_dbm_environment"
+}
+$auto_path = "$base_path\$pipeline"
 $java_cmd = "$env:bamboo_dbm_java_cmd"
 $dbm_task = "Upgrade"
 $version = "$env:bamboo_dbm_version"
-$env = "$env:bamboo_dbm_environment"
 
 write-host "#=> Changing user to $username"
 
