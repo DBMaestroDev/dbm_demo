@@ -9,12 +9,12 @@
     "connections" : {
     "repository" : {
       "user" : "twmanagedb",
-      "password_enc" : "manage#2009",
+      "password" : "manage#2009",
       "connect" : "dbmtemplate:1521/orcl"
     },
     "remote" : {
       "user" : "dbmaestro_teamwork",
-      "password_enc" : "Remote#2009",
+      "password" : "Remote#2009",
       "connect" : "dbmtemplate:1521/orcl"
     }
   },
