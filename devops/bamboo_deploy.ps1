@@ -10,14 +10,13 @@ $server = "10.0.0.12"
 $domain = "DBMTemplate"
 $username = "$domain\$env:bamboo_dbm_username"
 $password = "$env:bamboo_dbm_password"
+$pipeline = "$env:bamboo_dbm_pipeline"
+$base_path = "$env:bamboo_dbm_base_path"
+$env = "$env:bamboo_dbm_environment"
+
 if ($ci_deploy){
   $pipeline = "$env:bamboo_dbm_ci_pipeline"
-  $base_path = "$env:bamboo_dbm_ci_base_path"
   $env = "$env:bamboo_dbm_ci_environment"
-}else{
-  $pipeline = "$env:bamboo_dbm_pipeline"
-  $base_path = "$env:bamboo_dbm_base_path"
-  $env = "$env:bamboo_dbm_environment"
 }
 $auto_path = "$base_path\$pipeline"
 $java_cmd = "$env:bamboo_dbm_java_cmd"
