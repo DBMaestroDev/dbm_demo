@@ -3,7 +3,7 @@
 Enable-PsRemoting -Force
 $ci_deploy = $False
 write-Host "#----- DBmaestro Deploy Version: $env:bamboo_dbm_version -----#"
-if (-not (Test-Path env:bamboo_buildKey)) { $ci_deploy = $True }
+if (-not (Test-Path $env:bamboo_buildKey)) { $ci_deploy = $True }
 # Build a credential - you can do this in another file for security
 $localuser = "dbmguest"
 $server = "10.0.0.12"
