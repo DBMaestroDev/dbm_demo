@@ -304,7 +304,7 @@ def out_vals(val_obj){
 
 def get_export_json_file(target, path_only = false){
   def contents = [:]  
-  def export_path_temp += "${local_settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
+  def export_path_temp = "${local_settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
   println "JSON Export config: ${export_path_temp}"
   if(path_only){
     return export_path_temp
