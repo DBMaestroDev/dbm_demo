@@ -11,6 +11,7 @@ $password = "$env:bamboo_dbm_password"
 $source_pipeline = "$env:bamboo_Source_Pipeline"
 $target_pipeline = "$env:bamboo_Target_Pipeline"
 $export_packages = "$env:bamboo_Export_Packages"
+$auto_path = "C:\Automation\dbm_demo\devops"
 $script_file = "dbm_api.bat"
 
 $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($username,(ConvertTo-SecureString -String $password -AsPlainText -Force))
@@ -18,7 +19,7 @@ $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($us
 
 write-Host "#----- Remote call to DBMconnect -----#"
 write-Host "# Listing Packages"
-write-Host "# Conn: \\$($server):$($auto_path)\\$script_file"
+write-Host "# Conn: \\$($server):$($auto_path)\$script_file"
 [String]$dbm_cmd = @"
 C:;
 cd $auto_path
