@@ -8,13 +8,9 @@ $domain = "DBMTemplate"
 $user = "$env:bamboo_dbm_username"
 $username = "$domain\$user"
 $password = "$env:bamboo_dbm_password"
-$automation_path = "$env:bamboo_dbm_automation_dir"
 $source_pipeline = "$env:bamboo_Source_Pipeline"
 $target_pipeline = "$env:bamboo_Target_Pipeline"
 $export_packages = "$env:bamboo_Export_Packages"
-$java_cmd = "java -jar \"C:\Program Files (x86)\DBmaestro\TeamWork\TeamWorkOracleServer\Automation\DBmaestroAgent.jar\""
-$dbm_task = "Package"
-$auto_path = "C:\\Automation\\dbm_demo\\devops"
 $script_file = "dbm_api.bat"
 
 $cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($username,(ConvertTo-SecureString -String $password -AsPlainText -Force))
