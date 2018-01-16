@@ -25,7 +25,7 @@ C:;
 cd $auto_path
 set TARGET_PIPELINE=$target_pipeline
 set EXPORT_PACKAGES=$export_packages
-$script_file action=packages ARG1=$source_pipeline
+$auto_path\$script_file action=packages ARG1=$source_pipeline
 "@
 # invoke
 write-Host "#=> Running: $dbm_cmd"
@@ -39,7 +39,7 @@ C:;
 cd "$auto_path" 
 set TARGET_PIPELINE=$target_pipeline
 set EXPORT_PACKAGES=$export_packages
-$script_file action=export_packages ARG1=$source_pipeline
+$auto_path\$script_file action=export_packages ARG1=$source_pipeline
 "@
 # invoke
 write-Host "#=> Running: $dbm_cmd"
@@ -55,7 +55,7 @@ if ($LASTEXITCODE -ne 0) {
 C:;
 cd "$auto_path" 
 set TARGET_PIPELINE=$target_pipeline
-$script_file action=dbm_package
+$auto_path\$script_file action=dbm_package
 "@
 # invoke
 write-Host "#=> Running: $dbm_cmd"
