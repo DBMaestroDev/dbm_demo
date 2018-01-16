@@ -170,7 +170,7 @@ def export_packages(query_string, conn){
   }
   def target_schema = get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
-  }
+
   message_box("Exporting Versions")
   println "JSON Export config: ${export_path_temp}"
   contents = get_export_json_file(target_pipeline)
