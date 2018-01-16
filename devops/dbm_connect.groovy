@@ -54,6 +54,9 @@ if (arg_map.containsKey("action")) {
     case "create_control_json":
       create_control_json(query_string)
       break
+    case "dbm_package":
+      dbm_package
+      break
     default:
       perform_query()
       break
@@ -287,6 +290,17 @@ def create_control_json(query_string, conn){
     writer << JsonOutput.prettyPrint(JsonOutput.toJson(result))
   } 
   
+}
+
+def dbm_package() {
+  def java_cmd = local_settings["general"]["java_cmd"]
+  def server = local_settings["general"]["server"]
+  def target_pipeline = System.getenv("TARGET_PIPELINE")
+  def base_path = local_settings["general"]["staging_path"]
+  def base_schema = get_target_schema(target_pipeline)
+  println "#-------- Performing DBmPackage command ----------#"
+  println "# Cmd: ${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server}"
+  def results = "${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server} ".execute().text
 }
 
 // #--------- UTILITY ROUTINES ------------#

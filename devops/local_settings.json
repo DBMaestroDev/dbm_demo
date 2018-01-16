@@ -1,10 +1,11 @@
 {
   "### Instructions ###": 
     "Enter the local settings items for your installation",
-    "paths" : {
+    "general" : {
       "base_path" : "C:\\Automation\\dbm_demo",
-      "automation_path" : "\"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
-      "staging_path" : ""
+      "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+      "staging_path" : "C:\\pipelinescript",
+      "server" : "dbmguest"
     },
     "connections" : {
     "repository" : {
