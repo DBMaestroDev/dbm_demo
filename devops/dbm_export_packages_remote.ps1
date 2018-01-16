@@ -39,7 +39,7 @@ C:;
 cd "$auto_path" 
 set TARGET_PIPELINE=$target_pipeline
 set EXPORT_PACKAGES=$export_packages
-$auto_path\$script_file action=export_packages ARG1=$source_pipeline
+$auto_path\$script_file action=package_export ARG1=$source_pipeline
 "@
 # invoke
 write-Host "#=> Running: $dbm_cmd"

@@ -48,12 +48,6 @@ println "... done"
 
 if (arg_map.containsKey("action")) {
   switch (arg_map["action"].toLowerCase()) {
-    case "export_packages":
-      export_packages(query_string)
-      break
-    case "create_control_json":
-      create_control_json(query_string)
-      break
     case "dbm_package":
       dbm_package
       break
