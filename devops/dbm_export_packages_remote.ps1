@@ -45,9 +45,9 @@ $auto_path\$script_file action=package_export ARG1=$source_pipeline
 write-Host "#=> Running: $dbm_cmd"
 [ScriptBlock]$script = [ScriptBlock]::Create($dbm_cmd)
 Invoke-Command -ComputerName $server -Credential $cred -ScriptBlock $script -ErrorVariable errmsg
-if ($LASTEXITCODE -ne 0) {
-  exit(1)
-}
+#if ($LASTEXITCODE -ne 0) {
+#  exit(1)
+#}
 
 # Now run the packaging command
 # Build with here string

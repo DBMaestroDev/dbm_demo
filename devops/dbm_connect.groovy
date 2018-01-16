@@ -161,26 +161,19 @@ def export_packages(query_string, conn){
   def contents = [:]
   sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
   def src = ""
-  def do_it = false
   def cur_ver = ""
-  def x_path_temp = ""
-  def target_pipeline = ""
   def source_pipeline = ""
-  def target_schema = ""
-  
-  if (!arg_map.containsKey("ARG2")){
-    println "Error: Give path to control.json as 2nd argument"
+  def target_pipeline = System.getenv("TARGET_PIPELINE")
+  if(! target_pipeline){
+    println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
   }
-  message_box("Exporting Versions")
-  println "JSON Export config: ${arg_map["ARG2"]}"
-  target_pipeline = System.getenv("TARGET_PIPELINE")
-  target_schema = get_target_schema(target_pipeline)
-  x_path_temp = arg_map["ARG2"].replaceAll("_SCHEMA_",target_schema)
-  def json_file_obj = new File( x_path_temp )
-  if (json_file_obj.exists() ) {
-    contents = jsonSlurper.parseText(json_file_obj.text)  
+  def target_schema = get_target_schema(target_pipeline)
+  def export_path_temp = get_export_json_file(target_pipeline, true)
   }
+  message_box("Exporting Versions")
+  println "JSON Export config: ${export_path_temp}"
+  contents = get_export_json_file(target_pipeline)
   def target_path = contents["export_path"]
   def base_path = new File(target_path).getParent()
   ensure_dir("${base_path}${sep}hold")
@@ -226,19 +219,22 @@ def create_control_json(query_string, conn){
   def seed_list = [:]
   def current_dir = new File(".").getAbsolutePath()
   def p_list = ""
-  def x_path_temp = ""
   def target_pipeline = System.getenv("TARGET_PIPELINE")
-  def source_pipeline = ""
+  def source_pipeline = System.getenv("SOURCE_PIPELINE")
   def target_schema = ""
-  if ( !(System.getenv("EXPORT_PACKAGES") == null) ) { p_list = System.getenv("EXPORT_PACKAGES") }
-  if ( !(arg_map["ARG2"] == null) ) { 
-    source_pipeline = System.getenv("SOURCE_PIPELINE")
-    println "ARG2: ${arg_map["ARG2"]}, Targ: ${target_pipeline}"
-    target_schema = get_target_schema(target_pipeline)
-    x_path_temp = arg_map["ARG2"].replaceAll("_SCHEMA_",target_schema)
-  }else{
+  if ( System.getenv("EXPORT_PACKAGES") != null ) { p_list = System.getenv("EXPORT_PACKAGES") }
+  if ( (arg_map["ARG1"] != null) ) { 
+    source_pipeline = arg_map["ARG1"]
+  }else if(source_pipeline == null){
+    println "Source Pipeline must be in ARG1"
     return true
   }
+  def export_path_temp = get_export_json_file(target_pipeline, true)
+  def ex_path = new File(export_path_temp).getParent()
+  if ( ex_path != null ) { 
+    println "Destination: ${export_path_temp}"
+  } 
+  
   if( p_list && p_list != "" ){
     p_list.split(",").each{ 
       if (it.contains("_REMAP_")) {
@@ -258,11 +254,6 @@ def create_control_json(query_string, conn){
     target_versions.add("${rec.version}".toString())
   }
   
-  def ex_path = new File(x_path_temp).getParent()
-  if ( ex_path != null ) { 
-    println "Destination: ${ex_path}"
-  } 
-  result["export_path"] = ex_path
   result["packages"] = [:]
   conn.eachRow(query_string){ rec -> 
     def ver = "${rec.version}".toString().trim()
@@ -278,8 +269,8 @@ def create_control_json(query_string, conn){
       }
     }
   }
-  println "JSON control file: ${result["export_path"]}${sep}export_control.json"
-  val_file = new File(result["export_path"],"export_control.json")
+  println "JSON control file: ${export_path_temp}"
+  val_file = new File(export_path_temp)
   val_file.withWriter('utf-8') { writer -> 
     writer << JsonOutput.prettyPrint(JsonOutput.toJson(result))
   } 
@@ -309,6 +300,20 @@ def out_vals(val_obj){
     siz = 15
   }
   return [val,siz]
+}
+
+def get_export_json_file(target, path_only = false){
+  def contents = [:]  
+  def export_path_temp += "${local_settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
+  println "JSON Export config: ${export_path_temp}"
+  if(path_only){
+    return export_path_temp
+  }
+  def json_file_obj = new File( export_path_temp )
+  if (json_file_obj.exists() ) {
+    contents = jsonSlurper.parseText(json_file_obj.text)  
+  }
+  return contents
 }
 
 def get_target_schema(cur_pipeline){
