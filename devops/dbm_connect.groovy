@@ -105,11 +105,11 @@ def perform_query() {
     }
     separator()
     println ""
+    conn.close()
     if (query.containsKey("post_process")) {
       post_process(query["post_process"], query_stg, conn)
     }
 
-    conn.close()
   }
 }
 
@@ -170,7 +170,8 @@ def export_packages(query_string, conn){
   }
   def target_schema = get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
-
+  def conn = sql_connection(query["connection"].toLowerCase())
+  
   message_box("Exporting Versions")
   println "JSON Export config: ${export_path_temp}"
   contents = get_export_json_file(target_pipeline)
@@ -211,6 +212,7 @@ def export_packages(query_string, conn){
       result += " - GO (missing)\n"
     }
   }
+  conn.close()
   println result
 }
 
@@ -247,10 +249,11 @@ def create_control_json(query_string, conn){
     println "Packages to Transfer"
     println seed_list
   } 
+  def conn = sql_connection(query["connection"].toLowerCase())
   
   // Get target packages for comparison
   def target_versions = []
-  sql.eachRow(query_string.replaceAll(source_pipeline, target_pipeline)){ rec -> 
+  conn.eachRow(query_string.replaceAll(source_pipeline, target_pipeline)){ rec -> 
     target_versions.add("${rec.version}".toString())
   }
   
@@ -274,7 +277,7 @@ def create_control_json(query_string, conn){
   val_file.withWriter('utf-8') { writer -> 
     writer << JsonOutput.prettyPrint(JsonOutput.toJson(result))
   } 
-  
+  conn.close()
 }
 
 def dbm_package() {
