@@ -294,7 +294,7 @@ def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
   conn.eachRow(query_string) 
   { rec -> 
-    msg_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
+    message_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
     println rec.OBJECTCREATIONSCRIPT
   }
 }
