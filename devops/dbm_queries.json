@@ -103,5 +103,38 @@
   		  }
   		}
   	]
+  },
+  "label_contents" : {
+    "name" : "Object revisions in label",
+    "usage" : "dbm_api.bat action=label_contents ARG1=<label name>",
+	"queries" : 
+  [
+		{ "connection" : "repo",
+		  "query": "select chk.ACTION_LOG_ID, rev.COUNTED_REVISION as Revision, ent.dbobjectname as Object, l.name as Label, l.id as labelid, rev.ENTITYREPOSITORYID as entid  from twmanagedb.twlabels_checkins chk INNER JOIN TWMANAGEDB.TBLCONTROLLEROBJECTACTIONLOG rev ON chk.action_log_id = rev.id INNER JOIN TWMANAGEDB.TWLABELS l on chk.label_id = l.id INNER JOIN TWMANAGEDB.TBLCONTLMONITOREDDBENTITIES ent ON rev.ENTITYREPOSITORYID = ent.id WHERE l.name = 'ARG1'",
+		  "output": {
+          "ActID": [0,6],
+		    "Rev": [1,4],
+		    "Object": [2,25],
+        "Label" : [3,35],
+        "LabID" : [4,6],
+        "EntID" : [5,6]
+		  }
+		}
+	]
+  },
+  "labels" : {
+    "name" : "Label list for a schema",
+    "usage" : "dbm_api.bat action=labels ARG1=<schema name>",
+	"queries" : 
+  [
+		{ "connection" : "repo",
+		  "query": "select l.name as Label, l.id as labelid, ent.schemaname from twmanagedb.twlabels_checkins chk INNER JOIN TWMANAGEDB.TBLCONTROLLEROBJECTACTIONLOG rev ON chk.action_log_id = rev.id INNER JOIN TWMANAGEDB.TWLABELS l on chk.label_id = l.id INNER JOIN TWMANAGEDB.TBLCONTLMONITOREDDBENTITIES ent ON rev.ENTITYREPOSITORYID = ent.id where ent.schemaname = 'ARG1' group by l.name, l.id, ent.schemaname order by l.id;",
+		  "output": {
+          "Label": [0,35],
+		    "LabID": [1,6],
+		    "Schema": [2,25]
+		  }
+		}
+	]
   }
 }
