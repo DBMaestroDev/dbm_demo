@@ -295,7 +295,9 @@ def show_object_ddl(query_string, conn) {
   conn.eachRow(query_string) 
   { rec -> 
     message_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
-    println rec.OBJECTCREATIONSCRIPT
+    java.sql.Clob clob = (java.sql.Clob) rec.OBJECTCREATIONSCRIPT
+    bodyText = clob.getAsciiStream().getText()
+    println bodyText
   }
 }
 
