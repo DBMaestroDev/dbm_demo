@@ -124,6 +124,9 @@ def post_process(option, query_string, connection){
     case "create_control_json":
       create_control_json(query_string, connection)
       break
+    case "show_object_ddl":
+      show_object_ddl(query_string, connection)
+      break
   }
   return result
 }
@@ -285,6 +288,15 @@ def dbm_package() {
   println "#-------- Performing DBmPackage command ----------#"
   println "# Cmd: ${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server}"
   def results = "${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server} ".execute().text
+}
+
+def show_object_ddl(query_string, conn) {
+  // Redo query and loop through records
+  conn.eachRow(query_string) 
+  { rec -> 
+    msg_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
+    println rec.OBJECTCREATIONSCRIPT
+  }
 }
 
 // #--------- UTILITY ROUTINES ------------#

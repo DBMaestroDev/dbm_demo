@@ -143,9 +143,24 @@
 	"queries" : 
   [
 		{ "connection" : "repo",
-		  "query": "select COUNTEDREVISION, object_name, schemaname 
-from TWMANAGEDB.VIEW_CTRL_OBJSHISTORY where object_name = 'ARG2' and schemaname = 'ARG1'",
+		  "query": "select COUNTEDREVISION, object_name, schemaname from TWMANAGEDB.VIEW_CTRL_OBJSHISTORY where object_name = 'ARG2' and schemaname = 'ARG1'",
 		  "output": {
+          "Rev": [0,5],
+		    "Object": [1,25],
+		    "Schema": [2,25]
+		  }
+		}
+	]
+  },
+  "object_ddl" : {
+    "name" : "ddl for an object",
+    "usage" : "dbm_api.bat action=object_ddl ARG1=<object name> ARG2=<revision>",
+	"queries" : 
+  [
+		{ "connection" : "repo",
+		  "query": "select COUNTEDREVISION, object_name, schemaname, objectcreationscript from TWMANAGEDB.VIEW_CTRL_OBJSHISTORY_SCRIPT where object_name = 'ARG1' and COUNTEDREVISION = 'ARG2';",
+  		"post_process" : "show_object_ddl",
+  		"output": {
           "Rev": [0,5],
 		    "Object": [1,25],
 		    "Schema": [2,25]
