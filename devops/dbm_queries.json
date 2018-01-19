@@ -106,11 +106,11 @@
   },
   "label_contents" : {
     "name" : "Object revisions in label",
-    "usage" : "dbm_api.bat action=label_contents ARG1=<label name>",
+    "usage" : "dbm_api.bat action=label_contents ARG1=<label ID>",
 	"queries" : 
   [
 		{ "connection" : "repo",
-		  "query": "select chk.ACTION_LOG_ID, rev.COUNTED_REVISION as Revision, ent.dbobjectname as Object, l.name as Label, l.id as labelid, rev.ENTITYREPOSITORYID as entid  from twmanagedb.twlabels_checkins chk INNER JOIN TWMANAGEDB.TBLCONTROLLEROBJECTACTIONLOG rev ON chk.action_log_id = rev.id INNER JOIN TWMANAGEDB.TWLABELS l on chk.label_id = l.id INNER JOIN TWMANAGEDB.TBLCONTLMONITOREDDBENTITIES ent ON rev.ENTITYREPOSITORYID = ent.id WHERE l.name = 'ARG1'",
+		  "query": "select chk.ACTION_LOG_ID, rev.COUNTED_REVISION as Revision, ent.dbobjectname as Object, l.name as Label, l.id as labelid, rev.ENTITYREPOSITORYID as entid  from twmanagedb.twlabels_checkins chk INNER JOIN TWMANAGEDB.TBLCONTROLLEROBJECTACTIONLOG rev ON chk.action_log_id = rev.id INNER JOIN TWMANAGEDB.TWLABELS l on chk.label_id = l.id INNER JOIN TWMANAGEDB.TBLCONTLMONITOREDDBENTITIES ent ON rev.ENTITYREPOSITORYID = ent.id WHERE l.ID = 'ARG1'",
 		  "output": {
           "ActID": [0,6],
 		    "Rev": [1,4],
