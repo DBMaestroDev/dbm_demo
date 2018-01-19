@@ -158,7 +158,7 @@
 	"queries" : 
   [
 		{ "connection" : "repo",
-		  "query": "select COUNTEDREVISION, object_name, schemaname, objectcreationscript from TWMANAGEDB.VIEW_CTRL_OBJSHISTORY_SCRIPT where object_name = 'ARG1' and COUNTEDREVISION = 'ARG2';",
+		  "query": "select COUNTEDREVISION, object_name, schemaname, objectcreationscript from TWMANAGEDB.VIEW_CTRL_OBJSHISTORY_SCRIPT where object_name = 'ARG1' and COUNTEDREVISION = 'ARG2'",
   		"post_process" : "show_object_ddl",
   		"output": {
           "Rev": [0,5],
