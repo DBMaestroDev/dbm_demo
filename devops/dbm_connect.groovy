@@ -88,16 +88,16 @@ def perform_query() {
     println "Processed Query: ${query_stg}"
     message_box("Results")
     def header = ""
-    query["output"].each{k, v ->
-      def va = out_vals(v)
-      header += "| ${k.padRight(va[1])}"
+    query["output"].each{arr ->
+      def va = out_vals(arr)
+      header += "| ${arr[0].padRight(va[1])}"
       }
     println header
     separator()
     conn.eachRow(query_stg)
     { row -> 
-      query["output"].each{k, v ->
-        def va = out_vals(v)
+      query["output"].each{arr ->
+        def va = out_vals(arr)
         def val = row.getAt(va[0])
         print "| ${val.toString().trim().padRight(va[1])}"
       }
@@ -306,8 +306,8 @@ def out_vals(val_obj){
   def val = ""
   def siz = 0
   if(val_obj instanceof List) {
-    val = val_obj[0]
-    siz = val_obj[1]
+    val = val_obj[1]
+    siz = val_obj[2]
   }else{
     val = val_obj
     siz = 15
