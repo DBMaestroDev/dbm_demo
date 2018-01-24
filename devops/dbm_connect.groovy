@@ -93,7 +93,7 @@ def perform_query() {
       header += "| ${arr[0].padRight(va[1])}"
       }
     println header
-    separator()
+    separator(100)
     conn.eachRow(query_stg)
     { row -> 
       query["output"].each{arr ->
@@ -103,7 +103,7 @@ def perform_query() {
       }
       println " "
     }
-    separator()
+    separator(100)
     println ""
     if (query.containsKey("post_process")) {
       post_process(query["post_process"], query_stg, conn)
@@ -371,7 +371,7 @@ def map_has_key(find_map, match_regex){
 }
 
 def message_box(msg, def mtype = "sep") {
-  def tot = 72
+  def tot = 80
   def start = ""
   def res = ""
   msg = (msg.size() > 65) ? msg[0..64] : msg
@@ -389,7 +389,7 @@ def message_box(msg, def mtype = "sep") {
   return res
 }
 
-def separator( def ilength = 72){
+def separator( def ilength = 82){
   def dashy = "-" * (ilength - 2)
   println "#${dashy}#"
 }

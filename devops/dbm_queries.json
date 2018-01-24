@@ -177,9 +177,9 @@
 		  "query": "select v.NAME as Version, f.flowname as pipeline, e.lsname as environment, s.dbcname as schema, script.NAME as Script, h.id, h.schema_id, h.END_EXEC_TIME as Finish, h.script_id, h.script_history_id, h.target_schema_id from TWMANAGEDB.TBL_SMG_DEPLOY_COMMAND_HISTORY h INNER JOIN TWMANAGEDB.TBL_DBC s on s.dbcid = h.schema_id INNER JOIN TWMANAGEDB.TBL_LS_DBC_MAPPING jt ON jt.DBCID = s.DBCID INNER JOIN TWMANAGEDB.TBL_LS e ON jt.LSID = e.LSID INNER JOIN TWMANAGEDB.TBL_FLOW f ON e.FLOWID = f.FLOWID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON h.SCRIPT_ID = jt.SCRIPT_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR script ON script.script_id = jt.script_id INNER JOIN TWMANAGEDB.TBL_SMG_VERSION v ON jt.VERSION_ID = v.ID WHERE command_type_id = 4 AND f.FLOWNAME = 'ARG1' AND e.LSNAME = 'ARG2' ORDER BY h.END_EXEC_TIME",
   		"output": [
           ["Version",0,20],
-		    ["Schema",1,20],
-		    ["Script",2,30],
-        ["Finish",3,15]
+		    ["Schema",3,20],
+		    ["Script",4,30],
+        ["Finish",6,15]
 		  ]
 		}
 	]
