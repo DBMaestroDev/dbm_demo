@@ -1,6 +1,6 @@
 USE [AH3111ODZ]
 
-CREATE TABLE BB_EMPLOYEES (
+CREATE TABLE ZZ_EMPLOYEES (
 id INT,
 first_name varchar(40),
 last_name varchar(40),
