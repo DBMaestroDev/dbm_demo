@@ -21,4 +21,5 @@ a change
 
 BJB 2/1/18 SQL Files
 	set earlier version on commit
+	SENDING 3.11.2.2
 
