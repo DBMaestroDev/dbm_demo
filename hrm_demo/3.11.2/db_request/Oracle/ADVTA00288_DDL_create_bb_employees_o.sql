@@ -1,9 +1,9 @@
-CREATE TABLE BB_EMPLOYEES (
+CREATE TABLE ZZ_EMPLOYEES (
 id number,
 first_name varchar2(40),
 last_name varchar2(40),
 title varchar2(50),
 );
 
-ALTER TABLE BB_EMPLOYEES 
-ADD CONSTRAINT pk_bb_employees PRIMARY KEY (id);
+ALTER TABLE ZZ_EMPLOYEES 
+ADD CONSTRAINT pk_ZZ_EMPLOYEES PRIMARY KEY (id);
