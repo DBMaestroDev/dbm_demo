@@ -1,5 +1,7 @@
-USE [AH3111ODZ]
+-- USE [AH3111ODZ]
 
 ALTER TABLE BB_EMPLOYEES 
 ADD birthdate DATE,
 started_at DATE;
+
+GO
