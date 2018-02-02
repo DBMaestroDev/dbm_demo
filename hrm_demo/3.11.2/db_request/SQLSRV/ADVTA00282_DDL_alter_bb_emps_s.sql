@@ -1,3 +1,4 @@
+-- Alter and add 
 alter table ZZ_EMPLOYEES alter column title VARCHAR(100)
 GO
 
