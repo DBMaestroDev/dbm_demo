@@ -2,4 +2,4 @@
 
 ALTER TABLE ZZ_EMPLOYEES ADD (
   birthdate DATE,
-started_at DATE);
+started_at timestamp);
