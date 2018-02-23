@@ -20,7 +20,7 @@ WHERE  STATUS <> 'VALID' AND OWNER = USER;
 
 -- Step 1: Creating columns
 EXECUTE DBMS_OUTPUT.PUT_LINE('Step 1: Creating columns');
-ALTER TABLE "DEPENDENTS" ADD ("RELATIONSHIP" VARCHAR2(40 BYTE) DEFAULT NULL);
+ALTER TABLE "dependent_names" ADD ("RELATIONSHIP" VARCHAR2(40 BYTE) DEFAULT NULL);
 
 -- Step 2: Recompiling invalid objects
 EXECUTE DBMS_OUTPUT.PUT_LINE('Step 2: Recompiling invalid objects');
