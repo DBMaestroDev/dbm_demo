@@ -1,2 +1,2 @@
-select count(*) from employees as emp_count;
+select count(*) as emp_count from employees;
 select * from departments;
