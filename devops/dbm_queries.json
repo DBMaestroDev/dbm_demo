@@ -179,7 +179,7 @@
           ["Version",0,20],
 		    ["Schema",3,20],
 		    ["Script",4,30],
-        ["Finish",6,15]
+        ["Finish",7,15]
 		  ]
 		}
 	]
