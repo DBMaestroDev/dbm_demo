@@ -148,6 +148,3 @@ BEGIN
     COMMIT TRANSACTION
 END
 GO
-
-//
-Exit;
