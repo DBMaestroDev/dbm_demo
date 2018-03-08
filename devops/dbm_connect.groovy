@@ -290,6 +290,28 @@ def dbm_package() {
   def results = "${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server} ".execute().text
 }
 
+
+def adhocify_package(package_name) {
+  def post_results = ""
+  separator()
+  def parts = package_name.split("__")
+  def new_name = parts.size == 2 ? parts[1] : package_name
+  def query = "update twmanagedb.TBL_SMG_VERSION set Name = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where name = 'ARG_FULL_NAME';\ncommit;"
+  def conn = sql_connection("repository")
+  //println "Raw Query: ${query["query"]}"
+  def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
+  query_stg = query_stg.replaceAll("ARG_NAME", new_name)
+  println "Processed Query: ${query_stg}"
+  message_box("Results")
+  conn.eachRow(query_string) 
+  { rec -> 
+    println rec
+  }
+  separator()
+  conn.close()
+}
+
+
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
   conn.eachRow(query_string) 

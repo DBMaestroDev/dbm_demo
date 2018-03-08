@@ -4,7 +4,7 @@
 # Static Variables
 pipeline=HumanResources
 base_path=C:\\pipelinescript
-base_schema=HR_INTEGRATION
+base_schema=HR
 ci_pipeline=HR_CI
 ci_base_schema=HR_INFRA
 ci_environment=DIT
