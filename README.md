@@ -19,3 +19,7 @@ BJB 1/11/18 Reorg folders for multiple apps
 BJB 1/11/18 merge from master
 a change
 
+BJB 2/1/18 SQL Files
+	set earlier version on commit
+	SENDING 3.11.2.2
+
