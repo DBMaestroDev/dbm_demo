@@ -52,7 +52,7 @@ if (arg_map.containsKey("action")) {
       dbm_package
       break
     case "adhoc_package":
-      adhocify_package
+      adhocify_package()
       break
     default:
       perform_query()
@@ -157,7 +157,7 @@ def sql_connection(conn_type) {
     conn = local_settings["connections"]["remote"]["connect"]
   }
   // Assign local settings
-  println "Querying ${conn_type} Db"
+  println "Querying ${conn_type} Db: ${conn}"
   return Sql.newInstance("jdbc:oracle:thin:@${conn}", user, password)
 }
 
@@ -298,18 +298,16 @@ def adhocify_package() {
   def package_name = arg_map["ARG1"]
   separator()
   def parts = package_name.split("__")
-  def new_name = parts.size == 2 ? parts[1] : package_name
-  def query = "update twmanagedb.TBL_SMG_VERSION set Name = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where name = 'ARG_FULL_NAME';\ncommit;"
+  def new_name = parts.length == 2 ? parts[1] : package_name
+  def query = "update twmanagedb.TBL_SMG_VERSION set Name = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where name = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
   //println "Raw Query: ${query["query"]}"
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
   query_stg = query_stg.replaceAll("ARG_NAME", new_name)
   println "Processed Query: ${query_stg}"
   message_box("Results")
-  conn.eachRow(query_string) 
-  { rec -> 
-    println rec
-  }
+  def res = conn.execute(query_stg) 
+   println res
   separator()
   conn.close()
 }
