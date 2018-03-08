@@ -54,6 +54,9 @@ if (arg_map.containsKey("action")) {
     case "adhoc_package":
       adhocify_package()
       break
+    case "disable_package":
+      disable_package()
+      break
     default:
       perform_query()
       break
@@ -293,13 +296,12 @@ def dbm_package() {
   def results = "${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server} ".execute().text
 }
 
-
 def adhocify_package() {
   def package_name = arg_map["ARG1"]
   separator()
   def parts = package_name.split("__")
   def new_name = parts.length == 2 ? parts[1] : package_name
-  def query = "update twmanagedb.TBL_SMG_VERSION set Name = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where name = 'ARG_FULL_NAME'"
+  def query = "update twmanagedb.TBL_SMG_VERSION set NAME = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where NAME = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
   //println "Raw Query: ${query["query"]}"
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
@@ -307,11 +309,25 @@ def adhocify_package() {
   println "Processed Query: ${query_stg}"
   message_box("Results")
   def res = conn.execute(query_stg) 
-   println res
+  println res
   separator()
   conn.close()
 }
 
+def disable_package() {
+  def package_name = arg_map["ARG1"]
+  separator()
+  def query = "update twmanagedb.TBL_SMG_VERSION set IS_ENABLED = 0 where NAME = 'ARG_FULL_NAME'"
+  def conn = sql_connection("repository")
+  //println "Raw Query: ${query["query"]}"
+  def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
+  println "Processed Query: ${query_stg}"
+  message_box("Results")
+  def res = conn.execute(query_stg) 
+  println res
+  separator()
+  conn.close()
+}
 
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
