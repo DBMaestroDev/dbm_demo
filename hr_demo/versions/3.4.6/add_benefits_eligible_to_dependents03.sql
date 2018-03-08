@@ -1,2 +1,2 @@
-alter table dependents add (benefits_eligible number);
+alter table dependent_names add (benefits_eligible number);
 exit;

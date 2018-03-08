@@ -23,3 +23,6 @@ BJB 2/1/18 SQL Files
 	set earlier version on commit
 	SENDING 3.11.2.2
 
+BJB 2/25/18 Set Version for deployment
+2/27/18 set for Oracle - 1.0.2
+Reset for SQLServ pipeline

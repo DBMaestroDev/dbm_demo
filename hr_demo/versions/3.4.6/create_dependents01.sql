@@ -19,8 +19,8 @@ FROM   ALL_OBJECTS
 WHERE  STATUS <> 'VALID' AND OWNER = USER;
 
 -- Step 1: Creating table - 'DEPENDENTS'
-EXECUTE DBMS_OUTPUT.PUT_LINE('Step 1: Creating table - DEPENDENTS');
-CREATE TABLE "DEPENDENTS" 
+EXECUTE DBMS_OUTPUT.PUT_LINE('Step 1: Creating table - dependent_names');
+CREATE TABLE "dependent_names" 
    (	"ID" NUMBER, 
 	"EMPLOYEE_ID" NUMBER, 
 	"FIRST_NAME" VARCHAR2(40), 
