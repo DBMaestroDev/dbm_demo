@@ -51,6 +51,9 @@ if (arg_map.containsKey("action")) {
     case "dbm_package":
       dbm_package
       break
+    case "adhoc_package":
+      adhocify_package
+      break
     default:
       perform_query()
       break
@@ -291,8 +294,8 @@ def dbm_package() {
 }
 
 
-def adhocify_package(package_name) {
-  def post_results = ""
+def adhocify_package() {
+  def package_name = arg_map["ARG1"]
   separator()
   def parts = package_name.split("__")
   def new_name = parts.size == 2 ? parts[1] : package_name
