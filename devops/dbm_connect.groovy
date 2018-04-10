@@ -301,7 +301,6 @@ def adhocify_package() {
   separator()
   def parts = package_name.split("__")
   def new_name = parts.length == 2 ? parts[1] : package_name
-  if (arg_map.containsKey("ARG2")) { new_name = arg_map["ARG2"] }
   def query = "update twmanagedb.TBL_SMG_VERSION set NAME = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where NAME = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
   //println "Raw Query: ${query["query"]}"
@@ -317,9 +316,8 @@ def adhocify_package() {
 
 def disable_package() {
   def package_name = arg_map["ARG1"]
-  def enable = arg_map.containsKey("ARG2") ? 1 : 0
   separator()
-  def query = "update twmanagedb.TBL_SMG_VERSION set IS_ENABLED = ${enable} where NAME = 'ARG_FULL_NAME'"
+  def query = "update twmanagedb.TBL_SMG_VERSION set IS_ENABLED = 0 where NAME = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
   //println "Raw Query: ${query["query"]}"
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
@@ -347,8 +345,8 @@ def out_vals(val_obj){
   def val = ""
   def siz = 0
   if(val_obj instanceof List) {
-    val = val_obj[1]
-    siz = val_obj[2]
+    val = val_obj[0]
+    siz = val_obj[1]
   }else{
     val = val_obj
     siz = 15

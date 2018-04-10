@@ -2,7 +2,7 @@ import groovy.json.*
 
 // N8 Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "hrm"
+def landscape = "adventure"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
@@ -13,13 +13,13 @@ rootJobName = "$env.JOB_NAME";
 branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
-def settings_file = "local_settings_hrm.json"
+def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
 def git_message = ""
 // message looks like this "Adding new tables [Version: V2.3.4] "
-def reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
-//def reg = ~/.*\[Version: (.*)\].*/
+//def reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
+def reg = ~/.*\[Version: (.*)\].*/
 def environment = ""
 def environments = []
 def approver = ""
@@ -80,7 +80,7 @@ stage('GitParams') {
     //git_message = "This is git message. [VERSION: 2.5.0]"
     echo "# From Git: ${git_message}"
     result = git_message.replaceFirst(reg, '$1')
-	  dbcr_result = git_message.replaceFirst(reg, '$2')
+	//  dbcr_result = git_message.replaceFirst(reg, '$2')
 	//git_message = "[Version: 3.11.2.1] using [DBCR: ADVTA00292]"
 	//result = "3.11.2.1"
   }
@@ -104,7 +104,7 @@ if(! branchVersion.equals("")){
 	echo "# VERSION from git:" + result
 }
 
-version = "V" + result + "__" + dbcr_result
+version = "V" + result // + "__" + dbcr_result
 if (dbcr_result == "" && env.Skip_Packaging != "No"){
 	version = "V" + result
 }
@@ -119,10 +119,10 @@ stage(environment) {
     echo "#------------------- Copying files for ${version} ---------#"
     bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
     // This is for when files are prefixed with <dbcr_result>
-    bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
-    bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
+    //bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
+    //bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
     // This is for copying a whole directory
-    //bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
+    bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server}"
@@ -135,12 +135,16 @@ stage(environment) {
     bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
   }
 }
+if(environments.size() < 2) {
+	currentBuild.result = "SUCCESS"
+	return
+}
 environment = environments[1]
 approver = approvers[0]
 def pair = environment.split(",")
 def do_pair = false
-if (pair.length == 2) {environment = pair[0] }
-do_pair = (pair.length == 2) 
+if (pair.size() == 2) {environment = pair[0] }
+do_pair = (pair.size() == 2) 
 stage(environment) {
 	// FIXME checkpoint('Rerun QA')
 	input message: "Deploy to ${environment}?", submitter: approver
@@ -153,6 +157,10 @@ stage(environment) {
 		}
 	}   
 } 
+if(environments.size() < 3) {
+	currentBuild.result = "SUCCESS"
+	return
+}
 environment = environments[2]
 approver = approvers[1]
 stage(environment) {
@@ -164,6 +172,10 @@ stage(environment) {
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
 	}   
 } 
+if(environments.size() < 4) {
+	currentBuild.result = "SUCCESS"
+	return
+}
 environment = environments[3]
 approver = approvers[2]
 stage(environment) {
