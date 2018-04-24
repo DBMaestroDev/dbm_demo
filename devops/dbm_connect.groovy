@@ -57,6 +57,9 @@ if (arg_map.containsKey("action")) {
     case "disable_package":
       disable_package()
       break
+    case "empty_package":
+      empty_package()
+      break
     default:
       perform_query()
       break
@@ -95,17 +98,15 @@ def perform_query() {
     message_box("Results")
     def header = ""
     query["output"].each{arr ->
-      def va = out_vals(arr)
-      header += "| ${arr[0].padRight(va[1])}"
+      header += "| ${arr[0].padRight(arr[2])}"
       }
     println header
     separator(100)
     conn.eachRow(query_stg)
     { row -> 
       query["output"].each{arr ->
-        def va = out_vals(arr)
-        def val = row.getAt(va[0])
-        print "| ${val.toString().trim().padRight(va[1])}"
+        def val = row.get(arr[1])
+        print "| ${val.toString().trim().padRight(arr[2])}"
       }
       println " "
     }
@@ -118,6 +119,7 @@ def perform_query() {
 
   }
 }
+
 
 def post_process(option, query_string, connection){
   //println "Option: ${option}"
@@ -134,6 +136,33 @@ def post_process(option, query_string, connection){
       show_object_ddl(query_string, connection)
       break
   }
+  return result
+}
+
+def result_query(query){
+  message_box("Results")
+  def header = ""
+  def result = []
+  def conn = sql_connection("repo")
+  query["output"].each{arr ->
+    header += "| ${arr[0].padRight(arr[2])}"
+  }
+  println header
+  separator(100)
+  conn.eachRow(query["query"])
+  { row -> 
+    query["output"].each{arr ->
+      def val = row.getAt(arr[1])
+      print "| ${val.toString().trim().padRight(arr[2])}"
+      if( arr[0] == 'ScriptID') {
+        result.add(val)
+      }
+    }
+    println " "
+  }
+  separator(100)
+  println ""
+  conn.close()
   return result
 }
 
@@ -341,18 +370,6 @@ def show_object_ddl(query_string, conn) {
 }
 
 // #--------- UTILITY ROUTINES ------------#
-def out_vals(val_obj){
-  def val = ""
-  def siz = 0
-  if(val_obj instanceof List) {
-    val = val_obj[0]
-    siz = val_obj[1]
-  }else{
-    val = val_obj
-    siz = 15
-  }
-  return [val,siz]
-}
 
 def get_export_json_file(target, path_only = false){
   def contents = [:]  
@@ -489,4 +506,28 @@ def create_file(pth, name, content){
 def read_file(pth, name){
   def fil = new File(pth,name)
   return fil.text
+}
+
+
+def empty_package(version){
+  def contents = file_contents["package_content"]
+  def version = arg_map["ARG2"]
+  def pipeline = arg_map["ARG1"]
+  message_box("Task: Empty Package - ")
+  println " Description: ${contents["name"]}"
+  def query = contents["queries"][0]
+  ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  ver_query = ver_query.replaceAll('ARG2', version)
+  query["query"] = ver_query
+  def result_ids = result_query(query)
+  def conn = sql_connection("repo")
+  result_ids.each {script_id -> 
+    echo "Removing script_id = ${script_id}"
+    def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
+    def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
+    conn.execute(del_query1.replaceAll('ARG1', script_id)
+    conn.execute(del_query2.replaceAll('ARG1', script_id)
+  }
+  conn.close()
 }
