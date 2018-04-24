@@ -508,22 +508,22 @@ def read_file(pth, name){
   return fil.text
 }
 
-
-def empty_package(){
+def empty_package(version){
   def contents = file_contents["package_content"]
   def version = arg_map["ARG2"]
   def pipeline = arg_map["ARG1"]
   message_box("Task: Empty Package - ")
-  println " Description: ${contents["name"]}"
+  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
   def query = contents["queries"][0]
   ver_query = query["query"]
   ver_query = ver_query.replaceAll('ARG1', pipeline)
   ver_query = ver_query.replaceAll('ARG2', version)
   query["query"] = ver_query
   def result_ids = result_query(query)
+  println " Processed Query: ${query["query"]}"
   def conn = sql_connection("repo")
   result_ids.each {script_id -> 
-    println "Removing script_id = ${script_id}"
+    echo "Removing script_id = ${script_id}"
     def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
     def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
     conn.execute(del_query1.replaceAll('ARG1', script_id))
