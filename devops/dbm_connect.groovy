@@ -508,7 +508,7 @@ def read_file(pth, name){
   return fil.text
 }
 
-def empty_package(version){
+def empty_package(){
   def contents = file_contents["package_content"]
   def version = arg_map["ARG2"]
   def pipeline = arg_map["ARG1"]
