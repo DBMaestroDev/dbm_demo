@@ -526,6 +526,8 @@ def empty_package(){
     println "Removing script_id = ${script_id}"
     def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
     def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
+	def disable_query = "alter table TWMANAGEDB.TBL_SMG_DEPLOY_COMMAND_HISTORY disable constraint FK_COMMAND_HISTORY_DYNAMIC_SCR"
+    conn.execute(disable_query)
     conn.execute(del_query2.replaceAll('ARG1', script_id.toString() ))
     conn.execute(del_query1.replaceAll('ARG1', script_id.toString() ))
   }
