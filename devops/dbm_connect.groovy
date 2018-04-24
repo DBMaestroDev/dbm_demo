@@ -541,6 +541,4 @@ def empty_package(){
 	cnt += 1
   }
   conn.close()
-  
-  p
 }
