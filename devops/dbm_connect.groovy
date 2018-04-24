@@ -523,7 +523,7 @@ def empty_package(){
   println " Processed Query: ${query["query"]}"
   def conn = sql_connection("repo")
   result_ids.each {script_id -> 
-    echo "Removing script_id = ${script_id}"
+    println "Removing script_id = ${script_id}"
     def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
     def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
     conn.execute(del_query1.replaceAll('ARG1', script_id))
