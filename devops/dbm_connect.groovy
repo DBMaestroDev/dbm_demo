@@ -139,11 +139,15 @@ def post_process(option, query_string, connection){
   return result
 }
 
-def result_query(query){
+def result_query(query, grab = []){
   message_box("Results")
   def header = ""
-  def result = []
+  def result = [:]
   def conn = sql_connection("repo")
+	grab.each {item ->
+		result[item] = []
+	}
+
   query["output"].each{arr ->
     header += "| ${arr[0].padRight(arr[2])}"
   }
@@ -154,10 +158,10 @@ def result_query(query){
     query["output"].each{arr ->
       def val = row.getAt(arr[1])
       print "| ${val.toString().trim().padRight(arr[2])}"
-      if( arr[0] == 'ScriptID') {
-        result.add(val)
-      }
     }
+	grab.each {item ->
+		result[item].add(row.getAt(item))
+	}
     println " "
   }
   separator(100)
@@ -512,6 +516,7 @@ def empty_package(){
   def contents = file_contents["package_content"]
   def version = arg_map["ARG2"]
   def pipeline = arg_map["ARG1"]
+  def cnt = 0
   message_box("Task: Empty Package - ")
   println " Description: ${contents["name"]}\nARGS: ${arg_map}"
   def query = contents["queries"][0]
@@ -519,10 +524,10 @@ def empty_package(){
   ver_query = ver_query.replaceAll('ARG1', pipeline)
   ver_query = ver_query.replaceAll('ARG2', version)
   query["query"] = ver_query
-  def result_ids = result_query(query)
+  def results = result_query(query, ["SCRIPT_ID","script","SCRIPT_SORCE_DATA_REFERENCE"])
   println " Processed Query: ${query["query"]}"
   def conn = sql_connection("repo")
-  result_ids.each {script_id -> 
+  results["SCRIPT_ID"].each {script_id -> 
     println "Removing script_id = ${script_id}"
     def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
     def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
@@ -530,6 +535,12 @@ def empty_package(){
     conn.execute(disable_query)
     conn.execute(del_query2.replaceAll('ARG1', script_id.toString() ))
     conn.execute(del_query1.replaceAll('ARG1', script_id.toString() ))
+	println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
+	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
+	fil.delete()
+	cnt += 1
   }
   conn.close()
+  
+  p
 }
