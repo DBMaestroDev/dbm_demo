@@ -1,7 +1,6 @@
 // N8 Error Cleanup
 //
 import groovy.json.*
-import java.sql.Connection
 //
 // Add a properties for Platform and Skip_Packaging
 properties([
@@ -64,7 +63,8 @@ if (env.Failed_Version != "V1.0.0.0"){
   stage("Empty Package"){
       echo "#--- Removing failed script from ${env.Failed_Version} ---#"
       node (dbmNode) {
-        dbm_connect("empty_package", ['ARG1' : pipeline["pipeline"], 'ARG2' : env.Failed_Version])
+	   echo "ARGS: ${['ARG1' : "${pipeline["pipeline"]}", 'ARG2' : "${env.Failed_Version}"] }"
+       dbm_connect("empty_package", ['ARG1' : "${pipeline["pipeline"]}", 'ARG2' : "${env.Failed_Version}"])
      }
   }
 }
@@ -199,8 +199,9 @@ def dbm_connect(action, args = [:]){
   def cli = "${libPath}${sep}dbm_api.bat"
   def argstg = ""
   args.each {cur -> 
-    argstg += "${cur}=${arg[cur]} "
+	echo "Doing: ${cur}"
+    argstg += "${cur} " //=${args[cur]} "
   }
   echo "Executing: dbm_api.bat action=${action} ${argstg}"
-  bat "${cli} action=${action} ${arg_stg}"
+  bat "${cli} action=${action} ${argstg}"
 }
