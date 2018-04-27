@@ -13,17 +13,18 @@ properties([
 
 // This is the Jenkins alias for the dbmaestro server
 def dbmNode = "dbmaestro"
+def developBranch = "develop"
 rootJobName = "$env.JOB_NAME";
 branchName = rootJobName.replaceFirst('.*/.*/','')
 branchName = branchName.replaceFirst('%2F','/')
 branchType = branchName.replaceFirst('/.*','')
 def landscape = branchType
-if(branchType.equals("release") || branchType.equals("hotfix")){
+if(landscape.equals("release") || landscape.equals("hotfix")){
     branchVersion = branchName.replaceFirst('.*/','')
 }
 automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.n8.ddu\\dbmaestroGroovyFiles"
 settingsFile = "local_settings.json"
-local_settings = [:]
+pipeline = [:]
 branchVersion = ""
 version = ""
 def gitMessage = ""
@@ -36,52 +37,34 @@ def buildNumber = "$env.BUILD_NUMBER"
 def ddu_deploy = false
 def flavor = 0
 def sourceDir = ""
-def baseDir = ""
 def environment = ""
 def approver = ""
 def settings_content = ""
 def option = 0
+def altPipeline = ""
 
 // ------------- OUTBOARD SETTINGS FILE -----------------------
 node (dbmNode){
 	ddu_deploy = (env.JOB_NAME).toLowerCase().contains("ddu")
-	file_path = "${automationPath}${sep}${settingsFile}"
+	def file_path = "${automationPath}${sep}${settingsFile}"
 	println "JSON Settings Document: ${file_path}"
 	settings_content = readFile(file_path).trim()
 }
 
-local_settings = get_settings(settings_content)
-server = local_settings["general"]["server"]
-javaCmd = local_settings["general"]["java_cmd"]
-stagingDir = local_settings["general"]["staging_path"]
-// note key off of landscape variable
-baseSchema = local_settings["branch_map"][landscape][flavor]["base_schema"]
-baseEnv = local_settings["branch_map"][landscape][flavor]["base_env"]
-pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
-environments = local_settings["branch_map"][landscape][flavor]["environments"]
-def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
-sourceDir = local_settings["branch_map"][landscape][flavor]["source_dir"]
-if (branchType == "hotfix" && !ddu_deploy) {
-  // Hotfix will switch so need release values saved
-  r_baseSchema = baseSchema
-  r_baseEnv = baseEnv
-  r_pipeline = pipeline
-  r_environments = environments
-  r_approvers = approvers
-  baseSchema = local_settings["branch_map"]["develop"][flavor]["base_schema"]
-  baseEnv = local_settings["branch_map"]["develop"][flavor]["base_env"]
-  pipeline = local_settings["branch_map"]["develop"][flavor]["pipeline"]
-  environments = local_settings["branch_map"]["develop"][flavor]["environments"]
-  approvers = local_settings["branch_map"]["develop"][flavor]["approvers"]
-}
-// null the variable - not serializable
-local_settings = null
+pipeline = get_settings(settings_content, landscape)
 
-echo "Working with: ${rootJobName}\n - Branch: ${branchType}\n - Pipe: ${pipeline}\n - Env: ${baseEnv}\n - Schema: ${baseSchema}"
-stagingDir = "${stagingDir}${sep}${pipeline}${sep}${baseSchema}"
-def spoolPath = "${stagingDir}${sep}${pipeline}${sep}reports"
+if (ddu_deploy) { landscape = "ddu" }
+
+if (landscape == "hotfix") {
+  // Hotfix will start in develop
+  pipeline = get_settings(settings_content, developBranch)
+}
+
+echo "Working with: ${rootJobName}\n - Branch: ${landscape}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["baseEnv"]}\n - Schema: ${pipeline["baseSchema"]}"
+stagingDir = "${pipeline["stagingDir"]}${sep}${pipeline["pipeline"]}${sep}${pipeline["baseSchema"]}"
+def spoolPath = "${stagingDir}${sep}${pipeline["pipeline"]}${sep}reports"
 // Add new ddu/ddl subdir to repo
-sourceDir = "${sourceDir}${sep}${ ddu_deploy ? "ddu" : "ddl" }"
+sourceDir = "${pipeline["sourceDir"]}${sep}${ ddu_deploy ? "ddu" : "ddl" }"
 
 /*
 #-----------------------------------------------#
@@ -138,7 +121,7 @@ if(! branchVersion.equals("")){
 version = "V" + result
 echo "# FINAL VERSION: ${version}"
 
-if( branchType == "hotfix" || branchType == "develop") {
+if( ["hotfix","ddu","develop"].contains(landscape)) {
   stage('Packaging') {
     node (dbmNode) {
       //Copy from source to version folder
@@ -149,7 +132,7 @@ if( branchType == "hotfix" || branchType == "develop") {
         echo '#------- Copying files for ${version} -------#'
         // trigger packaging
         echo '#------- Packaging Files for ${version} -------#'
-        bat "${javaCmd} -Package -ProjectName ${pipeline} -Server ${server}"
+        bat "${javaCmd} -Package -ProjectName ${pipeline["pipeline"]} -Server ${server}"
 		if (ddu_deploy) {
 			version = adhoc_package(version)
 		}
@@ -157,19 +140,19 @@ if( branchType == "hotfix" || branchType == "develop") {
     }
   }
 }
-if( branchType == "develop" || (branchType == "hotfix" && !ddu_deploy)) {
-  environment = environments[0]
-  approver = approvers[0]
-  stage("${branchType}_DIT"){
+if( ["hotfix","develop"].contains(landscape)) {
+  environment = pipeline["environments"][0]
+  approver = pipeline["approvers"][0]
+  stage("${landscape}_DIT"){
       checkpoint('Rerun DIT')
       node (dbmNode) {
         //  Deploy to DIT
         dbmaestro_deploy(environment, option)
       }
   }
-  environment = environments[1]
-  approver = approvers[1]
-  stage("${branchType}_FIT"){
+  environment = pipeline["environments"][1]
+  approver = pipeline["approvers"][1]
+  stage("${landscape}_FIT"){
       checkpoint('Rerun FIT')
       input message: "Deploy to FIT?", submitter: approver
       node (dbmNode) {
@@ -180,31 +163,31 @@ if( branchType == "develop" || (branchType == "hotfix" && !ddu_deploy)) {
   }
 }
 //
-if( branchType == "hotfix" && !ddu_deploy) {
+if( landscape == "hotfix") {
   //Reset variables for next pipeline
-  environments = r_environments
-  approvers = r_approvers
+  altPipeline = pipeline["pipeline"]
+  pipeline = get_settings(settings_content, landscape)
 }
-if( branchType == "release" || branchType == "hotfix") {
-  environment = environments[0]
-  approver = approvers[0]
-  stage("${branchType}_SIT"){
+
+if( ["hotfix","release","ddu"].contains(landscape)) {
+  environment = pipeline["environments"][0]
+  approver = pipeline["approvers"][0]
+  stage("${landscape}_SIT"){
       checkpoint('Rerun SIT')
       input message: "Deploy to SIT?", submitter: approver
       node (dbmNode) {
-        if( branchType == "hotfix" && !ddu_deploy) {
+        if( landscape == "hotfix" ) {
           // Hotfix needs package transfer on the fly
-          transfer_packages(pipeline, r_pipeline, version)
-          pipeline = r_pipeline
+          transfer_packages(altPipeline, pipeline["pipeline"], version)
         }
         //  Deploy to SIT
         dbmaestro_deploy(environment, option)
 	    }
   }
 
-  environment = environments[1]
-  approver = approvers[1]
-  stage("${branchType}_Staging"){
+  environment = pipeline["environments"][1]
+  approver = pipeline["approvers"][1]
+  stage("${landscape}_Staging"){
     checkpoint('Rerun Staging')
     input message: "Deploy to Staging?", submitter: approver
       node (dbmNode) {
@@ -213,9 +196,9 @@ if( branchType == "release" || branchType == "hotfix") {
       }
   }
 
-  environment = environments[2]
-  approver = approvers[2]
-  stage("${branchType}_PROD"){
+  environment = pipeline["environments"][2]
+  approver = pipeline["approvers"][2]
+  stage("${landscape}_PROD"){
     checkpoint('Rerun Prod')
     input message: "Deploy to Prod?", submitter: approver
   	node (dbmNode) {
@@ -224,7 +207,7 @@ if( branchType == "release" || branchType == "hotfix") {
     }
   }
 }
-if (ddu_deploy){
+if (landscape == "ddu"){
   node (dbmNode) {
     echo '#------- Copying Spool files ---------#'
     echo "From: ${spool_path}${sep}ddu_${version}*"
@@ -257,25 +240,23 @@ def adhoc_package(full_package_name){
 }
 
 
-def get_settings(content) {
+def get_settings(content, landscape, flavor = 0) {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
-	  settings = jsonSlurper.parseText(content)
-	return settings
-}
-
-def environment_choice(env, option = 0) {
-  def pair = env.split(",")
-  if (pair.length < 2) { return pair }
-  def do_pair = false
-  if (option == 0) {
-	  pair = pair - pair[1]
-  }else if (option == 1) {
-	  pair = pair - pair[0]
-  }else{
-	  // la di da
-  }
-  return pair
+  def pipe = [:]
+  settings = jsonSlurper.parseText(content)
+  pipe["server"] = settings["general"]["server"]
+  pipe["javaCmd"] = settings["general"]["java_cmd"]
+  pipe["stagingDir"] = settings["general"]["staging_path"]
+  // note key off of landscape variable
+  pipe["baseSchema"] = settings["branch_map"][landscape][flavor]["base_schema"]
+  pipe["baseEnv"] = settings["branch_map"][landscape][flavor]["base_env"]
+  pipe["pipeline"] = settings["branch_map"][landscape][flavor]["pipeline"]
+  pipe["environments"] = settings["branch_map"][landscape][flavor]["environments"]
+  pipe["approvers"] = settings["branch_map"][landscape][flavor]["approvers"]
+  pipe["sourceDir"] = settings["branch_map"][landscape][flavor]["source_dir"]
+    
+	return pipe
 }
 
 def dbmaestro_deploy(environment_map, option = 0) {
@@ -296,7 +277,7 @@ def dbmaestro_deploy(environment_map, option = 0) {
 		*/
 		if (do_it && cnt < 1) {
 			echo '#------- Performing Deploy on ${cur_env} -------#'
-			bat "${javaCmd} -Upgrade -ProjectName ${pipeline} -EnvName ${cur_env} -PackageName ${version} -Server ${server}"
+			bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${version} -Server ${pipeline["server"]}"
 			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "AVS_DEVOPS_RELEASE_ENGINEERING@ADP.com,CAPS_Open_Systems_DBA@ADP.com" )
 		}
         cnt += 1
