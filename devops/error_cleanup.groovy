@@ -199,7 +199,7 @@ def dbm_connect(action, args = [:]){
   def cli = "${libPath}${sep}dbm_api.bat"
   def argstg = ""
   args.each {cur -> 
-	echo "Doing: ${cur}"
+	  echo "Doing: ${cur}"
     argstg += "${cur} " //=${args[cur]} "
   }
   echo "Executing: dbm_api.bat action=${action} ${argstg}"
