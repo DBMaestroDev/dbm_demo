@@ -36,13 +36,13 @@ println "loading..."
 println "JSON Settings Document: ${base_path}${sep}${settings_file}"
 def json_file_obj = new File( base_path, settings_file )
 if (json_file_obj.exists() ) {
-  local_settings = jsonSlurper.parseText(json_file_obj.text)  
+  local_settings = jsonSlurper.parseText(json_file_obj.text)
 }
 
 println "JSON Config Document: ${base_path}${sep}${json_file}"
 json_file_obj = new File( base_path, json_file )
 if (json_file_obj.exists() ) {
-  file_contents = jsonSlurper.parseText(json_file_obj.text)  
+  file_contents = jsonSlurper.parseText(json_file_obj.text)
 }
 println "... done"
 
@@ -67,7 +67,7 @@ if (arg_map.containsKey("action")) {
 }else{
   if (arg_map.containsKey("help")) {
     message_box("dbm_api HELP", "title")
-    file_contents.each { k,v -> 
+    file_contents.each { k,v ->
       println "${k}: ${v["name"]}"
       println "\tUsage: ${v["usage"]}"
       println " --------- "
@@ -75,7 +75,7 @@ if (arg_map.containsKey("action")) {
   }else{
     println "Error: specify action=<action> as argument"
     System.exit(1)
-    
+
   }
 }
 
@@ -103,9 +103,9 @@ def perform_query() {
     println header
     separator(100)
     conn.eachRow(query_stg)
-    { row -> 
+    { row ->
       query["output"].each{arr ->
-        def val = row.get(arr[1])
+        def val = row.getAt(arr[1])
         print "| ${val.toString().trim().padRight(arr[2])}"
       }
       println " "
@@ -154,7 +154,7 @@ def result_query(query, grab = []){
   println header
   separator(100)
   conn.eachRow(query["query"])
-  { row -> 
+  { row ->
     query["output"].each{arr ->
       def val = row.getAt(arr[1])
       print "| ${val.toString().trim().padRight(arr[2])}"
@@ -205,30 +205,31 @@ def export_packages(query_string, conn){
   def src = ""
   def cur_ver = ""
   def source_pipeline = ""
-  def target_pipeline = System.getenv("TARGET_PIPELINE")
+  def target_pipeline = System.getenv("TARGET_PIPELINE").trim()
   if(! target_pipeline){
     println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
   }
   def target_schema = get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
-  
+
   message_box("Exporting Versions")
   println "JSON Export config: ${export_path_temp}"
   contents = get_export_json_file(target_pipeline)
-  def target_path = contents["export_path"]
+  def result = ""
+  def target_path = "${export_path_temp.replace("${sep}export_control.json", '')}${sep}${target_schema}"
   def base_path = new File(target_path).getParent()
   ensure_dir("${base_path}${sep}hold")
   def tmp_path = target_path
   def fil_name = ""
   def hdr = ""
   // Redo query and loop through records
-  conn.eachRow(query_string) 
-  { rec -> 
+  conn.eachRow(query_string)
+  { rec ->
     hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
-    hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
+    hdr += "-- Source: Version - ${rec.version}, created: ${rec.createdAt}\n"
     cur_ver = "${rec.version}".toString()
-    def result = cur_ver
+    result = cur_ver
     tmp_path = "${target_path}${sep}${cur_ver}"
     src = new File(rec.script_sorce_data_reference).text
     if (contents["packages"].containsKey(cur_ver)) {
@@ -248,7 +249,7 @@ def export_packages(query_string, conn){
       //println src
       println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
       create_file(tmp_path, fil_name, src)
-    
+
     }else{
       result += " - GO (missing)\n"
     }
@@ -261,11 +262,11 @@ def create_control_json(query_string, conn){
   def seed_list = [:]
   def current_dir = new File(".").getAbsolutePath()
   def p_list = ""
-  def target_pipeline = System.getenv("TARGET_PIPELINE")
-  def source_pipeline = System.getenv("SOURCE_PIPELINE")
+  def target_pipeline = System.getenv("TARGET_PIPELINE").trim()
+  def source_pipeline = System.getenv("SOURCE_PIPELINE").trim()
   def target_schema = ""
   if ( System.getenv("EXPORT_PACKAGES") != null ) { p_list = System.getenv("EXPORT_PACKAGES") }
-  if ( (arg_map["ARG1"] != null) ) { 
+  if ( (arg_map["ARG1"] != null) ) {
     source_pipeline = arg_map["ARG1"]
   }else if(source_pipeline == null){
     println "Source Pipeline must be in ARG1"
@@ -273,12 +274,12 @@ def create_control_json(query_string, conn){
   }
   def export_path_temp = get_export_json_file(target_pipeline, true)
   def ex_path = new File(export_path_temp).getParent()
-  if ( ex_path != null ) { 
+  if ( ex_path != null ) {
     println "Destination: ${export_path_temp}"
-  } 
-  
+  }
+
   if( p_list && p_list != "" ){
-    p_list.split(",").each{ 
+    p_list.split(",").each{
       if (it.contains("_REMAP_")) {
         def parts = it.split("_REMAP_")
         seed_list[parts[0].trim()] = parts[1].trim()
@@ -288,16 +289,16 @@ def create_control_json(query_string, conn){
     }
     println "Packages to Transfer"
     println seed_list
-  } 
-  
+  }
+
   // Get target packages for comparison
   def target_versions = []
-  conn.eachRow(query_string.replaceAll(source_pipeline, target_pipeline)){ rec -> 
+  conn.eachRow(query_string.replaceAll(source_pipeline, target_pipeline)){ rec ->
     target_versions.add("${rec.version}".toString())
   }
-  
+
   result["packages"] = [:]
-  conn.eachRow(query_string){ rec -> 
+  conn.eachRow(query_string){ rec ->
     def ver = "${rec.version}".toString().trim()
     if (! target_versions.contains(ver)) {
       if (seed_list.size() > 0 ) {
@@ -313,9 +314,9 @@ def create_control_json(query_string, conn){
   }
   println "JSON control file: ${export_path_temp}"
   val_file = new File(export_path_temp)
-  val_file.withWriter('utf-8') { writer -> 
+  val_file.withWriter('utf-8') { writer ->
     writer << JsonOutput.prettyPrint(JsonOutput.toJson(result))
-  } 
+  }
 }
 
 def dbm_package() {
@@ -341,7 +342,7 @@ def adhocify_package() {
   query_stg = query_stg.replaceAll("ARG_NAME", new_name)
   println "Processed Query: ${query_stg}"
   message_box("Results")
-  def res = conn.execute(query_stg) 
+  def res = conn.execute(query_stg)
   println res
   separator()
   conn.close()
@@ -356,7 +357,7 @@ def disable_package() {
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
   println "Processed Query: ${query_stg}"
   message_box("Results")
-  def res = conn.execute(query_stg) 
+  def res = conn.execute(query_stg)
   println res
   separator()
   conn.close()
@@ -364,8 +365,8 @@ def disable_package() {
 
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
-  conn.eachRow(query_string) 
-  { rec -> 
+  conn.eachRow(query_string)
+  { rec ->
     message_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
     java.sql.Clob clob = (java.sql.Clob) rec.OBJECTCREATIONSCRIPT
     bodyText = clob.getAsciiStream().getText()
@@ -376,7 +377,8 @@ def show_object_ddl(query_string, conn) {
 // #--------- UTILITY ROUTINES ------------#
 
 def get_export_json_file(target, path_only = false){
-  def contents = [:]  
+  def jsonSlurper = new JsonSlurper()
+  def contents = [:]
   def export_path_temp = "${local_settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
   println "JSON Export config: ${export_path_temp}"
   if(path_only){
@@ -384,7 +386,7 @@ def get_export_json_file(target, path_only = false){
   }
   def json_file_obj = new File( export_path_temp )
   if (json_file_obj.exists() ) {
-    contents = jsonSlurper.parseText(json_file_obj.text)  
+    contents = jsonSlurper.parseText(json_file_obj.text)
   }
   return contents
 }
@@ -402,7 +404,7 @@ def add_query_arguments(query){
   def result_stg = query
   if (query.contains("ARG1")){
     if (arg_map.containsKey("ARG1")){
-      (0..10).each { 
+      (0..10).each {
         def cur_key = "ARG${it}".toString()
         if(arg_map.containsKey(cur_key)){
           //println "Find: ${cur_key} => ${arg_map[cur_key]}"
@@ -443,7 +445,7 @@ def message_box(msg, def mtype = "sep") {
     res = "#${"-" * tot}#\n"
     start = "#${" " * (ilen/2).toInteger()} ${msg} "
     res += "${start}${" " * (tot - start.size() + 1)}#\n"
-    res += "#${"-" * tot}#\n"   
+    res += "#${"-" * tot}#\n"
   }
   println res
   return res
@@ -470,7 +472,7 @@ def path_from_pipeline(pipe_name){
   def query_stg = "select f.FLOWID, f.FLOWNAME, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW f INNER JOIN TWMANAGEDB.TBL_FLOW_SETTINGS s ON f.FLOWID = s.FLOWID WHERE f.FLOWNAME = 'ARG1'"
   def result = ""
   sql.eachRow(query_stg.replaceAll("ARG1", pipe_name))
-  { row -> 
+  { row ->
     result = row.SCRIPTOUTPUTFOLDER
   }
   return result
@@ -488,7 +490,7 @@ def password_decrypt(password_enc){
 
 def ensure_dir(pth) {
   folder = new File(pth)
-  if ( !folder.exists() ) { 
+  if ( !folder.exists() ) {
   println "Creating folder: ${pth}"
   folder.mkdirs() }
   return pth
@@ -501,7 +503,7 @@ def dir_exists(pth) {
 
 def create_file(pth, name, content){
   def fil = new File(pth,name)
-  fil.withWriter('utf-8') { writer -> 
+  fil.withWriter('utf-8') { writer ->
       writer << content
   }
   return "${pth}${sep}${name}"
@@ -529,13 +531,10 @@ def empty_package(){
   def conn = sql_connection("repo")
   results["SCRIPT_ID"].each {script_id -> 
     println "Removing script_id = ${script_id}"
-    def del_query1 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR where script_id = ARG1"
-    def del_query2 = "delete from TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR where script_id = ARG1"
-	def disable_query = "alter table TWMANAGEDB.TBL_SMG_DEPLOY_COMMAND_HISTORY disable constraint FK_COMMAND_HISTORY_DYNAMIC_SCR"
-    conn.execute(disable_query)
-    conn.execute(del_query2.replaceAll('ARG1', script_id.toString() ))
-    conn.execute(del_query1.replaceAll('ARG1', script_id.toString() ))
-	println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
+    conn.call("{call PKG_RM.DELETE_SCRIPT(?,?)}", [script_id, Sql.VARCHAR]) { was_deleted ->
+		if (was_deleted == 'TRUE') {println "Deleted Successfully (${was_deleted})"}
+	}
+    println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
 	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
 	fil.delete()
 	cnt += 1
