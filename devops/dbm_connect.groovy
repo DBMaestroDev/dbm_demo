@@ -227,7 +227,7 @@ def export_packages(query_string, conn){
   conn.eachRow(query_string)
   { rec ->
     hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
-    hdr += "-- Source: Version - ${rec.version}, created: ${rec.createdAt}\n"
+    hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
     cur_ver = "${rec.version}".toString()
     result = cur_ver
     tmp_path = "${target_path}${sep}${cur_ver}"
