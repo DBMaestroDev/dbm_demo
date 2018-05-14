@@ -33,6 +33,9 @@ for (arg in this.args) {
 }
 separator()
 println "loading..."
+if(arg_map.containsKey('settings')) {
+	settings_file = "local_settings_${arg_map["settings"]}.json"
+}
 println "JSON Settings Document: ${base_path}${sep}${settings_file}"
 def json_file_obj = new File( base_path, settings_file )
 if (json_file_obj.exists() ) {
@@ -60,6 +63,9 @@ if (arg_map.containsKey("action")) {
     case "empty_package":
       empty_package()
       break
+    case "transfer_packages":
+      transfer_packages()
+      break
     default:
       perform_query()
       break
@@ -79,11 +85,11 @@ if (arg_map.containsKey("action")) {
   }
 }
 
-def perform_query() {
+def perform_query(action = 'none') {
   if (!file_contents.containsKey(arg_map["action"])) {
-    println "Error: Action: ${arg_map["action"]} - not found!"
-    println "Available: ${file_contents.keySet()}"
-    System.exit(1)
+	println "Error: Action: ${arg_map["action"]} - not found!"
+	println "Available: ${file_contents.keySet()}"
+	System.exit(1)
   }
   contents = file_contents[arg_map["action"]]
   message_box("Task: ${arg_map["action"]}")
@@ -210,7 +216,7 @@ def export_packages(query_string, conn){
     println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
   }
-  def target_schema = get_target_schema(target_pipeline)
+  def target_schema = "Northwind-SIT" //get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
 
   message_box("Exporting Versions")
@@ -227,7 +233,7 @@ def export_packages(query_string, conn){
   conn.eachRow(query_string)
   { rec ->
     hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
-    hdr += "-- Source: Version - ${rec.version}, created: ${rec.createdAt}\n"
+    hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
     cur_ver = "${rec.version}".toString()
     result = cur_ver
     tmp_path = "${target_path}${sep}${cur_ver}"
@@ -238,17 +244,17 @@ def export_packages(query_string, conn){
           tmp_path = "${target_path}${sep}${contents["packages"][cur_ver][1]}"
         }
         result += " - GO\n"
+		  ensure_dir(tmp_path)
+		  fil_name = "${rec.excution_order}_${rec.script}"
+		  src = hdr + src
+		  //println src
+		  println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
+		  create_file(tmp_path, fil_name, src)
       }else{
         result += " - HOLD\n"
         tmp_path = "${base_path}${sep}hold${sep}${cur_ver}"
         hdr += "-- (skipped in primary release)\n"
       }
-      ensure_dir(tmp_path)
-      fil_name = "${rec.excution_order}_${rec.script}"
-      src = hdr + src
-      //println src
-      println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
-      create_file(tmp_path, fil_name, src)
 
     }else{
       result += " - GO (missing)\n"
@@ -540,4 +546,12 @@ def empty_package(){
 	cnt += 1
   }
   conn.close()
+}
+
+def transfer_packages(){
+  arg_map["action"] = "packages"
+  perform_query()
+  arg_map["action"] = "package_export"
+  perform_query()
+  
 }
