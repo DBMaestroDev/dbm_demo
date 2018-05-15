@@ -216,7 +216,7 @@ def export_packages(query_string, conn){
     println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
   }
-  def target_schema = "Northwind-SIT" //get_target_schema(target_pipeline)
+  def target_schema = get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
 
   message_box("Exporting Versions")
