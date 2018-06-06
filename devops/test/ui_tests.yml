@@ -1,0 +1,117 @@
+#----------------------------------------------------------#
+#   UI Test Configuration
+#    controls WATIR testing script
+#----------------------------------------------------------#
+# 6-7-18 BJB
+---
+:test_data:
+  :name: UI WATIR
+  :test_url: http://dbmtemplate:88
+  :test_username: dbmguest@dbmaestro.com
+  :test_password: Trial123!
+  :log_name: regression_log_ui_tests.txt
+  :request:
+    :name: Test request
+    :app_name: app_name
+    :environment_name: environment_name
+    :description: Login to App and test project
+    :steps: 
+      - :name: First step automated
+        :component_name: comp_name
+        :automation_name: directExecute
+        :automation_argument_1: set
+        :automation_argument_2: PATH
+      - :name: Second step automated
+        :component_name: comp_name
+        :automation_name: worldExecute
+        :automation_argument_1: dir
+        :automation_argument_2: app
+      - :name: Third step automated
+        :component_name: comp_name
+        :automation_name: directExecute
+        :automation_argument_1: type config/torquebox.yml
+        :automation_argument_2: stomp
+  :automation:
+    directExecute:
+      :name: directExecute
+      :automation_category: General
+      :automation_type: Automation
+      :content: |-
+        ###
+        # command:
+        #   name: Name of command
+        # success:
+        #   name: Term or Phrase to indicate success
+        ###
+        
+        #==============  User Portion of Script ==================
+        
+        # Run the command directly on the localhost
+        result = run_command(params, params["command"], '')
+        
+        params["success"] = params["success"] || ""
+        
+        # Apply success or failure criteria
+        if result.index(params["success"]).nil?
+          write_to "Command_Failed - term not found: [#{params["success"]}]\n"
+        else
+          write_to "Success - found term: #{params["success"]}\n"
+        end
+
+    worldExecute:
+      :name: worldExecute
+      :automation_category: General
+      :automation_type: Automation
+      :content: |-
+        ###
+        # command:
+        #   name: Name of command
+        # success:
+        #   name: Term or Phrase to indicate success
+        ###
+        
+        #==============  User Portion of Script ==================
+        
+        # Run the command directly on the localhost
+        result = run_command(params, params["command"], '')
+        
+        params["success"] = params["success"] || ""
+        
+        # Apply success or failure criteria
+        if result.index(params["success"]).nil?
+          write_to "Command_Failed - term not found: [#{params["success"]}]\n"
+        else
+          write_to "WorldSuccess - found term: #{params["success"]}\n"
+        end
+
+:test_control:
+  :test_login: true
+  :test_applications: true
+  :test_automation: true
+  :test_requests: true
+  :test_reorder_steps: true
+  :test_steps: true
+  :test_request_execute: true
+
+:test_cases:
+  login: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  dashboard_display: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  application_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  component_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  environment_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  automation_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  automation_state_change: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_add_plan: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_choose_app_environment: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_add_steps: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  step_create: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  step_assign_component: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  step_assign_automation: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  step_assign_automation_arguments: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_reorder_steps: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_planned_state: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_started_state: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+  request_run_automated: "https://rally1.rallydev.com/#/3862856604/detail/defect/37489607872"
+
+

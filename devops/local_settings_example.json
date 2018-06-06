@@ -5,7 +5,9 @@
       "base_path" : "C:\\Automation\\dbm_demo",
       "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
       "staging_path" : "C:\\pipelinescript",
-      "server" : "dbmtemplate"
+      "server" : "dbmtemplate",
+  	  "username" : "dbmguest@dbmaestro.com",
+  	  "token" : "2BqDtNyL7gQjp6J0Kp7HNHbB5P0WayH0"
     },
     "connections" : {
     "repository" : {

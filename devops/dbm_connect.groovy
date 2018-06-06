@@ -541,3 +541,60 @@ def empty_package(){
   }
   conn.close()
 }
+
+def getNextVersion(optionType){
+  //Get version from currentVersion.txt file D:\\repo\\N8
+  // looks like this:
+  // develop=1.10.01
+  // release=1.9.03
+  def newVersion = ""
+  def curVersion = [:]
+  def versionFile = "D:\\n8ddu\\N8\\currentVersion.txt"
+  def fil = new File(versionFile)
+  def contents = fil.readLines
+  contents.each{ -> cur
+    def pair = cur.split("=")
+    curVersion[pair[0].trim()] = pair[1].trim()
+  }
+  
+  switch (optionType.toLowerCase()) {
+    case "develop":
+      curVersion["develop"] = newVersion = incrementVersion(curVersion["develop"])
+      break
+    case "hotfix":
+      curVersion["develop"] = newVersion = incrementVersion(curVersion["develop"], "other")
+      break
+    case "cross_over":
+      curVersion["release"] = newVersion = incrementVersion(curVersion["release"])
+      break
+    case "ddu":
+      curVersion["release"] = newVersion = incrementVersion(curVersion["release"], "other")
+      break
+  }
+  stg = "develop=${curVersion["develop"]}\r\n"
+  stg += "release=${curVersion["release"]}"
+  fil.write(stg)
+  fil.close()
+  return newVersion
+}
+
+def incrementVersion(ver, process = "normal"){
+  // ver = 1.9.04
+  def new_ver = ver
+  def parts = ver.split('\\.')
+  println parts
+  if(process == "normal"){
+      parts[2] = (parts[2].toInteger() + 1).toString()
+      new_ver = parts[0..2].join(".")
+      println new_ver
+  }else{
+      if(parts.size() > 3){
+          parts[3] = (parts[3].toInteger() + 1).toString()
+      }else{
+          parts = parts + '1'
+      }
+      println parts[3]
+      new_ver = parts[0..3].join(".")
+      println new_ver
+  }
+}
