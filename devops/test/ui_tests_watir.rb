@@ -1,7 +1,7 @@
 # Test RPM4.6 Using Watir
 #  BJB 4/6/15
 require 'rubygems'
-require 'watir-webdriver'
+require 'watir'
 #require 'active_support/all'
 
 @echo = true
@@ -35,26 +35,38 @@ def log(txt)
   fil.close
 end
 
-def test_details_lookup(name)
-  result = "Rally test not found"
-  if @test_details[:test_cases].has_key?(name)
-    result = @test_details[:test_cases][name]
-  end
-  result
-end
-
 def test_login(user, password)
-  @browser.goto @brpm_url
+  @browser.goto @target_url
   log_msg = "Testing login screen (#{user}/<password>)"
-  @browser.text_field(:id => "user_login").set user
-  @browser.text_field(:id => "user_password").set password
-  @browser.button(:name => "commit").click
+  @browser.text_field(:name => "userName").set user
+  @browser.text_field(:name => "password").set password
+  @browser.button(:value => "Login").click
   log_regression_test("login", true, log_msg)
   raise "ERROR: failed login" if !@browser.title.include?("Dashboard")
   log_msg = "Directed to #{@browser.title}"
   @logged_in = true
   log_regression_test("dashboard_display", true, log_msg)
   true
+end
+
+def test_project
+  result = goto_item("project")
+  log_msg = "Projects Screen: #{@browser.title}"
+end
+
+def test_package
+  script_name = save_script_file("create_bbtable")
+  result = goto_item("package")
+  package_name = "#{@test_data["package_name"]}.#{@run_number}"
+  log_msg = "Packages Screen: #{@browser.title}"
+  result = goto_item("new_package")
+  log_msg = "Package: #{package_name}"
+  @browser.text_field("ng-model": "vm.data.packageName").set package_name
+  @browser.button("ng-class": "button.klass").click
+  log_msg = "Test Upload file (cancel)"
+  @browser.button(class: "btn-default script-repository-add-script").click
+  @browser.div("ng-model": "vm.data.files").click
+  @browser.send_keys :escape
 end
 
 def test_applications(app_details)
@@ -260,32 +272,37 @@ def log_regression_test(test_name, result, details = "", script_name = "")
   @test_log
 end
 
-def update_request_details(app_details)
-  @test_details[:test_data][:request][:environment_name] = app_details[:environments][0][:name]
-  @test_details[:test_data][:request][:app_name] = app_details[:name]
-  @test_details[:test_data][:request][:steps].each_with_index do |step, idx|
-    @test_details[:test_data][:request][:steps][idx][:component_name] = app_details[:components][0][:name]
-    script = @test_details[:test_data][:request][:steps][idx][:automation_name]
-    @test_details[:test_data][:request][:steps][idx][:automation_name] = @test_details[:test_data][:automation][script][:name]
+def goto_item(item_key)
+  return "Failed" if !@test_details[:test_items].has_key?(item_key)
+  item = @test_details[:test_items][item_key]
+  xpath = item["xpath"]
+  log "Testing #{item_key}"
+  cur = @browser.element(:xpath => xpath)
+  if cur.exists?
+    begin
+      if item.has_key?("action") && item["action"] == "double_click"
+        cur.double_click
+      else
+        cur.click
+      end
+    rescue Exception => e
+      return "Failed - #{e.message}"
+    end
+  else
+    return "Failed - link doesnt exist"
   end
-  log "Updated Request info:\n#{@test_details[:test_data][:request].inspect}"
+  return "Success"
+end 
+
+def save_script_file(script)
+  name = "#{@test_details[:automation][script]["name"]
+  fil = File.join(@test_details[:test_data][:staging_dir],name)
+  File.open(fil,"w+"){ |f|
+    f.write(@test_details[:automation][script]["content"].gsub("_RUNID_", @runid))
+  }
+  name
 end
 
-#-------------------------------------------------------#
-#       Seed Data
-
-app_details = {
-  :name => "new application_#{@timestamp}",
-  :components => [
-    {:name => "comp1_#{@timestamp}"},
-    {:name => "comp2_#{@timestamp}"}
-  ],
-  :environments => [
-    {:name => "env1_#{@timestamp}"},
-    {:name => "env2_#{@timestamp}"}
-  ]
-}
- 
   #-------------------------------------------------------#
   #       MAIN ROUTINE
   #-------------------------------------------------------#
@@ -296,12 +313,17 @@ begin
   @target_url = @test_details[:test_data][:test_url]
   cur_run = ARGV[0] rescue nil
   cur_run = "NewRun" if cur_run.nil?
+  @runid = @test_details[:test_data][:run_number]
   init_log(cur_run)
   log "Initializing #{browser.to_s}"
   @browser = Watir::Browser.new browser
   log "Using: #{@target_url}"
-  test_login(@test_details[:test_data][:test_username], @test_details[:test_data][:test_password]) if @test_details[:test_control][:test_login]  
+  test_login(@test_details[:test_data][:test_username], @test_details[:test_data][:test_password])
   @browser.driver.manage.window.maximize
+  @test_details[:test_control].each do |test,do_it|
+    self.send(test) if do_it
+  end
+
 rescue Exception => e
   puts "#{e.message}\n#{e.backtrace}"
 ensure
