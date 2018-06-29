@@ -1,7 +1,7 @@
 # Test RPM4.6 Using Watir
 #  BJB 4/6/15
 require 'rubygems'
-require 'watir-webdriver'
+require 'watir'
 #require 'active_support/all'
 
 @echo = true
@@ -44,11 +44,11 @@ def test_details_lookup(name)
 end
 
 def test_login(user, password)
-  @browser.goto @brpm_url
+  @browser.goto @target_url
   log_msg = "Testing login screen (#{user}/<password>)"
-  @browser.text_field(:id => "user_login").set user
-  @browser.text_field(:id => "user_password").set password
-  @browser.button(:name => "commit").click
+  @browser.text_field(:name => "userName").set user
+  @browser.text_field(:name => "password").set password
+  @browser.button(:value => "Login").click
   log_regression_test("login", true, log_msg)
   raise "ERROR: failed login" if !@browser.title.include?("Dashboard")
   log_msg = "Directed to #{@browser.title}"

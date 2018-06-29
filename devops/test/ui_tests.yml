@@ -6,7 +6,7 @@
 ---
 :test_data:
   :name: UI WATIR
-  :test_url: http://dbmtemplate:88
+  :test_url: dbmtemplate:88
   :test_username: dbmguest@dbmaestro.com
   :test_password: Trial123!
   :log_name: regression_log_ui_tests.txt

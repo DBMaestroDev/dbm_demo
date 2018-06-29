@@ -1,0 +1,59 @@
+{
+  "### Instructions ###": 
+    "Enter the local settings items for your installation",
+    "general" : {
+      "base_path" : "C:\\Automation\\jenkins_pipe",
+      "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+      "staging_path" : "C:\\pipelinescript\\HR",
+	  "server" : "dbmtemplate:8017"
+    },
+    "connections" : {
+		"repository" : {
+		  "user" : "twmanagedb",
+		  "password" : "manage#2009",
+		  "connect" : "dbmtemplate:1521/orcl"
+		},
+		"remote" : {
+		  "user" : "dbmaestro_teamwork",
+		  "password" : "Remote#2009",
+		  "connect" : "dbmtemplate:1521/orcl"
+		}
+	 },
+	"branch_map" : {
+		"develop" : [
+		  {
+		  "pipeline" : "Northwind_DEV",
+		  "base_env" : "DIT",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind",
+		  "base_schema" : "Northwind-DEV",
+		  "environments" : [
+			 "DIT",
+			 "QAT"
+		   ],
+		   "approvers" : [
+			 "dbmguest",
+			 "dbmguest"
+		   ]
+		  }
+		],
+		"release" : [
+		  {
+		  "pipeline" : "Northwind_RELEASE",
+		  "base_env" : "SIT",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind",
+		  "base_schema" : "Northwind-SIT",
+		  "environments" : [
+			 "SIT",
+			 "STAGE",
+			 "PROD"
+		   ],
+		  "approvers" : [
+		   "dbmguest",
+		   "dbmguest",
+		   "dbmguest"
+		   ]
+		  }
+		]
+	}
+}
+
