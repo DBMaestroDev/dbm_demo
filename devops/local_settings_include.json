@@ -8,6 +8,10 @@
 	  "server" : "dbmtemplate:8017",
 	  "username" : "dbmguest@dbmaestro.com",
 	  "token" : "gKIn2LyvFxozrXm53aaHiWbkygMLzLfy"
+	  "source_control" : {
+		"type" : "git",
+		"remote" : "false"
+		}
     },
     "connections" : {
 		"repository" : {
@@ -42,7 +46,7 @@
 		  {
 		  "pipeline" : "Northwind_RELEASE",
 		  "base_env" : "SIT",
-		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind\\ddl",
 		  "base_schema" : "Northwind-SIT",
 		  "environments" : [
 			 "SIT",
