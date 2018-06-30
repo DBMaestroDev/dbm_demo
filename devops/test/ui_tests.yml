@@ -18,7 +18,7 @@
 :test_control:
   :test_project: true
   :test_package: true
-  :test_upgrade: true
+  :test_upgrade: false
 
 :test_items:
   project : 
