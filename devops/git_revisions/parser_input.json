@@ -1,0 +1,34 @@
+{
+  "### Instructions ###": 
+    "Enter the local settings items for the parser",
+    "general" : {
+      "base_path" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
+      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBm\"",
+      "code_separator" : "GO",
+      "repository_name" : "REPO"
+    },
+    "objects" : {
+      "CREATE VIEW" : "VIEWS",
+      "CREATE TABLE" : "TABLES",
+      "ALTER TABLE" : "ALTER_TABLE",
+      "CREATE INDEX" : "INDEXES",
+      "CREATE CLUSTERED INDEX" : "INDEXES",
+      "CREATE NONCLUSTERED INDEX" : "INDEXES",
+      "CREATE UNIQUE NONCLUSTERED INDEX" : "INDEXES",
+      "CREATE UNIQUE INDEX" : "INDEXES",
+      "CREATE FUNCTION" : "FUNCTIONS",
+      "CREATE PROCEDURE" : "PROCEDURES",
+      "CREATE TRIGGER" : "TRIGGERS",
+      "prefix" : ""
+    },
+    "sub_objects" : {
+      "ADD CONSTRAINT" : "CONSTRAINTS",
+      "prefix" : "sub_"
+    },
+    "sub_modifiers" : {
+      "NOCHECK CONSTRAINT" : "CONSTRAINTS",
+      "prefix" : "mod_"
+    }
+  }
+}
+
