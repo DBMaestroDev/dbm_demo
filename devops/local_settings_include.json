@@ -7,7 +7,7 @@
       "staging_path" : "C:\\pipelinescript\\HR",
 	  "server" : "dbmtemplate:8017",
 	  "username" : "dbmguest@dbmaestro.com",
-	  "token" : "gKIn2LyvFxozrXm53aaHiWbkygMLzLfy"
+	  "token" : "gKIn2LyvFxozrXm53aaHiWbkygMLzLfy",
 	  "source_control" : {
 		"type" : "git",
 		"remote" : "false"
@@ -30,14 +30,14 @@
 		  {
 		  "pipeline" : "Northwind_DEV",
 		  "base_env" : "DIT",
-		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind\\ddl",
 		  "base_schema" : "Northwind-DEV",
 		  "environments" : [
 			 "DIT",
 			 "QAT"
 		   ],
 		   "approvers" : [
-			 "dbmguest",
+			 "none",
 			 "dbmguest"
 		   ]
 		  }
