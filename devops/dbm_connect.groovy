@@ -210,6 +210,10 @@ def export_packages(query_string, conn){
     println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
   }
+  def consolidate_version = System.getenv("CONSOLIDATE_VERSION").trim()
+  if(consolidate_version != "none"){
+    println "Consolidating packages to version: ${consolidate_version}"
+  }
   def target_schema = get_target_schema(target_pipeline)
   def export_path_temp = get_export_json_file(target_pipeline, true)
 
@@ -219,17 +223,22 @@ def export_packages(query_string, conn){
   def result = ""
   def target_path = "${export_path_temp.replace("${sep}export_control.json", '')}${sep}${target_schema}"
   def base_path = new File(target_path).getParent()
-  ensure_dir("${base_path}${sep}hold")
+  //ensure_dir("${base_path}${sep}hold")
   def tmp_path = target_path
   def fil_name = ""
   def hdr = ""
+  def do_save = false
   // Redo query and loop through records
   conn.eachRow(query_string)
   { rec ->
     hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
     hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
     cur_ver = "${rec.version}".toString()
+    if(consolidate_version != "none"){
+      cur_ver = consolidate_version
+    }
     result = cur_ver
+    do_save = false
     tmp_path = "${target_path}${sep}${cur_ver}"
     src = new File(rec.script_sorce_data_reference).text
     if (contents["packages"].containsKey(cur_ver)) {
@@ -237,18 +246,21 @@ def export_packages(query_string, conn){
         if (contents["packages"][cur_ver][1] != ""){
           tmp_path = "${target_path}${sep}${contents["packages"][cur_ver][1]}"
         }
+        do_save = true
         result += " - GO\n"
       }else{
         result += " - HOLD\n"
         tmp_path = "${base_path}${sep}hold${sep}${cur_ver}"
         hdr += "-- (skipped in primary release)\n"
       }
-      ensure_dir(tmp_path)
-      fil_name = "${rec.excution_order}_${rec.script}"
-      src = hdr + src
-      //println src
-      println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
-      create_file(tmp_path, fil_name, src)
+      if(do_save){
+        ensure_dir(tmp_path)
+        fil_name = "${sortable(rec.excution_order)}_${rec.script}"
+        src = hdr + src
+        //println src
+        println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
+        create_file(tmp_path, fil_name, src)
+      }
 
     }else{
       result += " - GO (missing)\n"
@@ -597,4 +609,13 @@ def incrementVersion(ver, process = "normal"){
       new_ver = parts[0..3].join(".")
       println new_ver
   }
+}
+
+def sortable(inum){
+  ans = "00"
+  //incoming int
+  def seq = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z']
+  def iter = (icnt/36).toInteger()
+  def remain = icnt % 36
+  return "${seq.get(iter)}${seq.get(remain)}"
 }

@@ -303,8 +303,9 @@ def dbmaestro_deploy(environment_map, option = 0) {
 }
 
 @NonCPS
-def transfer_packages(source_pipe, target_pipe, packages){
-	bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && ${automationPath}${sep}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep}dbm_api.bat action=export_packages ARG1=${source_pipe} "
+def transfer_packages(source_pipe, target_pipe, packages, consolidate_version = "none"){
+  // Take new arguments to consolidate packages
+	bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && set CONSOLIDATE_VERSION=${consolidate_version} && ${automationPath}${sep}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep}dbm_api.bat action=export_packages ARG1=${source_pipe} "
 	echo message_box("Packaging Files for ${packages.join(",")}")
 	bat "${javaCmd} -Package -ProjectName ${pipeline["pipeline"]} -Server ${server}"
 	
