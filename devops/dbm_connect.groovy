@@ -60,6 +60,9 @@ if (arg_map.containsKey("action")) {
     case "empty_package":
       empty_package()
       break
+    case "transfer_packages":
+      transfer_packages()
+      break
     default:
       perform_query()
       break
@@ -218,8 +221,14 @@ def export_packages(query_string, conn){
   def export_path_temp = get_export_json_file(target_pipeline, true)
 
   message_box("Exporting Versions")
+  println "Target Pipeline: ${target_pipeline}, schema: ${target_schema}"
   println "JSON Export config: ${export_path_temp}"
   contents = get_export_json_file(target_pipeline)
+  def pkg_list = []
+  contents["packages"].each {k,v ->
+	if(v[0] == "true"){ pkg_list.add(k) }
+  }
+  println "Package List: ${pkg_list}"
   def result = ""
   def target_path = "${export_path_temp.replace("${sep}export_control.json", '')}${sep}${target_schema}"
   def base_path = new File(target_path).getParent()
@@ -228,23 +237,25 @@ def export_packages(query_string, conn){
   def fil_name = ""
   def hdr = ""
   def do_save = false
+  def counter = 0
   // Redo query and loop through records
   conn.eachRow(query_string)
   { rec ->
     hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
     hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
     cur_ver = "${rec.version}".toString()
+	target_ver = cur_ver
     if(consolidate_version != "none"){
-      cur_ver = consolidate_version
+      target_ver = consolidate_version
     }
     result = cur_ver
     do_save = false
-    tmp_path = "${target_path}${sep}${cur_ver}"
+    tmp_path = "${target_path}${sep}${target_ver}"
     src = new File(rec.script_sorce_data_reference).text
     if (contents["packages"].containsKey(cur_ver)) {
       if (contents["packages"][cur_ver][0]) {
         if (contents["packages"][cur_ver][1] != ""){
-          tmp_path = "${target_path}${sep}${contents["packages"][cur_ver][1]}"
+          tmp_path = "${target_path}${sep}${target_ver}"
         }
         do_save = true
         result += " - GO\n"
@@ -255,7 +266,7 @@ def export_packages(query_string, conn){
       }
       if(do_save){
         ensure_dir(tmp_path)
-        fil_name = "${sortable(rec.excution_order)}_${rec.script}"
+        fil_name = "${sortable(counter)}_${rec.script}"
         src = hdr + src
         //println src
         println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
@@ -265,6 +276,7 @@ def export_packages(query_string, conn){
     }else{
       result += " - GO (missing)\n"
     }
+	counter += 1
   }
   println result
 }
@@ -613,9 +625,18 @@ def incrementVersion(ver, process = "normal"){
 
 def sortable(inum){
   ans = "00"
+  def icnt = inum.toInteger()
   //incoming int
   def seq = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z']
   def iter = (icnt/36).toInteger()
   def remain = icnt % 36
   return "${seq.get(iter)}${seq.get(remain)}"
+}
+
+def transfer_packages(){
+  arg_map["action"] = "packages"
+  perform_query()
+  arg_map["action"] = "package_export"
+  perform_query()
+  
 }
