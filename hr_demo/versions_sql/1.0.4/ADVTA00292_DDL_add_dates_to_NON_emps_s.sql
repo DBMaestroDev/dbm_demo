@@ -1,0 +1,7 @@
+-- USE [AH3111ODZ]
+
+ALTER TABLE NON_EMPLOYEES 
+ADD hiredate DATE,
+ended_at DATE;
+
+GO

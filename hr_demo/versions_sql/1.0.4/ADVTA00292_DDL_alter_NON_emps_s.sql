@@ -1,0 +1,5 @@
+alter table NON_EMPLOYEES alter column title VARCHAR(100)
+GO
+
+CREATE INDEX IDX_LAST_NAME ON NON_EMPLOYEES(last_name)
+GO
