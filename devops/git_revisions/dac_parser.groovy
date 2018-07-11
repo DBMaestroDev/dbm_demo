@@ -5,7 +5,7 @@
 => BJB 7/2/18
 */
 import groovy.json.*
-sep = "/" //FIXME Reset for windows
+sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 def settings_file = "${this_path}${sep}parser_input.json"
 def file_path = ""
@@ -17,13 +17,16 @@ arg_map = [:]
 parse_arguments(this.args)
 def base_path = settings["general"]["base_path"]
 delim = settings["general"]["code_separator"]
-if (!arg_map.containsKey("file")){
-  println message_box("ERROR: No file argument given", "title")
+if (!arg_map.containsKey("dacpac_file")){
+  println message_box("ERROR: No dacpac_file argument given", "title")
   System.exit(1)
 }
 def file_name = arg_map["file"]
 def rpt = true
 file_path = "${base_path}${sep}${file_name}"
+// FIXME - build routine to unpack the dacpac file
+// "C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\DacUnpack.exe" "%1"
+// unpack_file(file_name)
 def icnt = 0
 def last_line = "ZZZ___"
 def hand = new File(file_path).eachLine {line -> 
@@ -43,7 +46,10 @@ def hand = new File(file_path).eachLine {line ->
   last_line = line
   icnt += 1  
 }
-  
+// FIXME - now add all the files to git and commit
+// update_scm
+
+ 
 def parse_arguments(args){
   for (arg in args) {
     //println arg

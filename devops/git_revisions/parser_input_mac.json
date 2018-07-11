@@ -2,7 +2,7 @@
   "### Instructions ###": 
     "Enter the local settings items for the parser",
     "general" : {
-      "base_path" : "C:\\Automation\\dbm_demo\\devops\\git_revisions",
+      "base_path" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
       "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBm\"",
       "code_separator" : "GO",
       "repository_name" : "REPO"
