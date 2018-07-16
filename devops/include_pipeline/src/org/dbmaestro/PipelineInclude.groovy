@@ -81,7 +81,7 @@ def execute() {
 	def pipeline = [:]
 	def settings_content = ""
 	//def sourceDir = "C:\\automation\\jenkins_pipe"
-	def sourceDir = "D:\\dbmautomation\\deploy\\devops"
+	def sourceDir = "D:\\dbmautomation\\deploy\\devops "
   this.prepare()
 	node(dbmNode) {
 		def file_path = "${automationPath}${sep()}settings${sep()}${settingsFile}"
@@ -99,8 +99,11 @@ def execute() {
   
   echo message_box("Pipeline Deployment Using ${landscape} Process", "title")
   echo "Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["base_env"]}\n - Schema: ${pipeline["base_schema"]}"
-	def version = this.get_version(pipeline)
+	def tasks = this.get_tasks(pipeline)
+  pipeline["tasks"] = tasks
+	def version = env.Version
   pipeline["version"] = version
+  
   // Here we loop through the environments from the settings file to perform the deployment
   def env_num = 0
   pipeline["environments"].each { env ->
@@ -115,6 +118,44 @@ def execute() {
 
 return this;
 
+def get_tasks(pipe_info){
+	// message looks like this "Adding new tables [Version: V2.3.4] "
+	def reg = ~/.*\[Tasks: (.*)\].*/
+  def gitMessage = ""
+  def versionResult = ""
+  def branch_name = pipe_info["branch_name"]
+  def base_path = pipe_info["base_path"]
+  def dbm_node = pipe_info["dbm_node"]
+  def remote = pipe_info["remote_git"] != "false"
+  def scm = pipe_info["source_control"]
+  def pull_stg = remote ? " && git pull origin ${branch_name}" : ""
+  
+  // ------------- Update Local Git -----------------------
+  stage('GitParams') {
+  	node (dbm_node) {
+  			echo "# Read latest commit..."
+  			dir([path:"${base_path}"]){
+  				bat "git --version"
+				bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
+  				gitMessage = bat(
+  				  script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
+  				  returnStdout: true
+  				).trim()
+  		}
+  		echo "# From Git: ${gitMessage}"
+  		taskResult = gitMessage.replaceFirst(reg, '$1')
+  	}
+  }
+  // Both branch version and git version git wins as override!
+  if (gitMessage.length() != taskResult.length()){
+  	echo "# SNOW Tasks from git:" + taskResult
+  }else{
+    echo "# No SNOW Tasks found"
+    currentBuild.result = "UNSTABLE"
+    return
+  }
+	return taskResult
+}
 
 def get_version(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "

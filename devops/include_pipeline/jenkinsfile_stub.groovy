@@ -7,7 +7,8 @@ println "#----------- Remote Pipeline Execution ------------#"
 // Add a properties for Platform and Skip_Packaging more
 properties([
         parameters([
-                choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes')
+          string(name: 'Version', description: "Enter Version for the Deploy", defaultValue: "V1.0.0"),
+          choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes')
         ])
 ])
 
