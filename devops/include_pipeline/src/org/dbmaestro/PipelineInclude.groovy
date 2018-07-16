@@ -1,5 +1,8 @@
-// N8 Deployment Pipeline
-//
+/*
+ Deployment Pipeline Include
+This file is called by the stub and can be centralized for all pipelines
+7/6/18 BJB - DBmaestro
+*/
 package org.dbmaestro;
 
 import groovy.json.*
@@ -61,7 +64,6 @@ def run(Object step, pipe, env_num){
 def execute() {
   def buildNumber = "$env.BUILD_NUMBER"
 	def dbmNode = "master"
-	def developBranch = "develop"
 	def rootJobName = "$env.JOB_NAME";
 	//def branchName = rootJobName.replaceFirst('.*/.*/', '')
 	def fullBranchName = rootJobName.replaceFirst('.*/','')
@@ -80,7 +82,7 @@ def execute() {
 	def sourceDir = "C:\\automation\\jenkins_pipe"
 	this.prepare()
 	node(dbmNode) {
-		def file_path = "${automationPath}${sep()}${settingsFile}"
+		def file_path = "${automationPath}${sep()}settings${sep()}${settingsFile}"
 		println "JSON Settings Document: ${file_path}"
 		println "Job: ${env.JOB_NAME}"
 		def hnd = new File(file_path.trim())
@@ -97,6 +99,7 @@ def execute() {
   echo "Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["base_env"]}\n - Schema: ${pipeline["base_schema"]}"
 	def version = this.get_version(pipeline)
   pipeline["version"] = version
+  // Here we loop through the environments from the settings file to perform the deployment
   def env_num = 0
   pipeline["environments"].each { env ->
     echo "Executing Environment ${env}"
@@ -182,6 +185,7 @@ def dbmaestro_deploy(environment_map, option = 0) {
 
 @NonCPS
 def transfer_packages(source_pipe, target_pipe, packages) {
+  // Package list "V1.0.1,V1.0.2,V1.0.3=>V2.1.2"
     bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && ${automationPath}${sep()}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep()}dbm_api.bat action=package_export ARG1=${source_pipe} "
     echo message_box("Packaging Files for ${packages.join(",")}")
     bat "${javaCmd} -Package -ProjectName ${pipeline["pipeline"]} -Server ${server}"

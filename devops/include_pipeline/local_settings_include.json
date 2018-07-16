@@ -9,8 +9,8 @@
 	  "username" : "dbmguest@dbmaestro.com",
 	  "token" : "gKIn2LyvFxozrXm53aaHiWbkygMLzLfy",
 	  "source_control" : {
-		"type" : "git",
-		"remote" : "false"
+		  "type" : "git",
+		  "remote" : "false"
 		}
     },
     "connections" : {

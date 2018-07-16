@@ -5,18 +5,17 @@ def upgrade_environment(pipe, env_num){
   def approver = pipe["approvers"][env_num]
   def pair = environment.split(",")
   def do_pair = false
-  def version = "V${pipe["version"]}"
-  if (pair.size() == 2) {environment = pair[0] }
-  do_pair = (pair.size() == 2) 
+  def version = pipe["version"]
+  if(!version.startsWith("V")) { version = "V${version}" }
+  if (pair.size() > 1) {environment = pair[0] }
+  do_pair = (pair.size() > 1) 
   if(approver != "none"){
-	input message: "Deploy to ${environment}?", submitter: approver
+	  input message: "Deploy to ${environment}?", submitter: approver
   }
 	echo "#------------------- Performing Deploy on ${environment} --------------#"
-	bat "${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${environment} -PackageName ${version} -Server ${pipe["server"]}"
-	if (do_pair) {
-			bat "${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${pair[1]} -PackageName ${version} -Server ${pipe["server"]}"
-	}
-  
+	for(env in pair){
+		bat "${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${pipe["credential"]}"
+  }
 }
 
 def package_artifacts(pipe, env_num){
@@ -41,11 +40,6 @@ def package_artifacts(pipe, env_num){
   }else{
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
-}
-
-def base_environment(pipe_info, env){
-	println "#--- Testing for base_environment"
-	return (pipe_info["environments"][0] == env)
 }
 
 def execute(pipe_info, env_num){

@@ -304,8 +304,8 @@ def create_control_json(query_string, conn){
 
   if( p_list && p_list != "" ){
     p_list.split(",").each{
-      if (it.contains("_REMAP_")) {
-        def parts = it.split("_REMAP_")
+      if (it.contains("=>")) {
+        def parts = it.split("=>")
         seed_list[parts[0].trim()] = parts[1].trim()
       }else{
         seed_list[it.trim()] = ""
