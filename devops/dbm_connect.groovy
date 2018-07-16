@@ -203,15 +203,23 @@ def sql_connection(conn_type) {
 def export_packages(query_string, conn){
   def jsonSlurper = new JsonSlurper()
   def date = new Date()
+  def seed_list = [:]
   def contents = [:]
   sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
   def src = ""
   def cur_ver = ""
+  def p_list = ""
   def source_pipeline = ""
   def target_pipeline = System.getenv("TARGET_PIPELINE").trim()
   if(! target_pipeline){
     println "Error: Set TARGET_PIPELINE environment variable or pass path to control.json as 2nd argument"
     System.exit(1)
+  }
+  if ( System.getenv("EXPORT_PACKAGES") == null ) {
+    println "Error: Set EXPORT_PACKAGES environment variable to specify which packages move forward"
+    System.exit(1)
+  }else{ 
+    p_list = System.getenv("EXPORT_PACKAGES") 
   }
   def consolidate_version = System.getenv("CONSOLIDATE_VERSION").trim()
   if(consolidate_version != "none"){
@@ -221,87 +229,6 @@ def export_packages(query_string, conn){
   def export_path_temp = get_export_json_file(target_pipeline, true)
 
   message_box("Exporting Versions")
-  println "Target Pipeline: ${target_pipeline}, schema: ${target_schema}"
-  println "JSON Export config: ${export_path_temp}"
-  contents = get_export_json_file(target_pipeline)
-  def pkg_list = []
-  contents["packages"].each {k,v ->
-	if(v[0] == "true"){ pkg_list.add(k) }
-  }
-  println "Package List: ${pkg_list}"
-  def result = ""
-  def target_path = "${export_path_temp.replace("${sep}export_control.json", '')}${sep}${target_schema}"
-  def base_path = new File(target_path).getParent()
-  //ensure_dir("${base_path}${sep}hold")
-  def tmp_path = target_path
-  def fil_name = ""
-  def hdr = ""
-  def do_save = false
-  def counter = 0
-  // Redo query and loop through records
-  conn.eachRow(query_string)
-  { rec ->
-    hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
-    hdr += "-- Source: Version - ${rec.version}, created: ${rec.created_at}\n"
-    cur_ver = "${rec.version}".toString()
-	target_ver = cur_ver
-    if(consolidate_version != "none"){
-      target_ver = consolidate_version
-    }
-    result = cur_ver
-    do_save = false
-    tmp_path = "${target_path}${sep}${target_ver}"
-    src = new File(rec.script_sorce_data_reference).text
-    if (contents["packages"].containsKey(cur_ver)) {
-      if (contents["packages"][cur_ver][0]) {
-        if (contents["packages"][cur_ver][1] != ""){
-          tmp_path = "${target_path}${sep}${target_ver}"
-        }
-        do_save = true
-        result += " - GO\n"
-      }else{
-        result += " - HOLD\n"
-        tmp_path = "${base_path}${sep}hold${sep}${cur_ver}"
-        hdr += "-- (skipped in primary release)\n"
-      }
-      if(do_save){
-        ensure_dir(tmp_path)
-        fil_name = "${sortable(counter)}_${rec.script}"
-        src = hdr + src
-        //println src
-        println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
-        create_file(tmp_path, fil_name, src)
-      }
-
-    }else{
-      result += " - GO (missing)\n"
-    }
-	counter += 1
-  }
-  println result
-}
-
-def create_control_json(query_string, conn){
-  def result = [:]
-  def seed_list = [:]
-  def current_dir = new File(".").getAbsolutePath()
-  def p_list = ""
-  def target_pipeline = System.getenv("TARGET_PIPELINE").trim()
-  def source_pipeline = System.getenv("SOURCE_PIPELINE").trim()
-  def target_schema = ""
-  if ( System.getenv("EXPORT_PACKAGES") != null ) { p_list = System.getenv("EXPORT_PACKAGES") }
-  if ( (arg_map["ARG1"] != null) ) {
-    source_pipeline = arg_map["ARG1"]
-  }else if(source_pipeline == null){
-    println "Source Pipeline must be in ARG1"
-    return true
-  }
-  def export_path_temp = get_export_json_file(target_pipeline, true)
-  def ex_path = new File(export_path_temp).getParent()
-  if ( ex_path != null ) {
-    println "Destination: ${export_path_temp}"
-  }
-
   if( p_list && p_list != "" ){
     p_list.split(",").each{
       if (it.contains("=>")) {
@@ -311,35 +238,46 @@ def create_control_json(query_string, conn){
         seed_list[it.trim()] = ""
       }
     }
-    println "Packages to Transfer"
-    println seed_list
+    //println seed_list
   }
-
-  // Get target packages for comparison
-  def target_versions = []
-  conn.eachRow(query_string.replaceAll(source_pipeline, target_pipeline)){ rec ->
-    target_versions.add("${rec.version}".toString())
-  }
-
-  result["packages"] = [:]
-  conn.eachRow(query_string){ rec ->
-    def ver = "${rec.version}".toString().trim()
-    if (! target_versions.contains(ver)) {
-      if (seed_list.size() > 0 ) {
-        if (seed_list.keySet().contains(ver)){
-          result["packages"][ver] = [true, seed_list[ver]]
-        }else{
-          result["packages"][ver] = [false, ""]
-        }
-      }else{
-        result["packages"][ver] = [true, ""]
+  println "Target Pipeline: ${target_pipeline}, schema: ${target_schema}"
+  println "Packages: ${p_list}"
+  def result = ""
+  def tmp_path = target_path
+  def fil_name = ""
+  def hdr = ""
+  def do_save = false
+  def counter = 0
+  // Redo query and loop through records
+  hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
+  conn.eachRow(query_string)
+  { rec ->
+    cur_ver = "${rec.version}".toString()
+	  target_ver = cur_ver
+    result = cur_ver
+    do_save = false
+    hdr += "-- Version - ${cur_ver}, created: ${rec.created_at}\n"
+    src = new File(rec.script_sorce_data_reference).text
+    if (seed_list.containsKey(cur_ver)) {
+      if(consolidate_version != "none"){
+        target_ver = consolidate_version
       }
+      if(seed_list[cur_ver] != ""){
+        target_ver = seed_list[cur_ver]
+      }
+      tmp_path = "${target_path}${sep}${target_ver}"
+      ensure_dir(tmp_path)
+      fil_name = "${sortable(counter)}_${rec.script}"
+      src = hdr + src
+      //println src
+      println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
+      create_file(tmp_path, fil_name, src)
+      result += " - Transfer Version (${target_ver})"
+    }else{
+      result += " - Skip Version"
     }
-  }
-  println "JSON control file: ${export_path_temp}"
-  val_file = new File(export_path_temp)
-  val_file.withWriter('utf-8') { writer ->
-    writer << JsonOutput.prettyPrint(JsonOutput.toJson(result))
+    counter += 1
+    println result
   }
 }
 
@@ -634,8 +572,6 @@ def sortable(inum){
 }
 
 def transfer_packages(){
-  arg_map["action"] = "packages"
-  perform_query()
   arg_map["action"] = "package_export"
   perform_query()
   
