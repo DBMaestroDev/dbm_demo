@@ -75,12 +75,14 @@ def execute() {
 		branchVersion = branchName.replaceFirst('.*/', '')
 	}
 	echo "Inputs: ${rootJobName}, branch: ${branchType}, name: ${branchName}"
-	def automationPath = "C:\\automation\\dbm_demo\\devops"
-	def settingsFile = "local_settings_${branchType}.json"
+	//def automationPath = "C:\\automation\\dbm_demo\\devops"
+	def automationPath = "D:\\dbmautomation\\devops_shared"
+  def settingsFile = "local_settings_${branchType}.json"
 	def pipeline = [:]
 	def settings_content = ""
-	def sourceDir = "C:\\automation\\jenkins_pipe"
-	this.prepare()
+	//def sourceDir = "C:\\automation\\jenkins_pipe"
+	def sourceDir = "D:\\dbmautomation\\deploy\\devops"
+  this.prepare()
 	node(dbmNode) {
 		def file_path = "${automationPath}${sep()}settings${sep()}${settingsFile}"
 		println "JSON Settings Document: ${file_path}"
@@ -181,15 +183,6 @@ def dbmaestro_deploy(environment_map, option = 0) {
         }
         cnt += 1
     }
-}
-
-@NonCPS
-def transfer_packages(source_pipe, target_pipe, packages) {
-  // Package list "V1.0.1,V1.0.2,V1.0.3=>V2.1.2"
-    bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && ${automationPath}${sep()}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep()}dbm_api.bat action=package_export ARG1=${source_pipe} "
-    echo message_box("Packaging Files for ${packages.join(",")}")
-    bat "${javaCmd} -Package -ProjectName ${pipeline["pipeline"]} -Server ${server}"
-
 }
 
 @NonCPS

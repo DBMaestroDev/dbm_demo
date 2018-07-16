@@ -20,7 +20,9 @@ def upgrade_environment(pipe, env_num){
 
 def package_artifacts(pipe, env_num){
   def version = pipe["version"]
-  def staging_dir = pipe["staging_dir"]
+  def v_version = version
+  if( !version.startsWith("V") ) {v_version = "V#{version}" } 
+  def staging_dir = "${pipe["staging_dir"]}${sep()}${pipe["pipeline"]}${sep()}${pipe["base_schema"]}"
   def source_dir = pipe["source_dir"]
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     echo "#------------------- Copying files for ${version} ---------#"
@@ -32,7 +34,7 @@ def package_artifacts(pipe, env_num){
     //bat "if not exist \"${staging_dir}${sep()}${version}\" mkdir \"${staging_dir}${sep()}${version}\""
     //bat "copy \"${source_dir}${sep()}${dbcr_result}*.sql\" \"${staging_dir}${sep()}${version}\""
     // This is for copying a whole directory
-    bat "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${staging_dir}${sep()}V${version}\""
+    bat "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${staging_dir}${sep()}${v_version}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}"
