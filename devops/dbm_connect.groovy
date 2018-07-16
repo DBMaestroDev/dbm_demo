@@ -226,7 +226,6 @@ def export_packages(query_string, conn){
     println "Consolidating packages to version: ${consolidate_version}"
   }
   def target_schema = get_target_schema(target_pipeline)
-  def export_path_temp = get_export_json_file(target_pipeline, true)
 
   message_box("Exporting Versions")
   if( p_list && p_list != "" ){
@@ -243,13 +242,14 @@ def export_packages(query_string, conn){
   println "Target Pipeline: ${target_pipeline}, schema: ${target_schema}"
   println "Packages: ${p_list}"
   def result = ""
-  def tmp_path = target_path
+  def tmp_path = "${local_settings["general"]["staging_path"]}${sep}${target_pipeline}${sep}${target_schema}"
+  def target_path = tmp_path
   def fil_name = ""
   def hdr = ""
   def do_save = false
   def counter = 0
   // Redo query and loop through records
-  hdr += "-- Exported from pipeline: ${rec.FLOWNAME} on ${sdf.format(date)}\n"
+  hdr += "-- Exported from pipeline: ${target_pipeline} on ${sdf.format(date)}\n"
   conn.eachRow(query_string)
   { rec ->
     cur_ver = "${rec.version}".toString()
@@ -258,7 +258,7 @@ def export_packages(query_string, conn){
     do_save = false
     hdr += "-- Version - ${cur_ver}, created: ${rec.created_at}\n"
     src = new File(rec.script_sorce_data_reference).text
-    if (seed_list.containsKey(cur_ver)) {
+    if (seed_list.containsKey(cur_ver) && rec.script.endsWith(".sql") ) {
       if(consolidate_version != "none"){
         target_ver = consolidate_version
       }
@@ -270,7 +270,7 @@ def export_packages(query_string, conn){
       fil_name = "${sortable(counter)}_${rec.script}"
       src = hdr + src
       //println src
-      println "Exporting Script: ${rec.script}, Target: ${tmp_path}"
+      println "Exporting Script: ${rec.script}, Target: ${target_path}"
       create_file(tmp_path, fil_name, src)
       result += " - Transfer Version (${target_ver})"
     }else{
@@ -565,7 +565,7 @@ def sortable(inum){
   ans = "00"
   def icnt = inum.toInteger()
   //incoming int
-  def seq = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z']
+  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
   def iter = (icnt/36).toInteger()
   def remain = icnt % 36
   return "${seq.get(iter)}${seq.get(remain)}"
