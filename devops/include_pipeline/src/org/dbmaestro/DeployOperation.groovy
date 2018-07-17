@@ -23,7 +23,7 @@ def package_artifacts(pipe, env_num){
   def tasks = pipe["tasks"]
   def v_version = version
   if( !version.startsWith("V") ) {v_version = "V#{version}" } 
-  def staging_dir = "${pipe["staging_dir"]}${sep()}${pipe["pipeline"]}${sep()}${pipe["base_schema"]}"
+  def staging_dir = pipe["staging_dir"]
   def source_dir = pipe["source_dir"]
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     echo "#------------------- Copying files for ${version} ---------#"
