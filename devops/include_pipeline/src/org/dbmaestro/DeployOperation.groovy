@@ -27,6 +27,7 @@ def package_artifacts(pipe, env_num){
   def source_dir = pipe["source_dir"]
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     echo "#------------------- Copying files for ${version} ---------#"
+    ensure_dir("${source_dir}${sep()}processed")
     bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
 		echo "# Cleaning Directory"
 		bat "del /q \"${staging_dir}\\*\""
@@ -47,6 +48,14 @@ def package_artifacts(pipe, env_num){
   }else{
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
+}
+
+def ensure_dir(pth) {
+  folder = new File(pth)
+  if ( !folder.exists() ) {
+  println "Creating folder: ${pth}"
+  folder.mkdirs() }
+  return pth
 }
 
 def execute(pipe_info, env_num){
