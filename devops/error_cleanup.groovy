@@ -5,14 +5,14 @@ import groovy.json.*
 // Add a properties for Platform and Skip_Packaging
 properties([
 	parameters([
-		string(name: 'Version', description: "Last successful version", default: 'V1.0.0.0'),
-		string(name: 'Failed_Version', description: "Version of this attempt", default: 'V1.0.0.0'),
+		string(name: 'Version', description: "Last successful version", default: 'V1.0.x'),
+		string(name: 'Failed_Version', description: "Version of this attempt", default: 'V1.0.x'),
 		choice(name: 'Execute_Rollback', description: "Execute a Rollback", choices: 'No\nYes')
 	])
 ])
 
 // This is the Jenkins alias for the dbmaestro server
-def dbmNode = "" //"dbmaestro"
+def dbmNode = "master" //"dbmaestro"
 rootJobName = "$env.JOB_NAME";
 automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.n8.ddu\\dbmaestroGroovyFiles"
 automationPath = "C:\\Automation\\jenkins_pipe"
@@ -59,7 +59,7 @@ stage('Exit Integration') {
 
 environment = pipeline["environments"][0]
 approver = pipeline["approvers"][0]
-if (env.Failed_Version != "V1.0.0.0"){
+if (env.Failed_Version != "V1.0.x"){
   stage("Empty Package"){
       echo "#--- Removing failed script from ${env.Failed_Version} ---#"
       node (dbmNode) {
@@ -69,12 +69,13 @@ if (env.Failed_Version != "V1.0.0.0"){
   }
 }
 
-if (env.Execute_Rollback == "Yes" && version != "V1.0.0.0"){
-  stage("Rollback DIT"){
+if (env.Execute_Rollback == "Yes" && version != "V1.0.x"){
+  stage("Rollback ${environment}"){
     echo "#--- Rolling back to ${version} ---#"
-    input message: "Rollback DIT?", submitter: approver
+    if(approver != "none"){
+      input message: "Rollback ${environment}?", submitter: approver
+    }
     node (dbmNode) {
-        //  Deploy to FIT
         dbmaestro_cli("rollback", ["environment" : environment, "version" : version])
      }
   }
@@ -94,20 +95,10 @@ def ensure_dir(pth){
   }
 }
 
-def adhoc_package(full_package_name){
-	echo "Converting to AD-HOC package"
-	def parts = full_package_name.split("__")
-	def package_name = parts.length == 2 ? parts[1] : full_package_name
-	def version = parts[0]
-	def dbm_cmd = "cd ${automationPath} && dbm_api.bat action=adhoc_package"
-	bat "${dbm_cmd} ARG1=${full_package_name}"
-	return package_name
-}
-
-
 def get_settings(content, landscape, flavor = 0) {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
+  def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
   jsonsettings = jsonSlurper.parseText(content)
   settings["server"] = jsonsettings["general"]["server"]
   settings["javaCmd"] = jsonsettings["general"]["java_cmd"]
@@ -120,6 +111,8 @@ def get_settings(content, landscape, flavor = 0) {
   settings["approvers"] = jsonsettings["branch_map"][landscape][flavor]["approvers"]
   settings["sourceDir"] = jsonsettings["branch_map"][landscape][flavor]["source_dir"]
   settings["repository"] = jsonsettings["connections"]["repository"]["connect"]
+  credential = credential.replaceFirst("_USER_", jsonsettings["general"]["username"])
+  settings["credential"] = credential.replaceFirst("_PASS_", jsonsettings["general"]["token"])
   // null the variable - not serializable
   jsonsettings = null
 	return settings
@@ -137,36 +130,6 @@ def environment_choice(env, option = 0) {
 	  // la di da
   }
   return pair
-}
-
-def dbmaestro_deploy(environment_map, option = 0) {
-	def result = []
-	def cnt = 0
-	def pair = environment_map.split(",")
-	def do_it = true
-	pair.each { cur_env ->
-		if (cur_env.contains("FIT")) {
-			if(env.Optional_Environment_Deploy == cur_env) {
-				do_it = true
-			}else{
-				do_it = false
-			}
-		}else if(cur_env == "DryRun"){
-			if(env.Optional_DryRun_Deploy == "Yes") {
-				do_it = true
-			}else{
-				do_it = false
-			}
-		}
-
-		if (do_it) {
-			echo "#------- Performing Deploy on ${cur_env} -------#"
-			bat "${javaCmd} -Upgrade -ProjectName ${pipeline} -EnvName ${cur_env} -PackageName ${version} -Server ${server}"
-			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "AVS_DEVOPS_RELEASE_ENGINEERING@ADP.com,CAPS_Open_Systems_DBA@ADP.com" )
-		}
-		do_it = true
-    cnt += 1
-  } // pair
 }
 
 def dbmaestro_cli(task, options = [:]) {
@@ -191,7 +154,7 @@ def dbmaestro_cli(task, options = [:]) {
       break
   }
 	echo "#------- Performing ${task} on ${options["pipeline"]} -------#"
-	bat "${pipeline["javaCmd"]} -${dbm_task} -ProjectName ${pipeline["pipeline"]} -EnvName ${options["environment"]} ${args} -Server ${pipeline["server"]}"
+	bat "${pipeline["javaCmd"]} -${dbm_task} -ProjectName ${pipeline["pipeline"]} -EnvName ${options["environment"]} ${args} -Server ${pipeline["server"]} ${pipeline["credential"]}"
 	
 }
 

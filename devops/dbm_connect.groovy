@@ -37,12 +37,16 @@ println "JSON Settings Document: ${base_path}${sep}${settings_file}"
 def json_file_obj = new File( base_path, settings_file )
 if (json_file_obj.exists() ) {
   local_settings = jsonSlurper.parseText(json_file_obj.text)
+}else{
+  println "Cannot find settings file"
 }
 
 println "JSON Config Document: ${base_path}${sep}${json_file}"
 json_file_obj = new File( base_path, json_file )
 if (json_file_obj.exists() ) {
   file_contents = jsonSlurper.parseText(json_file_obj.text)
+}else{
+    println "Cannot find queries file"
 }
 println "... done"
 
@@ -133,7 +137,7 @@ def post_process(option, query_string, connection){
       export_packages(query_string, connection)
       break
     case "create_control_json":
-      create_control_json(query_string, connection)
+      //create_control_json(query_string, connection)
       break
     case "show_object_ddl":
       show_object_ddl(query_string, connection)
@@ -257,7 +261,6 @@ def export_packages(query_string, conn){
     result = cur_ver
     do_save = false
     hdr += "-- Version - ${cur_ver}, created: ${rec.created_at}\n"
-    src = new File(rec.script_sorce_data_reference).text
     if (seed_list.containsKey(cur_ver) && rec.script.endsWith(".sql") ) {
       if(consolidate_version != "none"){
         target_ver = consolidate_version
@@ -265,6 +268,7 @@ def export_packages(query_string, conn){
       if(seed_list[cur_ver] != ""){
         target_ver = seed_list[cur_ver]
       }
+      src = new File(rec.script_sorce_data_reference).text
       tmp_path = "${target_path}${sep}${target_ver}"
       ensure_dir(tmp_path)
       fil_name = "${sortable(counter)}_${rec.script}"
@@ -502,6 +506,39 @@ def empty_package(){
 	cnt += 1
   }
   conn.close()
+}
+
+def changeStagingDir() {
+  // Change the product staging directory
+  if (!arg_map.containsKey("pipeline")) {
+    println "Send pipeline= and path= arguments"
+    System.exit(1)
+  }
+  def flowid = 0
+  def old_path = ""
+  def pipeline = arg_map["pipeline"]
+  def query = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
+  println message_box("Change Staging Folder", "title")
+  def new_path = arg_map["path"]
+  println "Pipeline: ${pipeline}"
+  def conn = sql_connection("repo")
+  conn.eachRow(query) { rec ->
+    old_path = rec["SCRIPTOUTPUTFOLDER"]
+    println "Existing: ${old_path}"
+    flowid = rec["FLOWID"]
+  }
+  ensure_dir()
+  println "New: ${new_path}"
+  println ""
+  println "=> Update Flow Record"
+  def query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  def query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  def query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
 }
 
 def getNextVersion(optionType){
