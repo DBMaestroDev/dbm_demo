@@ -33,10 +33,10 @@ def package_artifacts(pipe, env_num){
     base_schema.each {schema ->
       def staging_dir = "${pipe["staging_dir"]}${sep()}${pipe["pipeline"]}${sep()}${schema}"
       echo "#------------------- Copying files for ${version} ---------#"
-      bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
+      bat "if exist ${staging_dir} del /q ${staging_dir}${sep()}*"
   		echo "# Cleaning Directory"
-  		bat "del /q \"${staging_dir}\\*\""
-  		bat "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q"
+  		bat "del /q \"${staging_dir}${sep()}*\""
+  		bat "FOR /D %%p IN (\"${staging_dir}${sep()}*.*\") DO rmdir \"%%p\" /s /q"
       def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
       def version_dir = "${staging_dir}${sep()}${v_version}"
       ensure_dir(processed_dir)
@@ -47,8 +47,8 @@ def package_artifacts(pipe, env_num){
       }
       // This is for when files are prefixed with <dbcr_result>
       tasks.split(",").each {item->
-        bat "copy \"${source_dir}${sep()}${item.trim()}*${filter.trim()}.sql\" \"${version_dir}\""
-        bat "move \"${source_dir}${sep()}${item.trim()}*${filter.trim()}.sql\" \"${processed_dir}\""
+        bat "copy \"${source_dir}${sep()}${item.trim()}*${filter}.sql\" \"${version_dir}\""
+        bat "move \"${source_dir}${sep()}${item.trim()}*${filter}.sql\" \"${processed_dir}\""
       }
       // This is for copying a whole directory
       //bat "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\""

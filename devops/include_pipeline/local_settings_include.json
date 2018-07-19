@@ -70,17 +70,19 @@
 			 "SIT",
 			 "STAGE",
 			 "PROD"
-		   ],
-		  "approvers" : [
-		   "dbmguest",
-		   "dbmguest",
-		   "dbmguest"
-		   ],
-       "schema_flags" : {
-         "_main" : "Northwind-SIT",
-         "_alt" : "Northwind-SIT_ro"
-       }
-		  }
+		  ],
+      "acomment" : "### Must be at least as many approvers as there are environments ###",
+      "approvers" : [
+		    "dbmguest",
+		    "dbmguest",
+		    "dbmguest"
+		  ],
+      "bcomment" : "### Must be as many schema flags as there are schema, only use if multi-schema ###",
+      "schema_flags" : {
+       "_main" : "Northwind-SIT",
+       "_alt" : "Northwind-SIT_ro"
+      }
+	    }
 		]
 	}
 }
