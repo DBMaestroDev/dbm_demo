@@ -29,6 +29,9 @@ def get_settings(content, landscape, flavor = 0) {
     pipe["source_dir"] = settings["branch_map"][landscape][flavor]["source_dir"]
     credential = credential.replaceFirst("_USER_", settings["general"]["username"])
     pipe["credential"] = credential.replaceFirst("_PASS_", settings["general"]["token"])
+    if(settings["branch_map"][landscape][flavor].containsKey("schema_flags")){
+      pipe["schema_flags"] = settings["branch_map"][landscape][flavor]["schema_flags"]
+    }
     
 	println "Pipe: ${pipe["environments"]}"
     return pipe
@@ -88,7 +91,6 @@ def execute(settings = [:]) {
 	pipeline["branch_name"] = branchName
 	pipeline["branch_type"] = landscape
 	pipeline["dbm_node"] = dbmNode
-  pipeline["staging_dir"] = "${pipeline["staging_dir"]}${sep()}${pipeline["pipeline"]}${sep()}${pipeline["base_schema"]}"
   pipeline["spool_path"] = "${pipeline["staging_dir"]}${sep()}${pipeline["pipeline"]}${sep()}reports"
   settings.each {k,v ->
     pipeline[k] = v

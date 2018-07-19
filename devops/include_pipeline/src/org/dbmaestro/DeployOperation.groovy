@@ -21,26 +21,39 @@ def upgrade_environment(pipe, env_num){
 def package_artifacts(pipe, env_num){
   def version = pipe["version"]
   def tasks = pipe["tasks"]
+  def base_schema = [pipe["base_schema"]]
+  def alt_schema = ""
   def v_version = version
   if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V#{version}" } 
-  def staging_dir = pipe["staging_dir"]
+  pair = base_schema[0].split(",")
+  if(pair.size() > 1) {base_schema = pair }
   def source_dir = pipe["source_dir"]
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
-    echo "#------------------- Copying files for ${version} ---------#"
-    bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
-		echo "# Cleaning Directory"
-		bat "del /q \"${staging_dir}\\*\""
-		bat "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q"
-    def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
-    def version_dir = "${staging_dir}${sep()}${v_version}"
-    ensure_dir(processed_dir)
-    // This is for when files are prefixed with <dbcr_result>
-    tasks.split(",").each {item->
-      bat "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${version_dir}\""
-      bat "move \"${source_dir}${sep()}${item.trim()}*.sql\" \"${processed_dir}\""
+    def icnt = 0
+    base_schema.each {schema ->
+      def staging_dir = "${pipe["staging_dir"]}${sep()}${pipe["pipeline"]}${sep()}${schema}"
+      echo "#------------------- Copying files for ${version} ---------#"
+      bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
+  		echo "# Cleaning Directory"
+  		bat "del /q \"${staging_dir}\\*\""
+  		bat "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q"
+      def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
+      def version_dir = "${staging_dir}${sep()}${v_version}"
+      ensure_dir(processed_dir)
+      // This is to separate scripts into schema
+      def filter = ""
+      if(pipe.containsKey("schema_flags")){
+        filter = "${pipe[schema_flags[icnt]}*"
+      }
+      // This is for when files are prefixed with <dbcr_result>
+      tasks.split(",").each {item->
+        bat "copy \"${source_dir}${sep()}${item.trim()}*${filter.trim()}.sql\" \"${version_dir}\""
+        bat "move \"${source_dir}${sep()}${item.trim()}*${filter.trim()}.sql\" \"${processed_dir}\""
+      }
+      // This is for copying a whole directory
+      //bat "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\""
+      icnt += 1
     }
-    // This is for copying a whole directory
-    //bat "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}"
