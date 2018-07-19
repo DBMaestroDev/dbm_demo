@@ -21,15 +21,12 @@ def upgrade_environment(pipe, env_num){
 def package_artifacts(pipe, env_num){
   def version = pipe["version"]
   def tasks = pipe["tasks"]
-  def base_schema = [pipe["base_schema"]]
   def v_version = version
   if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V#{version}" } 
-  pair = base_schema[0].split(",")
-  if(pair.size() > 1) {base_schema = pair }
   def source_dir = pipe["source_dir"]
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     def icnt = 0
-    base_schema.each {schema ->
+    pipe["base_schema"].split(",").each {schema ->
       def staging_dir = "${pipe["staging_dir"]}${sep()}${pipe["pipeline"]}${sep()}${schema}"
       echo "#------------------- Copying files for ${version} ---------#"
       bat "if exist ${staging_dir} del /q ${staging_dir}${sep()}*"
