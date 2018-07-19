@@ -78,11 +78,10 @@
 		    "dbmguest"
 		  ],
       "bcomment" : "### Must be as many schema flags as there are schema, only use if multi-schema ###",
-      "schema_flags" : {
-       "_main" : "Northwind-SIT",
-       "_alt" : "Northwind-SIT_ro"
-      }
-	    }
+      "schema_flags" : [
+       "_main",
+       "_alt"
+     ]
 		]
 	}
 }

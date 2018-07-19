@@ -183,6 +183,23 @@
 		  ]
 		}
 	]
+  },
+  "revisions_in_label" : {
+    "name" : "DDL Revisions for all objects in a label",
+    "usage" : "dbm_api.bat action=revisions_in_label ARG1=<pipeline> ARG2=<label_name>",
+	"queries" : 
+  [
+		{ "connection" : "repo",
+		  "query": "SELECT schemaname, object_name, object_type, objectcreationscript FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog
+ where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = ‘ARG2'))",
+  		"output": [
+          ["Version",0,20],
+		    ["Schema",3,20],
+		    ["Script",4,30],
+        ["Finish",7,15]
+		  ]
+		}
+	]
   }
   
 }
