@@ -22,7 +22,6 @@ def package_artifacts(pipe, env_num){
   def version = pipe["version"]
   def tasks = pipe["tasks"]
   def base_schema = [pipe["base_schema"]]
-  def alt_schema = ""
   def v_version = version
   if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V#{version}" } 
   pair = base_schema[0].split(",")
