@@ -32,7 +32,8 @@
 		  "base_env" : "DIT",
 		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind\\ddl",
 		  "base_schema" : "Northwind-DEV",
-		  "environments" : [
+      "file_strategy" : "version",
+      "environments" : [
 			 "DIT",
 			 "QAT"
 		   ],
@@ -48,7 +49,8 @@
 		  "base_env" : "SIT",
 		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind\\ddl",
 		  "base_schema" : "Northwind-SIT",
-		  "environments" : [
+      "file_strategy" : "version",
+      "environments" : [
 			 "SIT",
 			 "STAGE",
 			 "PROD"
@@ -66,7 +68,8 @@
 		  "base_env" : "SIT",
 		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind\\ddl",
 		  "base_schema" : "Northwind-SIT,Northwind-SIT_ro",
-		  "environments" : [
+      "file_strategy" : "task",
+      "environments" : [
 			 "SIT",
 			 "STAGE",
 			 "PROD"

@@ -18,12 +18,16 @@ def get_settings(content, landscape, flavor = 0) {
     pipe["staging_dir"] = settings["general"]["staging_path"]
     pipe["base_path"] = settings["general"]["base_path"]
     pipe["source_control"] = settings["general"]["source_control"]["type"]
-	pipe["remote_git"] = settings["general"]["source_control"]["remote"]
-	echo "Landscape: ${landscape}, flavor: ${flavor}"
+	  pipe["remote_git"] = settings["general"]["source_control"]["remote"]
+	  echo "Landscape: ${landscape}, flavor: ${flavor}"
     // note key off of landscape variable
     pipe["base_schema"] = settings["branch_map"][landscape][flavor]["base_schema"]
     pipe["base_env"] = settings["branch_map"][landscape][flavor]["base_env"]
     pipe["pipeline"] = settings["branch_map"][landscape][flavor]["pipeline"]
+    pipe["file_strategy"] = "version"
+    if(settings["branch_map"][landscape][flavor].containsKey("file_strategy")){
+      pipe["file_strategy"] = settings["branch_map"][landscape][flavor]["file_strategy"]
+    }
     pipe["environments"] = settings["branch_map"][landscape][flavor]["environments"]
     pipe["approvers"] = settings["branch_map"][landscape][flavor]["approvers"]
     pipe["source_dir"] = settings["branch_map"][landscape][flavor]["source_dir"]
