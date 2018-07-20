@@ -16,28 +16,28 @@ import java.io.File
 import java.text.SimpleDateFormat
 
 
-def execute(){
+def execute(arg_map){
+  sep = "\\" //FIXME Reset for windows
   def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
   def resource_path = "${base_path}${sep}..${sep}..${sep}..${sep}resources"
   def jsonSlurper = new JsonSlurper()
   def json_file = "dbm_queries.json"
-  def settings_file = "local_settings.json"
+  def settings_file = "local_settings_include.json"
   file_contents = [:]
   contents = [:]
-  local_settings = [:]
-  sep = "/" //FIXME Reset for windows
+  settings = [:]
   separator()
   println "loading..."
-  println "JSON Settings Document: ${base_path}${sep}settings${sep}${settings_file}"
-  def json_file_obj = new File( "${base_path}${sep}settings", settings_file )
+  println "JSON Settings Document: ${base_path}${sep}resources${sep}settings${sep}${settings_file}"
+  def json_file_obj = new File( "${base_path}${sep}resources${sep}settings", settings_file )
   if (json_file_obj.exists() ) {
-    local_settings = jsonSlurper.parseText(json_file_obj.text)
+    settings = jsonSlurper.parseText(json_file_obj.text)
   }else{
     println "Cannot find settings file"
   }
-
-  println "JSON Config Document: ${base_path}${sep}settings${sep}${json_file}"
-  json_file_obj = new File( "${base_path}${sep}settings", json_file )
+	settings["arg_map"] = arg_map
+  println "JSON Config Document: ${base_path}${sep}resources${sep}${json_file}"
+  json_file_obj = new File( "${base_path}${sep}resources", json_file )
   if (json_file_obj.exists() ) {
     file_contents = jsonSlurper.parseText(json_file_obj.text)
   }else{
@@ -45,8 +45,8 @@ def execute(){
   }
   println "... done"
 
-  if (arg_map.containsKey("action")) {
-    switch (arg_map["action"].toLowerCase()) {
+  if (settings["arg_map"].containsKey("action")) {
+    switch (settings["arg_map"]["action"].toLowerCase()) {
       case "dbm_package":
         dbm_package
         break
@@ -67,7 +67,7 @@ def execute(){
         break
     }
   }else{
-    if (arg_map.containsKey("help")) {
+    if (settings["arg_map"].containsKey("help")) {
       message_box("dbm_api HELP", "title")
       file_contents.each { k,v ->
         println "${k}: ${v["name"]}"
@@ -88,13 +88,13 @@ def status_message(extras){
 }
 
 def perform_query() {
-  if (!file_contents.containsKey(arg_map["action"])) {
-    println "Error: Action: ${arg_map["action"]} - not found!"
+  if (!file_contents.containsKey(settings["arg_map"]["action"])) {
+    println "Error: Action: ${settings["arg_map"]["action"]} - not found!"
     println "Available: ${file_contents.keySet()}"
     System.exit(1)
   }
-  contents = file_contents[arg_map["action"]]
-  message_box("Task: ${arg_map["action"]}")
+  contents = file_contents[settings["arg_map"]["action"]]
+  message_box("Task: ${settings["arg_map"]["action"]}")
   println " Description: ${contents["name"]}"
   for (query in contents["queries"]) {
     def post_results = ""
@@ -183,22 +183,22 @@ def sql_connection(conn_type) {
   def password = ""
   def conn = ""
   if (conn_type == "repo" || conn_type == "repository") {
-    user = local_settings["connections"]["repository"]["user"]
-    if (local_settings["connections"]["repository"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
+    user = settings["connections"]["repository"]["user"]
+    if (settings["connections"]["repository"].containsKey("password_enc")) {
+      password = password_decrypt(settings["connections"]["repository"]["password_enc"])
     }else{
-      password = local_settings["connections"]["repository"]["password"]
+      password = settings["connections"]["repository"]["password"]
     }
-    conn = local_settings["connections"]["repository"]["connect"]
+    conn = settings["connections"]["repository"]["connect"]
   }else if (conn_type == "remote") {
     // FIXME find instance for named environment and build it
-    user = local_settings["connections"]["remote"]["user"]
-    if (local_settings["remote"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["remote"]["password_enc"])
+    user = settings["connections"]["remote"]["user"]
+    if (settings["remote"].containsKey("password_enc")) {
+      password = password_decrypt(settings["connections"]["remote"]["password_enc"])
     }else{
-      password = local_settings["connections"]["remote"]["password"]
+      password = settings["connections"]["remote"]["password"]
     }
-    conn = local_settings["connections"]["remote"]["connect"]
+    conn = settings["connections"]["remote"]["connect"]
   }
   // Assign local settings
   println "Querying ${conn_type} Db: ${conn}"
@@ -247,7 +247,7 @@ def export_packages(query_string, conn){
   println "Target Pipeline: ${target_pipeline}, schema: ${target_schema}"
   println "Packages: ${p_list}"
   def result = ""
-  def tmp_path = "${local_settings["general"]["staging_path"]}${sep}${target_pipeline}${sep}${target_schema}"
+  def tmp_path = "${settings["general"]["staging_path"]}${sep}${target_pipeline}${sep}${target_schema}"
   def target_path = tmp_path
   def fil_name = ""
   def hdr = ""
@@ -287,10 +287,10 @@ def export_packages(query_string, conn){
 }
 
 def dbm_package() {
-  def java_cmd = local_settings["general"]["java_cmd"]
-  def server = local_settings["general"]["server"]
+  def java_cmd = settings["general"]["java_cmd"]
+  def server = settings["general"]["server"]
   def target_pipeline = System.getenv("TARGET_PIPELINE")
-  def base_path = local_settings["general"]["staging_path"]
+  def base_path = settings["general"]["staging_path"]
   def base_schema = get_target_schema(target_pipeline)
   println "#-------- Performing DBmPackage command ----------#"
   println "# Cmd: ${java_cmd} -Package -ProjectName ${target_pipeline} -Server ${server}"
@@ -298,7 +298,7 @@ def dbm_package() {
 }
 
 def adhocify_package() {
-  def package_name = arg_map["ARG1"]
+  def package_name = settings["arg_map"]["ARG1"]
   separator()
   def parts = package_name.split("__")
   def new_name = parts.length == 2 ? parts[1] : package_name
@@ -316,7 +316,7 @@ def adhocify_package() {
 }
 
 def disable_package() {
-  def package_name = arg_map["ARG1"]
+  def package_name = settings["arg_map"]["ARG1"]
   separator()
   def query = "update twmanagedb.TBL_SMG_VERSION set IS_ENABLED = 0 where NAME = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
@@ -346,7 +346,7 @@ def show_object_ddl(query_string, conn) {
 def get_export_json_file(target, path_only = false){
   def jsonSlurper = new JsonSlurper()
   def contents = [:]
-  def export_path_temp = "${local_settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
+  def export_path_temp = "${settings["general"]["staging_path"]}${sep}${target}${sep}export_control.json"
   println "JSON Export config: ${export_path_temp}"
   if(path_only){
     return export_path_temp
@@ -360,7 +360,7 @@ def get_export_json_file(target, path_only = false){
 
 def get_target_schema(cur_pipeline){
   def target_schema = ""
-  local_settings["branch_map"].each { k,v ->
+  settings["branch_map"].each { k,v ->
     def cur_branch = k
     v.each { pipe -> if (pipe["pipeline"] == cur_pipeline){ target_schema = pipe["base_schema"] } }
   }
@@ -370,12 +370,12 @@ def get_target_schema(cur_pipeline){
 def add_query_arguments(query){
   def result_stg = query
   if (query.contains("ARG1")){
-    if (arg_map.containsKey("ARG1")){
+    if (settings["arg_map"].containsKey("ARG1")){
       (0..10).each {
         def cur_key = "ARG${it}".toString()
-        if(arg_map.containsKey(cur_key)){
-          //println "Find: ${cur_key} => ${arg_map[cur_key]}"
-          result_stg = result_stg.replaceAll(cur_key, arg_map[cur_key])
+        if(settings["arg_map"].containsKey(cur_key)){
+          //println "Find: ${cur_key} => ${settings["arg_map"][cur_key]}"
+          result_stg = result_stg.replaceAll(cur_key, settings["arg_map"][cur_key])
         }else{
           //println "Find: ${cur_key} => %"
           result_stg = result_stg.replaceAll(cur_key, '%')
@@ -483,11 +483,11 @@ def read_file(pth, name){
 
 def empty_package(){
   def contents = file_contents["package_content"]
-  def version = arg_map["ARG2"]
-  def pipeline = arg_map["ARG1"]
+  def version = settings["arg_map"]["ARG2"]
+  def pipeline = settings["arg_map"]["ARG1"]
   def cnt = 0
   message_box("Task: Empty Package - ")
-  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
+  println " Description: ${contents["name"]}\nARGS: ${settings["arg_map"]}"
   def query = contents["queries"][0]
   ver_query = query["query"]
   ver_query = ver_query.replaceAll('ARG1', pipeline)
@@ -511,16 +511,16 @@ def empty_package(){
 
 def changeStagingDir() {
   // Change the product staging directory
-  if (!arg_map.containsKey("pipeline")) {
+  if (!settings["arg_map"].containsKey("pipeline")) {
     println "Send pipeline= and path= arguments"
     System.exit(1)
   }
   def flowid = 0
   def old_path = ""
-  def pipeline = arg_map["pipeline"]
+  def pipeline = settings["arg_map"]["pipeline"]
   def query_stg = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
   println message_box("Change Staging Folder", "title")
-  def new_path = arg_map["path"]
+  def new_path = settings["arg_map"]["path"]
   println "Pipeline: ${pipeline}"
   def conn = sql_connection("repo")
   conn.eachRow(query_stg) { rec ->
@@ -610,7 +610,7 @@ def sortable(inum){
 }
 
 def transfer_packages(){
-  arg_map["action"] = "package_export"
+  settings["arg_map"]["action"] = "package_export"
   perform_query()
   
 }
