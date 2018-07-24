@@ -3,11 +3,13 @@
 This file is called by the stub and can be centralized for all pipelines
 7/6/18 BJB - DBmaestro
 */
-package org.dbmaestro;
+package src.com.dbmaestro
 
 import groovy.json.*
+import src.com.dbmaestro.Utils as Utils
 
-@NonCPS
+ut = new Utils
+
 def get_settings(content, landscape, flavor = 0) {
     def jsonSlurper = new JsonSlurper()
     def settings = [:]
@@ -20,7 +22,7 @@ def get_settings(content, landscape, flavor = 0) {
     pipe["base_path"] = settings["general"]["base_path"]
     pipe["source_control"] = settings["general"]["source_control"]["type"]
 	pipe["remote_git"] = settings["general"]["source_control"]["remote"]
-	echo "Landscape: ${landscape}, flavor: ${flavor}"
+	println "Landscape: ${landscape}, flavor: ${flavor}"
     // note key off of landscape variable
     pipe["base_schema"] = settings["branch_map"][landscape][flavor]["base_schema"]
     pipe["base_env"] = settings["branch_map"][landscape][flavor]["base_env"]
@@ -35,25 +37,18 @@ def get_settings(content, landscape, flavor = 0) {
     return pipe
 }
  
-def prepare() {
-    node {
-        //checkout(scm)
-        println "Checkout from git"
-    }
-}
-
 def failTheBuild(String message) {
 
-    currentBuild.result = "FAILURE"    
     def messageColor = "\u001B[32m" 
     def messageColorReset = "\u001B[0m"
-    echo messageColor + message + messageColorReset
+    println messageColor + message + messageColorReset
     error(message)
+    System.exit(1)
 }
 
-def run(Object step, pipe, env_num){
+def run(pipe, env_num){
     try {
-        step.execute(pipe, env_num)
+        self.execute(pipe, env_num)
     } catch (err) {
         // unfortunately, err.message is not whitelisted by script security
         //failTheBuild(err.message)
@@ -63,30 +58,27 @@ def run(Object step, pipe, env_num){
 
 def execute(settings = [:]) {
 	def automationPath = "C:\\automation\\dbm_demo\\devops"
-	def settingsFileName = "local_settings.json"
-  def settingsFile = "${automationPath}${sep()}${settingsFileName}"
-	def buildNumber = "$env.BUILD_NUMBER"
+	def settingsFile = ""
+	def buildNumber = System.getenv("BUILD_NUMBER")
 	def dbmNode = "master"
-	def rootJobName = "$env.JOB_NAME";
+	def rootJobName = System.getenv("JOB_NAME")
 	//def branchName = rootJobName.replaceFirst('.*/.*/', '')
 	def fullBranchName = rootJobName.replaceFirst('.*/','')
 	def branchName = fullBranchName.replaceFirst('%2F', '/')
 	def landscape = branchName.replaceFirst('/.*', '')
   def pipeline = [:]
 	def settings_content = ""
-	echo "Inputs: ${rootJobName}, branch: ${landscape}, name: ${branchName}"
+  if(arg_)
+	println "Inputs: ${rootJobName}, branch: ${landscape}, name: ${branchName}"
   if( settings.containsKey("settings_file")) { 
     settingsFile = settings["settings_file"] 
-  }
-	this.prepare()
-	node(dbmNode) {
-		println "JSON Settings Document: ${settingsFile}"
-		println "Job: ${env.JOB_NAME}"
+  }		println "JSON Settings Document: ${settingsFile}"
+		println "Job: ${System.getenv("JOB_NAME")}"
 		def hnd = new File(settingsFile)
 		settings_content = hnd.text
 	}
 	pipeline = this.get_settings(settings_content, landscape)
-	pipeline["branch_name"] = branchName
+  pipeline["branch_name"] = branchName
 	pipeline["branch_type"] = landscape
 	pipeline["dbm_node"] = dbmNode
   pipeline["staging_dir"] = "${pipeline["staging_dir"]}${sep()}${pipeline["pipeline"]}${sep()}${pipeline["base_schema"]}"
@@ -94,26 +86,25 @@ def execute(settings = [:]) {
   settings.each {k,v ->
     pipeline[k] = v
   }
-  echo message_box("Pipeline Deployment Using ${landscape} Process", "title")
-  echo "Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["base_env"]}\n - Schema: ${pipeline["base_schema"]}"
+  if( !pipeline["arg_map"].containsKey("environment") ){
+    failTheBuild("Must send argument \"environment\"")
+  }
+  // Here we loop through the environments from the settings file to perform the deployment
+  def environment  = pipeline["arg_map"]["environment"]
+  def env_num = pipeline["environments"].findIndexOf{ env -> env == environment) 
+  message_box("Pipeline Deployment Using ${landscape} Process", "title")
+  println "#=> Deploy to Environment: ${environment}"
+  println "#=> Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n  Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
 	def tasks = this.get_tasks(pipeline)
   pipeline["tasks"] = tasks
 	def version = this.get_version(pipeline)
   pipeline["version"] = version
-  
-  // Here we loop through the environments from the settings file to perform the deployment
-  def env_num = 0
-  pipeline["environments"].each { env ->
-    echo "Executing Environment ${env}"
-    this.run(new DeployOperation(), pipeline, env_num)
-    if (landscape == "master") {
-        println "Branch specific work"
-    }
-    env_num += 1
+  println "Executing Environment ${environment}"
+  this.run(new DeployOperation(), pipeline, env_num)
+  if (landscape == "master") {
+      println "Branch specific work"
   }
 }
-
-return this;
 
 def get_tasks(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "
@@ -128,27 +119,20 @@ def get_tasks(pipe_info){
   def pull_stg = remote ? " && git pull origin ${branch_name}" : ""
   
   // ------------- Update Local Git -----------------------
-  stage('GitParams') {
-  	node (dbm_node) {
-  			echo "# Read latest commit..."
-  			dir([path:"${base_path}"]){
-  				bat "git --version"
-				bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
-  				gitMessage = bat(
-  				  script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
-  				  returnStdout: true
-  				).trim()
-  		}
-  		echo "# From Git: ${gitMessage}"
-  		taskResult = gitMessage.replaceFirst(reg, '$1')
-  	}
-  }
+  message_box('GitParams', "title")
+	println "# Read latest commit..."
+	def result = shell_command("git --version")
+	result = shell_command("git remote update && git checkout ${branch_name}${pull_stg}")
+	result = shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s")
+  gitMessage = result["stdout"].trim()
+  println "# From Git: ${gitMessage}"
+  taskResult = gitMessage.replaceFirst(reg, '$1')
   // Both branch version and git version git wins as override!
   if (gitMessage.length() != taskResult.length()){
-  	echo "# SNOW Tasks from git:" + taskResult
+  	println "# SNOW Tasks from git:" + taskResult
   }else{
-    echo "# No SNOW Tasks found"
-    currentBuild.result = "UNSTABLE"
+    println "# No SNOW Tasks found"
+    failTheBuild("Git message not formatted properly")
     return
   }
 	return taskResult
@@ -156,9 +140,9 @@ def get_tasks(pipe_info){
 
 def get_version(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "
-  if ( env.Version != null && env.Version.length() > 1 && env.Version != "V0.0.0"){
-    echo "#------- Version environment variable set: ${env.Version} - using that ---------#\r\n#-------- Ignoring git version ----"
-    return env.Version
+  if ( System.getenv("Version") != null && System.getenv("Version").length() > 1 && System.getenv("Version") != "V0.0.0"){
+    println "#------- Version environment variable set: ${System.getenv("Version")} - using that ---------#\r\n#-------- Ignoring git version ----"
+    return System.getenv("Version")
   }
 	def reg = ~/.*\[Version: (.*)\].*/
   def gitMessage = ""
@@ -171,118 +155,41 @@ def get_version(pipe_info){
   def pull_stg = remote ? " && git pull origin ${branch_name}" : ""
   
   // ------------- Update Local Git -----------------------
-  stage('GitParams') {
-  	node (dbm_node) {
-  			echo "# Read latest commit..."
-  			dir([path:"${base_path}"]){
-  				bat "git --version"
-				bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
-  				gitMessage = bat(
-  				  script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
-  				  returnStdout: true
-  				).trim()
-  		}
-  		echo "# From Git: ${gitMessage}"
-  		versionResult = gitMessage.replaceFirst(reg, '$1')
-  	}
-  }
+  message_box('GitParams', "title")
+	println "# Read latest commit..."
+	bat "git --version"
+  bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
+	gitMessage = bat(
+		script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
+		returnStdout: true
+	).trim()
+
+	println "# From Git: ${gitMessage}"
+	versionResult = gitMessage.replaceFirst(reg, '$1')
   // Both branch version and git version git wins as override!
   if (gitMessage.length() != versionResult.length()){
-  	echo "# VERSION/FOLDER from git:" + versionResult
+  	println "# VERSION/FOLDER from git:" + versionResult
   }else{
-    echo "# No VERSION/FOLDER found"
+    println "# No VERSION/FOLDER found"
     currentBuild.result = "UNSTABLE"
     return
   }
 	return versionResult
 }
 
-// Run inside a Node block
-@NonCPS
-def dbmaestro_deploy(environment_map, option = 0) {
-    def result = []
-    def cnt = 0
-    def pair = environment_map.split(",")
-    if (pair.size() < 2) {
-        return true
-    }
-    def do_it = true
-    pair.each { cur_env ->
-        if (cur_env.contains("FIT")) {
-            echo env.Optional_Environment_Deploy
-            echo cur_env
-            if (cur_env.contains(env.Optional_Environment_Deploy) || env.Optional_Environment_Deploy == "BOTH") {
-                do_it = true
-            } else {
-                do_it = false
-            }
-        } else if (cur_env == "DryRun") {
-            if (env.Optional_DryRun_Deploy == "Yes") {
-                do_it = true
-            } else {
-                do_it = false
-            }
-        }
-        cnt += 1
-    }
-}
-
-@NonCPS
-def message_box(msg, def mtype = "sep") {
-    def tot = 100
-    def start = ""
-    def res = ""
-    res = "#--------------------------- ${msg} ---------------------------#"
-    return res
-    msg = (msg.size() > 85) ? msg[0..84] : msg
-    def ilen = tot - msg.size()
-    if (mtype == "sep") {
-        start = "#${"-" * (ilen / 2).toInteger()} ${msg} "
-        res = "${start}${"-" * (tot - start.size() + 1)}#"
-    } else {
-        res = "#${"-" * tot}#\r\n"
-        start = "#${" " * (ilen / 2).toInteger()} ${msg} "
-        res += "${start}${" " * (tot - start.size() + 1)}#\r\n"
-        res += "#${"-" * tot}#\r\n"
-    }
-    //println res
-    return res
-}
-
-@NonCPS
-def callPreProcess(cur_env) {
-    try {
-        echo "Running pre processing"
-        bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${preProcess} -Server ${pipeline["server"]}"
-    } catch (Exception e) {
-        echo e.getMessage();
-    }
-}
-
-@NonCPS
-def callPostProcess(cur_env) {
-    try {
-        echo "Running post processing"
-        bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${postProcess} -Server ${pipeline["server"]}"
-    } catch (Exception e) {
-        echo e.getMessage();
-    }
-}
-
-@NonCPS
 
 // GetNextEnv
 def shouldDeploy(cur_env) {
     if (cur_env.contains("FIT")) {
-        echo env.Optional_Environment_Deploy
-        echo cur_env
-        if (cur_env.contains(env.Optional_Environment_Deploy) || env.Optional_Environment_Deploy == "BOTH") {
+        println System.getenv("Optional_Environment_Deploy")
+        println cur_env
+        if (cur_env.contains(System.getenv("Optional_Environment_Deploy")) || System.getenv("Optional_Environment_Deploy") == "BOTH") {
             do_it = true
         } else {
             do_it = false
         }
     } else if (cur_env == "DryRun") {
-        if (env.Optional_DryRun_Deploy == "Yes") {
+        if (System.getenv("Optional_DryRun_Deploy") == "Yes") {
             do_it = true
         } else {
             do_it = false
@@ -293,57 +200,22 @@ def shouldDeploy(cur_env) {
     return do_it
 }
 
-@NonCPS
-def getNextVersion(optionType){
-  //Get version from currentVersion.txt file D:\\repo\\N8
-  // looks like this:
-  // develop=1.10.01
-  // release=1.9.03
-  def newVersion = ""
-  def curVersion = [:]
-  def versionFile = "D:\\n8dml\\N8\\currentVersion.txt"
-  def contents = readFile(versionFile)
-  contents.split("\r\n").each{ -> cur
-    def pair = cur.split("=")
-    curVersion[pair[0].trim()] = pair[1].trim()
-  }
-  
-  switch (optionType.toLowerCase()) {
-    case "develop":
-      curVersion["develop"] = newVersion = incrementVersion(curVersion["develop"])
-      break
-    case "hotfix":
-      curVersion["develop"] = newVersion = incrementVersion(curVersion["develop"], "other")
-      break
-    case "cross_over":
-      curVersion["release"] = newVersion = incrementVersion(curVersion["release"])
-      break
-    case "dml":
-      curVersion["release"] = newVersion = incrementVersion(curVersion["release"], "other")
-      break
-  }
-  stg = "develop=${curVersion["develop"]}\r\n"
-  stg += "release=${curVersion["release"]}"
-  fil.write(stg)
-  fil.close()
-  return newVersion
+def shell_command() {
+	def cmd = "cmd.exe /c \"${arg_map["ARG1"]}\""
+	def proc = cmd.execute()
+	def sout = new StringBuilder(), serr = new StringBuilder()
+	proc.waitForOrKill(5000)
+	proc.consumeProcessOutput(sout, serr)
+	message_box("Execute Command", "title")
+	println "Running: ${cmd}"
+	message_box("RESULTS")
+	println sout
+	if (serr.length() > 2){
+		println "Error: ${serr}"
+	}
+  return ["command" : cmd, "stdout" : sout, "stderr" : serr]
 }
 
-@NonCPS
-def incrementVersion(ver, process = "normal"){
-  // ver = 1.9.04
-  def new_ver = ver
-  def parts = ver.split('\\.')
-  if(process == "normal"){
-      parts[2] = (parts[2].toInteger() + 1).toString()
-      new_ver = parts[0..2].join(".")
-  }else{
-      if(parts.size() > 3){
-          parts[3] = (parts[3].toInteger() + 1).toString()
-      }else{
-          parts = parts + '1'
-      }
-      new_ver = parts[0..3].join(".")
-  }
-  return "V" + new_ver
+def sep() {
+  return "\\"
 }

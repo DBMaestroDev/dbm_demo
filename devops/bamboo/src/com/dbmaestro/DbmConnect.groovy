@@ -389,40 +389,6 @@ def add_query_arguments(query){
   return result_stg
 }
 
-def map_has_key(find_map, match_regex){
-  def result = "false"
-  for (skey in find_map.ketSet()) {
-    if (skey.matches(match_key)) {
-      result = skey
-    }
-  }
-  return result
-}
-
-def message_box(msg, def mtype = "sep") {
-  def tot = 80
-  def start = ""
-  def res = ""
-  msg = (msg.size() > 65) ? msg[0..64] : msg
-  def ilen = tot - msg.size()
-  if (mtype == "sep"){
-    start = "#${"-" * (ilen/2).toInteger()} ${msg} "
-    res = "${start}${"-" * (tot - start.size() + 1)}#"
-  }else{
-    res = "#${"-" * tot}#\n"
-    start = "#${" " * (ilen/2).toInteger()} ${msg} "
-    res += "${start}${" " * (tot - start.size() + 1)}#\n"
-    res += "#${"-" * tot}#\n"
-  }
-  println res
-  return res
-}
-
-def separator( def ilength = 82){
-  def dashy = "-" * (ilength - 2)
-  println "#${dashy}#"
-}
-
 def sql_file_list(dir_txt) {
   // Returns files in ascending date order
   def files=[]
@@ -445,41 +411,6 @@ def path_from_pipeline(pipe_name){
   return result
 }
 
-def password_decrypt(password_enc){
-  def slug = "__sj8kl3LM77g903ugbn_KG="
-  def result = ""
-  byte[] decoded = password_enc.decodeBase64()
-  def res = new String(decoded)
-  res = res.replaceAll(slug,"")
-  result = new String(res.decodeBase64())
-  return result
-}
-
-def ensure_dir(pth) {
-  folder = new File(pth)
-  if ( !folder.exists() ) {
-  println "Creating folder: ${pth}"
-  folder.mkdirs() }
-  return pth
-}
-
-def dir_exists(pth) {
-  folder = new File(pth)
-  return folder.exists()
-}
-
-def create_file(pth, name, content){
-  def fil = new File(pth,name)
-  fil.withWriter('utf-8') { writer ->
-      writer << content
-  }
-  return "${pth}${sep}${name}"
-}
-
-def read_file(pth, name){
-  def fil = new File(pth,name)
-  return fil.text
-}
 
 def empty_package(){
   def contents = file_contents["package_content"]
