@@ -59,6 +59,7 @@ def package_artifacts(pipe, env_num){
 }
 
 def execute(pipe_info, env_num){
+  ut = new Utils()
   ut.message_box(pipe_info["environments"][env_num], "title")
   if(env_num == 0){
 	  this.package_artifacts(pipe_info, env_num)
