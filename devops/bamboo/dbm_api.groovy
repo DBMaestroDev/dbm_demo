@@ -7,14 +7,14 @@ master include.
 //package src.com.dbmaestro
 
 import src.com.dbmaestro.DbmConnect as DbmConnect
-import src.com.dbmaestro.PielineInclude as PipelineInclude
+import src.com.dbmaestro.PipelineInclude as PipelineInclude
 
 // #--- Set these primary variables which may vary by application ------------# 
 def base_path = "C:\\Automation\\dbm_demo\\devops\\bamboo"
-def local_settings = "C:\\Automation\\dbm_demo\\devops\\bamboo\\resources\\settints\\local_settings_include.json"
+def local_settings = "C:\\Automation\\dbm_demo\\devops\\bamboo\\resources\\settings\\local_settings_include.json"
 
 def arg_map = [:]
-def settings = ["settings_file" : local_settings, "base_path" : base_path]
+def settings = ["settinzgs_file" : local_settings, "base_path" : base_path]
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")
@@ -26,9 +26,9 @@ for (arg in this.args) {
 }
 settings["arg_map"] = arg_map
 if(arg_map.containsKey("pipeline")){
-  def dbm_pipeline = new PipelineInclude(settings)
-  dbm_pipeline.execute(arg_map)
+  def dbm_pipeline = new PipelineInclude()
+  dbm_pipeline.execute(settings)
 }else{
-  def dbm_connect = new DbmConnect(settings)
-  dbm_connect.execute(arg_map)
+  def dbm_connect = new DbmConnect()
+  dbm_connect.execute(settings)
 }

@@ -7,6 +7,7 @@
 */
 // @ExecutionModes({ON_SINGLE_NODE})
 package src.com.dbmaestro
+import src.com.dbmaestro.Utils as Utils;
 
 import java.sql.Connection
 import groovy.sql.Sql
@@ -15,8 +16,12 @@ import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
 
+def DbmConnect(){
+	ut = new Utils()
+}
 
-def execute(arg_map){
+def execute(init_settings){
+  ut = new Utils()
   sep = "\\" //FIXME Reset for windows
   def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
   def resource_path = "${base_path}${sep}..${sep}..${sep}..${sep}resources"
@@ -26,7 +31,7 @@ def execute(arg_map){
   file_contents = [:]
   contents = [:]
   settings = [:]
-  separator()
+  ut.separator()
   println "loading..."
   println "JSON Settings Document: ${base_path}${sep}resources${sep}settings${sep}${settings_file}"
   def json_file_obj = new File( "${base_path}${sep}resources${sep}settings", settings_file )
@@ -35,7 +40,10 @@ def execute(arg_map){
   }else{
     println "Cannot find settings file"
   }
-	settings["arg_map"] = arg_map
+  init_settings.each {k,v ->
+    settings[k] = v
+  }
+  
   println "JSON Config Document: ${base_path}${sep}resources${sep}${json_file}"
   json_file_obj = new File( "${base_path}${sep}resources", json_file )
   if (json_file_obj.exists() ) {
@@ -62,6 +70,9 @@ def execute(arg_map){
       case "transfer_packages":
         transfer_packages()
         break
+      case "status_message":
+        status_message()
+        break
       default:
         perform_query()
         break
@@ -82,9 +93,9 @@ def execute(arg_map){
   }
 }
 
-def status_message(extras){
-  println "Doin OK"
-  println extras
+def status_message(){
+	println "Deliver message"
+	ut.message_box("Status: ${settings["arg_map"]["ARG1"]}")
 }
 
 def perform_query() {

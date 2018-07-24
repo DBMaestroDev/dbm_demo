@@ -4,8 +4,6 @@ def message_box(msg, def mtype = "sep") {
     def tot = 100
     def start = ""
     def res = ""
-    res = "#--------------------------- ${msg} ---------------------------#"
-    return res
     msg = (msg.size() > 85) ? msg[0..84] : msg
     def ilen = tot - msg.size()
     if (mtype == "sep") {
@@ -17,7 +15,7 @@ def message_box(msg, def mtype = "sep") {
         res += "${start}${" " * (tot - start.size() + 1)}#\r\n"
         res += "#${"-" * tot}#\r\n"
     }
-    //println res
+    println res
     return res
 }
 

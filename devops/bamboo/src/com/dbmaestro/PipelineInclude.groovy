@@ -8,7 +8,7 @@ package src.com.dbmaestro
 import groovy.json.*
 import src.com.dbmaestro.Utils as Utils
 
-ut = new Utils
+ut = new Utils()
 
 def get_settings(content, landscape, flavor = 0) {
     def jsonSlurper = new JsonSlurper()
@@ -68,15 +68,16 @@ def execute(settings = [:]) {
 	def landscape = branchName.replaceFirst('/.*', '')
   def pipeline = [:]
 	def settings_content = ""
-  if(arg_)
+  //if(arg_)
 	println "Inputs: ${rootJobName}, branch: ${landscape}, name: ${branchName}"
   if( settings.containsKey("settings_file")) { 
     settingsFile = settings["settings_file"] 
-  }		println "JSON Settings Document: ${settingsFile}"
-		println "Job: ${System.getenv("JOB_NAME")}"
-		def hnd = new File(settingsFile)
-		settings_content = hnd.text
-	}
+  }		
+  println "JSON Settings Document: ${settingsFile}"
+  println "Job: ${System.getenv("JOB_NAME")}"
+	def hnd = new File(settingsFile)
+	settings_content = hnd.text
+	
 	pipeline = this.get_settings(settings_content, landscape)
   pipeline["branch_name"] = branchName
 	pipeline["branch_type"] = landscape
@@ -91,7 +92,7 @@ def execute(settings = [:]) {
   }
   // Here we loop through the environments from the settings file to perform the deployment
   def environment  = pipeline["arg_map"]["environment"]
-  def env_num = pipeline["environments"].findIndexOf{ env -> env == environment) 
+  def env_num = pipeline["environments"].findIndexOf{ env -> env == environment}
   message_box("Pipeline Deployment Using ${landscape} Process", "title")
   println "#=> Deploy to Environment: ${environment}"
   println "#=> Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n  Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
