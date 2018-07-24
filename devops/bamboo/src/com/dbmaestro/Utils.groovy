@@ -66,7 +66,6 @@ def shell_command(cmd) {
 	def sout = new StringBuilder(), serr = new StringBuilder()
 	proc.waitForOrKill(5000)
 	proc.consumeProcessOutput(sout, serr)
-	message_box("Execute Command", "title")
 	println "Running: ${command}"
 	message_box("RESULTS")
 	println sout
@@ -74,4 +73,8 @@ def shell_command(cmd) {
 		println "Error: ${serr}"
 	}
 	return ["command" : command, "stdout" : sout, "stderr" : serr]
+}
+
+def sep(){
+	"\\"
 }

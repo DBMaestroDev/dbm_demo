@@ -37,15 +37,15 @@ def package_artifacts(pipe, env_num){
 		result = ut.shell_command( "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q" )
     if(pipe["file_strategy"] == "version"){
       // This is for copying a whole directory
-      result = ut.shell_command( "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\"")
+      result = ut.shell_command( "xcopy /s /y /i \"${source_dir}${ut.sep()}${version}\" \"${processed_dir}\"")
     }else{
-      def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
-      def version_dir = "${staging_dir}${sep()}${v_version}"
+      def processed_dir = "${source_dir}${ut.sep()}processed${ut.sep()}${v_version}"
+      def version_dir = "${staging_dir}${ut.sep()}${v_version}"
       ut.ensure_dir(processed_dir)
       // This is for when files are prefixed with <dbcr_result>
       tasks.split(",").each {item->
-        result = ut.shell_command( "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${version_dir}\"" )
-        result = ut.shell_command( "move \"${source_dir}${sep()}${item.trim()}*.sql\" \"${processed_dir}\"" )
+        result = ut.shell_command( "copy \"${source_dir}${ut.sep()}${item.trim()}*.sql\" \"${version_dir}\"" )
+        result = ut.shell_command( "move \"${source_dir}${ut.sep()}${item.trim()}*.sql\" \"${processed_dir}\"" )
       }
       
     }

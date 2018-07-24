@@ -91,6 +91,9 @@ def execute(settings = [:]) {
 	// Here we loop through the environments from the settings file to perform the deployment
 	def environment	 = pipeline["arg_map"]["environment"]
 	def env_num = pipeline["environments"].findIndexOf{ env -> env == environment}
+	if(env_num < 0){ 
+		failTheBuild("ERROR - environment not found ${environment} | ${env_num}" )
+	}
 	ut.message_box("Pipeline Deployment Using ${landscape} Process", "title")
 	println "#=> Deploy to Environment: ${environment}"
 	println "#=> Working with: Branch: ${landscape} V- ${branchName}\n	 Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
