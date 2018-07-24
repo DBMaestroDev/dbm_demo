@@ -156,12 +156,9 @@ def get_version(pipe_info){
 	// ------------- Update Local Git -----------------------
 	ut.message_box('GitParams', "title")
 	println "# Read latest commit..."
-	bat "git --version"
-	bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
-	gitMessage = bat(
-		script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%s",
-		returnStdout: true
-	).trim()
+	ut.shell_command( "git --version")
+	ut.shell_command("git remote update && git checkout ${branch_name}${pull_stg}")
+	gitMessage = ut.shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%s").trim()
 
 	println "# From Git: ${gitMessage}"
 	versionResult = gitMessage.replaceFirst(reg, '$1')
