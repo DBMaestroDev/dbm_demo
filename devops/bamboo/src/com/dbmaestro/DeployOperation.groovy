@@ -1,5 +1,6 @@
 package src.com.dbmaestro
 
+import src.com.dbmaestro.Utils as Utils
 
 def upgrade_environment(pipe, env_num){
   def environment = pipe["environments"][env_num]
@@ -14,7 +15,7 @@ def upgrade_environment(pipe, env_num){
   /*if(approver != "none"){
 	  input message: "Deploy to ${environment}?", submitter: approver
   } */
-	println "#------------------- Performing Deploy on ${environment} --------------#"
+	ut.message_box "Performing Deploy on ${environment}"
 	for(env in pair){
 		result = shell_command("${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${pipe["credential"]}")
   }
@@ -29,7 +30,7 @@ def package_artifacts(pipe, env_num){
   def staging_dir = pipe["staging_dir"]
   def source_dir = pipe["source_dir"]
   if(!System.getenv("Skip_Packaging") || System.getenv("Skip_Packaging") == "No"){
-    println "#------------------- Copying files for ${version} ---------#"
+    ut.message_box "Copying files for ${version}"
     result = shell_command( "if exist ${staging_dir} del /q ${staging_dir}\\*" )
 		println "# Cleaning Directory"
 		result = shell_command( "del /q \"${staging_dir}\\*\"" )
@@ -40,7 +41,7 @@ def package_artifacts(pipe, env_num){
     }else{
       def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
       def version_dir = "${staging_dir}${sep()}${v_version}"
-      ensure_dir(processed_dir)
+      ut.ensure_dir(processed_dir)
       // This is for when files are prefixed with <dbcr_result>
       tasks.split(",").each {item->
         result = shell_command( "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${version_dir}\"" )
@@ -49,16 +50,16 @@ def package_artifacts(pipe, env_num){
       
     }
     // trigger packaging
-    println "#----------------- Packaging Files for ${version} -------#"
+    ut.message_box "Packaging Files for ${version}"
     result = shell_command( "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}" )
     // version = adhoc_package(version)
   }else{
-	  println "#-------------- Skipping packaging step (parameter set) ---------#"
+	  ut.message_box "Skipping packaging step (parameter set)"
   }
 }
 
 def execute(pipe_info, env_num){
-  message_box(pipe_info["environments"][env_num], "title")
+  ut.message_box(pipe_info["environments"][env_num], "title")
   if(env_num == 0){
 	  this.package_artifacts(pipe_info, env_num)
   }

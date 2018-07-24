@@ -79,7 +79,7 @@ def execute(init_settings){
     }
   }else{
     if (settings["arg_map"].containsKey("help")) {
-      message_box("dbm_api HELP", "title")
+      ut.message_box("dbm_api HELP", "title")
       file_contents.each { k,v ->
         println "${k}: ${v["name"]}"
         println "\tUsage: ${v["usage"]}"
@@ -95,7 +95,7 @@ def execute(init_settings){
 
 def status_message(){
 	println "Deliver message"
-	ut.message_box("Status: ${settings["arg_map"]["ARG1"]}")
+	ut.ut.message_box("Status: ${settings["arg_map"]["ARG1"]}")
 }
 
 def perform_query() {
@@ -105,22 +105,22 @@ def perform_query() {
     System.exit(1)
   }
   contents = file_contents[settings["arg_map"]["action"]]
-  message_box("Task: ${settings["arg_map"]["action"]}")
+  ut.message_box("Task: ${settings["arg_map"]["action"]}")
   println " Description: ${contents["name"]}"
   for (query in contents["queries"]) {
     def post_results = ""
-    separator()
+    ut.separator()
     def conn = sql_connection(query["connection"].toLowerCase())
     //println "Raw Query: ${query["query"]}"
     def query_stg = add_query_arguments(query["query"])
     println "Processed Query: ${query_stg}"
-    message_box("Results")
+    ut.message_box("Results")
     def header = ""
     query["output"].each{arr ->
       header += "| ${arr[0].padRight(arr[2])}"
       }
     println header
-    separator(100)
+    ut.separator(100)
     conn.eachRow(query_stg)
     { row ->
       query["output"].each{arr ->
@@ -129,7 +129,7 @@ def perform_query() {
       }
       println " "
     }
-    separator(100)
+    ut.separator(100)
     println ""
     if (query.containsKey("post_process")) {
       post_process(query["post_process"], query_stg, conn)
@@ -159,7 +159,7 @@ def post_process(option, query_string, connection){
 }
 
 def result_query(query, grab = []){
-  message_box("Results")
+  ut.message_box("Results")
   def header = ""
   def result = [:]
   def conn = sql_connection("repo")
@@ -171,7 +171,7 @@ def result_query(query, grab = []){
     header += "| ${arr[0].padRight(arr[2])}"
   }
   println header
-  separator(100)
+  ut.separator(100)
   conn.eachRow(query["query"])
   { row ->
     query["output"].each{arr ->
@@ -183,7 +183,7 @@ def result_query(query, grab = []){
 	}
     println " "
   }
-  separator(100)
+  ut.separator(100)
   println ""
   conn.close()
   return result
@@ -243,7 +243,7 @@ def export_packages(query_string, conn){
   }
   def target_schema = get_target_schema(target_pipeline)
 
-  message_box("Exporting Versions")
+  ut.message_box("Exporting Versions")
   if( p_list && p_list != "" ){
     p_list.split(",").each{
       if (it.contains("=>")) {
@@ -282,12 +282,12 @@ def export_packages(query_string, conn){
       }
       src = new File(rec.script_sorce_data_reference).text
       tmp_path = "${target_path}${sep}${target_ver}"
-      ensure_dir(tmp_path)
+      ut.ensure_dir(tmp_path)
       fil_name = "${sortable(counter)}_${rec.script}"
       src = hdr + src
       //println src
       println "Exporting Script: ${rec.script}, Target: ${target_path}"
-      create_file(tmp_path, fil_name, src)
+      ut.create_file(tmp_path, fil_name, src)
       result += " - Transfer Version (${target_ver})"
     }else{
       result += " - Skip Version"
@@ -310,7 +310,7 @@ def dbm_package() {
 
 def adhocify_package() {
   def package_name = settings["arg_map"]["ARG1"]
-  separator()
+  ut.separator()
   def parts = package_name.split("__")
   def new_name = parts.length == 2 ? parts[1] : package_name
   def query = "update twmanagedb.TBL_SMG_VERSION set NAME = 'ARG_NAME', UNIQ_NAME = 'ARG_NAME', TYPE_ID = 2 where NAME = 'ARG_FULL_NAME'"
@@ -319,25 +319,25 @@ def adhocify_package() {
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
   query_stg = query_stg.replaceAll("ARG_NAME", new_name)
   println "Processed Query: ${query_stg}"
-  message_box("Results")
+  ut.message_box("Results")
   def res = conn.execute(query_stg)
   println res
-  separator()
+  ut.separator()
   conn.close()
 }
 
 def disable_package() {
   def package_name = settings["arg_map"]["ARG1"]
-  separator()
+  ut.separator()
   def query = "update twmanagedb.TBL_SMG_VERSION set IS_ENABLED = 0 where NAME = 'ARG_FULL_NAME'"
   def conn = sql_connection("repository")
   //println "Raw Query: ${query["query"]}"
   def query_stg = query.replaceAll("ARG_FULL_NAME", package_name)
   println "Processed Query: ${query_stg}"
-  message_box("Results")
+  ut.message_box("Results")
   def res = conn.execute(query_stg)
   println res
-  separator()
+  ut.separator()
   conn.close()
 }
 
@@ -345,7 +345,7 @@ def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
   conn.eachRow(query_string)
   { rec ->
-    message_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
+    ut.message_box("Object DDL Rev: ${rec.COUNTEDREVISION} of ${rec.OBJECT_NAME}")
     java.sql.Clob clob = (java.sql.Clob) rec.OBJECTCREATIONSCRIPT
     bodyText = clob.getAsciiStream().getText()
     println bodyText
@@ -428,7 +428,7 @@ def empty_package(){
   def version = settings["arg_map"]["ARG2"]
   def pipeline = settings["arg_map"]["ARG1"]
   def cnt = 0
-  message_box("Task: Empty Package - ")
+  ut.message_box("Task: Empty Package - ")
   println " Description: ${contents["name"]}\nARGS: ${settings["arg_map"]}"
   def query = contents["queries"][0]
   ver_query = query["query"]
@@ -461,7 +461,7 @@ def changeStagingDir() {
   def old_path = ""
   def pipeline = settings["arg_map"]["pipeline"]
   def query_stg = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
-  println message_box("Change Staging Folder", "title")
+  println ut.message_box("Change Staging Folder", "title")
   def new_path = settings["arg_map"]["path"]
   println "Pipeline: ${pipeline}"
   def conn = sql_connection("repo")
@@ -470,7 +470,7 @@ def changeStagingDir() {
     println "Existing: ${old_path}"
     flowid = rec["FLOWID"]
   }
-  ensure_dir()
+  ut.ensure_dir()
   println "New: ${new_path}"
   println ""
   println "=> Update Flow Record"
