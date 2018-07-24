@@ -99,7 +99,7 @@ def execute(settings = [:]) {
 	def version = this.get_version(pipeline)
 	pipeline["version"] = version
 	println "Executing Environment ${environment}"
-	this.run(new DeployOperation(), pipeline, env_num)
+	new DeployOperation().execute(pipeline, env_num)
 	if (landscape == "master") {
 			println "Branch specific work"
 	}
@@ -139,6 +139,10 @@ def get_tasks(pipe_info){
 
 def get_version(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "
+	if ( pipe_info["arg_map"].containsKey("version") && pipe_info["arg_map"]["version"] != "V0.0.0"){
+		println "#------- Version environment variable set: ${pipe_info["arg_map"]["version"]} - using that ---------#\r\n#-------- Ignoring git version ----"
+		return pipe_info["arg_map"]["version"]
+	}
 	if ( System.getenv("Version") != null && System.getenv("Version").length() > 1 && System.getenv("Version") != "V0.0.0"){
 		println "#------- Version environment variable set: ${System.getenv("Version")} - using that ---------#\r\n#-------- Ignoring git version ----"
 		return System.getenv("Version")
