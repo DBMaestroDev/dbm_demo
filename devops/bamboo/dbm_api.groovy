@@ -12,9 +12,9 @@ import src.com.dbmaestro.PipelineInclude as PipelineInclude
 // #--- Set these primary variables which may vary by application ------------# 
 def base_path = "C:\\Automation\\dbm_demo\\devops\\bamboo"
 def local_settings = "C:\\Automation\\dbm_demo\\devops\\bamboo\\resources\\settings\\local_settings_include.json"
-
+def landscape = "develop"
 def arg_map = [:]
-def settings = ["settinzgs_file" : local_settings, "base_path" : base_path]
+def settings = ["settings_file" : local_settings, "base_path" : base_path, "landscape" : landscape]
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")

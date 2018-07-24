@@ -38,9 +38,7 @@ def get_settings(content, landscape, flavor = 0) {
  
 def failTheBuild(String message) {
 
-	def messageColor = "\u001B[32m" 
-	def messageColorReset = "\u001B[0m"
-	println messageColor + message + messageColorReset
+	ut.message_box(message, "title")
 	error(message)
 	System.exit(1)
 }
@@ -59,17 +57,17 @@ def execute(settings = [:]) {
 	ut = new Utils()
 	def automationPath = "C:\\automation\\dbm_demo\\devops"
 	def settingsFile = ""
-	def buildNumber = System.getenv("BUILD_NUMBER")
 	def dbmNode = "master"
-	def rootJobName = System.getenv("JOB_NAME")
-	//def branchName = rootJobName.replaceFirst('.*/.*/', '')
-	def fullBranchName = rootJobName.replaceFirst('.*/','')
-	def branchName = fullBranchName.replaceFirst('%2F', '/')
-	def landscape = branchName.replaceFirst('/.*', '')
+	// Get these from Bamboo
+	def branchName = "develop" //rootJobName.replaceFirst('.*/.*/', '')
+	//def fullBranchName = rootJobName.replaceFirst('.*/','')
+	//def branchName = fullBranchName.replaceFirst('%2F', '/')
+	//def landscape = branchName.replaceFirst('/.*', '')
+	def landscape = settings["landscape"]
 	def pipeline = [:]
 	def settings_content = ""
 	//if(arg_)
-	println "Inputs: ${rootJobName}, branch: ${landscape}, name: ${branchName}"
+	println "branch: ${landscape}"
 	if( settings.containsKey("settings_file")) { 
 		settingsFile = settings["settings_file"] 
 	}		
@@ -95,7 +93,7 @@ def execute(settings = [:]) {
 	def env_num = pipeline["environments"].findIndexOf{ env -> env == environment}
 	ut.message_box("Pipeline Deployment Using ${landscape} Process", "title")
 	println "#=> Deploy to Environment: ${environment}"
-	println "#=> Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n	 Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
+	println "#=> Working with: Branch: ${landscape} V- ${branchName}\n	 Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
 	def tasks = this.get_tasks(pipeline)
 	pipeline["tasks"] = tasks
 	def version = this.get_version(pipeline)
@@ -122,10 +120,10 @@ def get_tasks(pipe_info){
 	// ------------- Update Local Git -----------------------
 	ut.message_box('GitParams', "title")
 	println "# Read latest commit..."
-	def result = shell_command("git --version")
-	result = shell_command("git remote update && git checkout ${branch_name}${pull_stg}")
-	result = shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s")
-	gitMessage = result["stdout"].trim()
+	def result = ut.shell_command("git --version")
+	//result = ut.shell_command("@cd ${base_path} && git remote update && git checkout ${branch_name}${pull_stg}")
+	result = ut.shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s")
+	gitMessage = result["stdout"]  //.trim()
 	println "# From Git: ${gitMessage}"
 	taskResult = gitMessage.replaceFirst(reg, '$1')
 	// Both branch version and git version git wins as override!
@@ -199,22 +197,6 @@ def shouldDeploy(cur_env) {
 		do_it = true;
 	}
 	return do_it
-}
-
-def shell_command() {
-	def cmd = "cmd.exe /c \"${arg_map["ARG1"]}\""
-	def proc = cmd.execute()
-	def sout = new StringBuilder(), serr = new StringBuilder()
-	proc.waitForOrKill(5000)
-	proc.consumeProcessOutput(sout, serr)
-	ut.message_box("Execute Command", "title")
-	println "Running: ${cmd}"
-	ut.message_box("RESULTS")
-	println sout
-	if (serr.length() > 2){
-		println "Error: ${serr}"
-	}
-	return ["command" : cmd, "stdout" : sout, "stderr" : serr]
 }
 
 def sep() {

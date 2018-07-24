@@ -59,3 +59,19 @@ def read_file(pth, name){
   def fil = new File(pth,name)
   return fil.text
 }
+
+def shell_command(cmd) {
+	def command = "cmd.exe /c \"${cmd}\""
+	def proc = command.execute()
+	def sout = new StringBuilder(), serr = new StringBuilder()
+	proc.waitForOrKill(5000)
+	proc.consumeProcessOutput(sout, serr)
+	message_box("Execute Command", "title")
+	println "Running: ${command}"
+	message_box("RESULTS")
+	println sout
+	if (serr.length() > 2){
+		println "Error: ${serr}"
+	}
+	return ["command" : command, "stdout" : sout, "stderr" : serr]
+}

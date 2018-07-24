@@ -17,7 +17,7 @@ def upgrade_environment(pipe, env_num){
   } */
 	ut.message_box "Performing Deploy on ${environment}"
 	for(env in pair){
-		result = shell_command("${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${pipe["credential"]}")
+		result = ut.shell_command("${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${pipe["credential"]}")
   }
 }
 
@@ -31,27 +31,27 @@ def package_artifacts(pipe, env_num){
   def source_dir = pipe["source_dir"]
   if(!System.getenv("Skip_Packaging") || System.getenv("Skip_Packaging") == "No"){
     ut.message_box "Copying files for ${version}"
-    result = shell_command( "if exist ${staging_dir} del /q ${staging_dir}\\*" )
+    result = ut.shell_command( "if exist ${staging_dir} del /q ${staging_dir}\\*" )
 		println "# Cleaning Directory"
-		result = shell_command( "del /q \"${staging_dir}\\*\"" )
-		result = shell_command( "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q" )
+		result = ut.shell_command( "del /q \"${staging_dir}\\*\"" )
+		result = ut.shell_command( "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q" )
     if(pipe["file_strategy"] == "version"){
       // This is for copying a whole directory
-      result = shell_command( "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\"")
+      result = ut.shell_command( "xcopy /s /y /i \"${source_dir}${sep()}${version}\" \"${processed_dir}\"")
     }else{
       def processed_dir = "${source_dir}${sep()}processed${sep()}${v_version}"
       def version_dir = "${staging_dir}${sep()}${v_version}"
       ut.ensure_dir(processed_dir)
       // This is for when files are prefixed with <dbcr_result>
       tasks.split(",").each {item->
-        result = shell_command( "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${version_dir}\"" )
-        result = shell_command( "move \"${source_dir}${sep()}${item.trim()}*.sql\" \"${processed_dir}\"" )
+        result = ut.shell_command( "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${version_dir}\"" )
+        result = ut.shell_command( "move \"${source_dir}${sep()}${item.trim()}*.sql\" \"${processed_dir}\"" )
       }
       
     }
     // trigger packaging
     ut.message_box "Packaging Files for ${version}"
-    result = shell_command( "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}" )
+    result = ut.shell_command( "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}" )
     // version = adhoc_package(version)
   }else{
 	  ut.message_box "Skipping packaging step (parameter set)"
