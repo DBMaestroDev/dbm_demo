@@ -122,7 +122,7 @@ def get_tasks(pipe_info){
 	println "# Read latest commit..."
 	def result = ut.shell_command("git --version")
 	//result = ut.shell_command("@cd ${base_path} && git remote update && git checkout ${branch_name}${pull_stg}")
-	result = ut.shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s")
+	result = ut.shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%s")
 	gitMessage = result["stdout"]  //.trim()
 	println "# From Git: ${gitMessage}"
 	taskResult = gitMessage.replaceFirst(reg, '$1')
@@ -159,7 +159,7 @@ def get_version(pipe_info){
 	bat "git --version"
 	bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
 	gitMessage = bat(
-		script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
+		script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%s",
 		returnStdout: true
 	).trim()
 
