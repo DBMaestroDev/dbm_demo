@@ -28,7 +28,7 @@ def package_artifacts(pipe, env_num){
   def v_version = version
 	def ssl = pipe["use_ssl"] == "false" ? "" : "-useSSL y "
   def result = ""
-  if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V#{version}" } 
+  if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V${version}" } 
   def staging_dir = pipe["staging_dir"]
   def source_dir = pipe["source_dir"]
   if(!System.getenv("Skip_Packaging") || System.getenv("Skip_Packaging") == "No"){
