@@ -27,6 +27,27 @@
 		}
 	 },
 	"branch_map" : {
+		"hr" : [
+		  {
+		  "pipeline" : "HumanResources",
+		  "base_env" : "DIT",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+		  "base_schema" : "HR",
+      "file_strategy" : "version",
+      "environments" : [
+			 "DIT",
+			 "QA",
+			 "STAGE",
+			 "PROD"
+		   ],
+		   "approvers" : [
+			 "none",
+			 "dbmguest",
+			 "dbmguest",
+			 "dbmguest"
+		   ]
+		  }
+		],
 		"develop" : [
 		  {
 		  "pipeline" : "Northwind_DEV",

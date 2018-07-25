@@ -36,7 +36,7 @@ def package_artifacts(pipe, env_num){
     result = ut.shell_command( "if exist ${staging_dir} del /q ${staging_dir}\\*" )
 		println "# Cleaning Directory"
 		result = ut.shell_command( "del /q \"${staging_dir}\\*\"" )
-		result = ut.shell_command( "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q" )
+		result = ut.shell_command( "FOR /D %p IN (\"${staging_dir}\\*.*\") DO rmdir \"%p\" /s /q" )
     def processed_dir = "${source_dir}${ut.sep()}processed${ut.sep()}${v_version}"
       def version_dir = "${staging_dir}${ut.sep()}${v_version}"
       if(pipe["file_strategy"] == "version"){
