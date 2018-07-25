@@ -6,6 +6,7 @@
       "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
       "staging_path" : "C:\\pipelinescript\\HR",
 	  "server" : "dbmtemplate:8017",
+		"use_ssl" : "false",
 	  "username" : "dbmguest@dbmaestro.com",
 	  "token" : "gKIn2LyvFxozrXm53aaHiWbkygMLzLfy",
 	  "source_control" : {

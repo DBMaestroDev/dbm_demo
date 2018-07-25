@@ -5,6 +5,7 @@ import src.com.dbmaestro.Utils as Utils
 def upgrade_environment(pipe, env_num){
   def environment = pipe["environments"][env_num]
   def approver = pipe["approvers"][env_num]
+	def ssl = pipe["use_ssl"] == "false" ? "" : "-useSSL y "
   def pair = environment.split(",")
   def do_pair = false
   def result = ""
@@ -17,7 +18,7 @@ def upgrade_environment(pipe, env_num){
   } */
 	ut.message_box "Performing Deploy on ${environment}"
 	for(env in pair){
-		result = ut.shell_command("${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${pipe["credential"]}")
+		result = ut.shell_command("${pipe["java_cmd"]} -Upgrade -ProjectName ${pipe["pipeline"]} -EnvName ${env} -PackageName ${version} -Server ${pipe["server"]} ${ssl}${pipe["credential"]}")
   }
 }
 
@@ -25,6 +26,7 @@ def package_artifacts(pipe, env_num){
   def version = pipe["version"]
   def tasks = pipe["tasks"]
   def v_version = version
+	def ssl = pipe["use_ssl"] == "false" ? "" : "-useSSL y "
   def result = ""
   if( !version.startsWith("V") && version =~ /\d\.\d/ ) {v_version = "V#{version}" } 
   def staging_dir = pipe["staging_dir"]
@@ -35,12 +37,12 @@ def package_artifacts(pipe, env_num){
 		println "# Cleaning Directory"
 		result = ut.shell_command( "del /q \"${staging_dir}\\*\"" )
 		result = ut.shell_command( "FOR /D %%p IN (\"${staging_dir}\\*.*\") DO rmdir \"%%p\" /s /q" )
-    if(pipe["file_strategy"] == "version"){
-      // This is for copying a whole directory
-      result = ut.shell_command( "xcopy /s /y /i \"${source_dir}${ut.sep()}${version}\" \"${processed_dir}\"")
-    }else{
-      def processed_dir = "${source_dir}${ut.sep()}processed${ut.sep()}${v_version}"
+    def processed_dir = "${source_dir}${ut.sep()}processed${ut.sep()}${v_version}"
       def version_dir = "${staging_dir}${ut.sep()}${v_version}"
+      if(pipe["file_strategy"] == "version"){
+      // This is for copying a whole directory
+      result = ut.shell_command( "xcopy /s /y /i \"${source_dir}${ut.sep()}${version}\" \"${version_dir}\"")
+    }else{
       ut.ensure_dir(processed_dir)
       // This is for when files are prefixed with <dbcr_result>
       tasks.split(",").each {item->
@@ -51,7 +53,7 @@ def package_artifacts(pipe, env_num){
     }
     // trigger packaging
     ut.message_box "Packaging Files for ${version}"
-    result = ut.shell_command( "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} -Server ${pipe["server"]} ${pipe["credential"]}" )
+    result = ut.shell_command( "${pipe["java_cmd"]} -Package -ProjectName ${pipe["pipeline"]} ${ssl}-Server ${pipe["server"]} ${pipe["credential"]}" )
     // version = adhoc_package(version)
   }else{
 	  ut.message_box "Skipping packaging step (parameter set)"

@@ -19,6 +19,7 @@ def get_settings(content, landscape, flavor = 0) {
 	pipe["java_cmd"] = settings["general"]["java_cmd"]
 	pipe["staging_dir"] = settings["general"]["staging_path"]
 	pipe["base_path"] = settings["general"]["base_path"]
+	pipe["use_ssl"] = settings["general"]["use_ssl"]
 	pipe["source_control"] = settings["general"]["source_control"]["type"]
 	pipe["remote_git"] = settings["general"]["source_control"]["remote"]
 	println "Landscape: ${landscape}, flavor: ${flavor}"
@@ -29,6 +30,7 @@ def get_settings(content, landscape, flavor = 0) {
 	pipe["environments"] = settings["branch_map"][landscape][flavor]["environments"]
 	pipe["approvers"] = settings["branch_map"][landscape][flavor]["approvers"]
 	pipe["source_dir"] = settings["branch_map"][landscape][flavor]["source_dir"]
+	pipe["file_strategy"] = settings["branch_map"][landscape][flavor]["file_strategy"]
 	credential = credential.replaceFirst("_USER_", settings["general"]["username"])
 	pipe["credential"] = credential.replaceFirst("_PASS_", settings["general"]["token"])
 	
@@ -97,8 +99,10 @@ def execute(settings = [:]) {
 	ut.message_box("Pipeline Deployment Using ${landscape} Process", "title")
 	println "#=> Deploy to Environment: ${environment}"
 	println "#=> Working with: Branch: ${landscape} V- ${branchName}\n	 Pipe: ${pipeline["pipeline"]}\n - Schema: ${pipeline["base_schema"]}"
-	def tasks = this.get_tasks(pipeline)
-	pipeline["tasks"] = tasks
+	if(pipeline["file_strategy"] == "tasks" ) {
+	  def tasks = this.get_tasks(pipeline)
+	  pipeline["tasks"] = tasks
+	}
 	def version = this.get_version(pipeline)
 	pipeline["version"] = version
 	println "Executing Environment ${environment}"
@@ -154,7 +158,7 @@ def get_version(pipe_info){
 	def gitMessage = ""
 	def versionResult = ""
 	def branch_name = pipe_info["branch_name"]
-	def base_path = pipe_info["base_path"]
+	def base_path = pipe_info["source_dir"]
 	def dbm_node = pipe_info["dbm_node"]
 	def remote = pipe_info["remote_git"] != "false"
 	def scm = pipe_info["source_control"]
@@ -164,11 +168,12 @@ def get_version(pipe_info){
 	ut.message_box('GitParams', "title")
 	println "# Read latest commit..."
 	ut.shell_command( "git --version")
-	ut.shell_command("git remote update && git checkout ${branch_name}${pull_stg}")
-	gitMessage = ut.shell_command("@cd ${base_path} && @git log -1 HEAD --pretty=format:%s").trim()
-
+	//ut.shell_command("git remote update && git checkout ${branch_name}${pull_stg}")
+	def result = ut.shell_command("@cd /d ${base_path} && @git log -1 HEAD --pretty=format:%s")
+	gitMessage = result["stdout"]
 	println "# From Git: ${gitMessage}"
 	versionResult = gitMessage.replaceFirst(reg, '$1')
+	versionResult = versionResult.trim()
 	// Both branch version and git version git wins as override!
 	if (gitMessage.length() != versionResult.length()){
 		println "# VERSION/FOLDER from git:" + versionResult

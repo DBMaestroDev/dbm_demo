@@ -95,7 +95,7 @@ def execute(init_settings){
 
 def status_message(){
 	println "Deliver message"
-	ut.ut.message_box("Status: ${settings["arg_map"]["ARG1"]}")
+	ut.message_box("Status: ${settings["arg_map"]["ARG1"]}")
 }
 
 def perform_query() {

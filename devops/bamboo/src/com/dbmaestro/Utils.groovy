@@ -64,7 +64,7 @@ def shell_command(cmd) {
 	def command = "cmd.exe /c \"${cmd}\""
 	def proc = command.execute()
 	def sout = new StringBuilder(), serr = new StringBuilder()
-	proc.waitForOrKill(5000)
+	proc.waitForOrKill(500000)
 	proc.consumeProcessOutput(sout, serr)
 	println "Running: ${command}"
 	message_box("RESULTS")
