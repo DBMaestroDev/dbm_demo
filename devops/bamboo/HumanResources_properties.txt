@@ -1,0 +1,13 @@
+# Human Resources Variables
+#---------#
+
+# Static Variables
+pipeline=HumanResources
+base_path=C:\\Automation\\dbm_demo
+base_schema=HR_DEV
+username=dbmguest@dbmaestro.com
+password=Trial123!
+java_cmd=java -jar "C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar"
+staging_path=C:\\Automation\\MP
+environment=DEV
+dbm_action=package

@@ -25,3 +25,9 @@ The job will be cloned for each environment and will have a different bamboo dbm
 
 Each task in bamboo will call the same powershell script: bamboo_dbm_operation.ps1
 
+The tasks available are:
+	deploy
+	package
+	git_params
+	stage_files
+

@@ -25,9 +25,14 @@ function Dbm_action {
 	$env_param = ""
 	$credential = '-AuthType DBmaestroAccount -UserName _USER_ -Password "_PASS_"'
 	$credential = ($credential -replace "_USER_", $username) -replace "_PASS_", $password
-	$version = Git_params
 	write-Host "Performing: $action"
+	if($action -eq "package"){
+	# Get from git in packaging phase
+		$version = Git_params
+	}
 	if($action -eq "deploy"){
+	# Should be set as and env variable in deploy phase
+		$version = $env:bamboo_dbm_version
 		$env_param = "-EnvName $env -PackageName V$version "
 	}
 	$domain_cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($domain_user,(ConvertTo-SecureString -String $domain_pwd -AsPlainText -Force))
@@ -72,7 +77,6 @@ git log -1 HEAD --pretty=format:%s"
 
 function Stage_files {
 	$version = "$env:bamboo_dbm_version"
-	$version = Git_params
 	if ( $version.length -lt 2 ) {
 	    write-Host "Failure - no version detected"
 	    exit(1)
@@ -90,11 +94,11 @@ write-host "#=> Invoking remote session on $server as $username"
 # invoke
 if($action -eq "Deploy"){
 	Dbm_action($action)
-}elseif($action -eq "Package"){
+} elseif ($action -eq "Package"){
 	Dbm_action($action)
-}elseif($action -eq "Git_params"){
+} elseif ($action -eq "Git_params"){
 	Git_params
-}elseif($action -eq "Stage_Files"){
+} elseif ($action -eq "Stage_Files"){
 	Stage_Files
 }else {
 	write-Host "ERROR command $action not found"
