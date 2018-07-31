@@ -1,6 +1,6 @@
 import groovy.json.*
 
-// Add a properties for Platform and Skip_Packaging
+// Add a properties for Platform and Skip_Packaging  
 properties([
 	parameters([
 		//choice(name: 'Landscape', description: "Develop/Release to specify deployment target", choices: 'MP_Dev\nMP_Dev2,MP_Release'),
