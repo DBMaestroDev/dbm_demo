@@ -55,6 +55,8 @@ $java_cmd -$action -ProjectName $pipeline $($env_param)-Server $server $($creden
 function Git_params {
 	$base_path = "$env:bamboo_dbm_base_path"
 	$regex = '.*\[Version: (.*)\].*'
+	$file_name = "version_properties.txt"
+	$cur_date = Get-Date -format "MM-dd-yy"
 	$dbm_cmd = @"
 C:;
 cd $base_path; 
@@ -71,7 +73,15 @@ git log -1 HEAD --pretty=format:%s"
   	$matches += $_	
   }
 	$found_ver = $matches[0].groups[1]
-	write-Host "Found: $found_ver"  
+	write-Host "Derived Version: $found_ver"
+	# Update the Version File
+	Write-Host "Replacing: $base_path\bamboo\$file_name with current version"
+	$content = "@
+# Derived version - $cur_date 
+version=$found_ver
+@"
+
+	$content | Set-Content $file_name
 	return $found_ver
 }
 

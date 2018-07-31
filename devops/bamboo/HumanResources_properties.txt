@@ -10,4 +10,4 @@ password=Trial123!
 java_cmd=java -jar "C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar"
 staging_path=C:\\Automation\\MP
 environment=DEV
-dbm_action=package
+action=package
