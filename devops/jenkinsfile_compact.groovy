@@ -35,7 +35,7 @@ local_settings = [
 			]
   ],
 	"branch_map" : [
-		"master" : [
+		"develop" : [
 		[
 		  "pipeline" : "HumanResources",
 		  "base_env" : "DIT",
