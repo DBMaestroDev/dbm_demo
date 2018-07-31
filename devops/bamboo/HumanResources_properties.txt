@@ -3,10 +3,14 @@
 
 # Static Variables
 pipeline=HumanResources
+server=10.0.0.15
 base_path=C:\\Automation\\dbm_demo
 base_schema=HR_DEV
 username=dbmguest@dbmaestro.com
 password=Trial123!
+domain=dbmtemplate
+domain_user=dbmguest
+domain_pwd=S1gleTr@ck#
 java_cmd=java -jar "C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar"
 source_path=C:\\Automation\\dbm_demo\\hr_demo\\versions
 staging_path=C:\\Automation\\MP

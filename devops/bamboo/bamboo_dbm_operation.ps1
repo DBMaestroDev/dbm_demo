@@ -5,9 +5,6 @@ write-Host "DBmaestro Deploy"
 
 # Build a credential - you can do this in another file for security
 $server = "$env:bamboo_dbm_server"
-$domain = "DBMTemplate"
-$domain_user = "$domain\someuser"
-$domain_pwd = "somepwd"
 $username = "$env:bamboo_dbm_username"
 $password = "$env:bamboo_dbm_password"
 $pipeline = "$env:bamboo_dbm_pipeline"
@@ -25,8 +22,9 @@ function Dbm_action {
 	$env_param = ""
 	$credential = '-AuthType DBmaestroAccount -UserName _USER_ -Password "_PASS_"'
 	$credential = ($credential -replace "_USER_", $username) -replace "_PASS_", $password
+
 	write-Host "Performing: $action"
-	if($action -eq "package"){
+	if($action -eq "ZZZZpackage"){
 	# Get from git in packaging phase
 		$version = Git_params
 	}
@@ -35,7 +33,6 @@ function Dbm_action {
 		$version = $env:bamboo_dbm_version
 		$env_param = "-EnvName $env -PackageName V$version "
 	}
-	$domain_cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($domain_user,(ConvertTo-SecureString -String $domain_pwd -AsPlainText -Force))
 	# Now run the automation command
 	# Build with here string
 	# java -jar DBmaestroAgent.jar -Validate  -ProjectName human_resources -EnvName integration -Server 10.1.0.15 -PackageName V1.0.1
@@ -44,7 +41,7 @@ C:;
 cd "$auto_path" 
 $java_cmd -$action -ProjectName $pipeline $($env_param)-Server $server $($credential)
 "@
-	
+	$domain_cred = Domain_credential
 	# invoke
 	write-Host "#=> Running: $dbm_cmd"
 	[ScriptBlock]$script = [ScriptBlock]::Create($dbm_cmd)
@@ -97,6 +94,14 @@ function Stage_files {
 	write-host "#=> Copying $source_path\$version to $target_path\$base_schema\V$version"
 	Copy-Item "$source_path\$version" -Destination $target_path\$base_schema\V$version -force
 	
+}
+
+function Domain_credential {
+	$domain = $env:bamboo_dbm_domain
+	$domain_user = "$domain\$env:bamboo_dbm_domain_user"
+	$domain_pwd = $env:bamboo_dbm_domain_pwd
+	$domain_cred = New-Object System.Management.Automation.PSCredential -ArgumentList @($domain_user,(ConvertTo-SecureString -String $domain_pwd -AsPlainText -Force))
+	return $domain_cred
 }
 
 write-Host "#-------------------- DBmaestro PS Actions Library ---------------------------#"
