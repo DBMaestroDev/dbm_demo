@@ -1,0 +1,2 @@
+# Version Properties File - Set Dynamically during build
+version=3.4.3
