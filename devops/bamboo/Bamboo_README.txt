@@ -30,4 +30,7 @@ The tasks available are:
 	package
 	git_params
 	stage_files
+	
+Version format:
+	git commit -a -m "Here is my commit [Version: 3.4.3]"
 
