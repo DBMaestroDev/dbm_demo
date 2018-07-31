@@ -53,7 +53,7 @@ $java_cmd -$action -ProjectName $pipeline $($env_param)-Server $server $($creden
 }
 
 function Git_params {
-	$base_path = "$env:bamboo_dbm_base_path"
+	$base_path = "$env:bamboo_build_working_directory"
 	$regex = '.*\[Version: (.*)\].*'
 	$file_name = "version_properties.txt"
 	$cur_date = Get-Date -format "MM-dd-yy"
