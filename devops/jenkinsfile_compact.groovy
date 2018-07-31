@@ -28,7 +28,7 @@ local_settings = [
       "password" : "manage#2009",
       "connect" : "dbmtemplate:1521/orcl"
     ],
-    "remote" : ]
+    "remote" : [
       "user" : "dbmaestro_teamwork",
       "password" : "Remote#2009",
       "connect" : "dbmtemplate:1521/orcl"
@@ -53,7 +53,7 @@ local_settings = [
  			 "teamwork",
  			 "teamwork"
  		   ]
-		  }
+		  ]
 		],
 		"hrm" : [
 		[
