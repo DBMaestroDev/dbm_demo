@@ -75,13 +75,13 @@ git log -1 HEAD --pretty=format:%s"
 	$found_ver = $matches[0].groups[1]
 	write-Host "Derived Version: $found_ver"
 	# Update the Version File
-	Write-Host "Replacing: $base_path\bamboo\$file_name with current version"
-	$content = "@
+	Write-Host "Replacing: $base_path\devops\bamboo\$file_name with current version"
+	$content = @"
 # Derived version - $cur_date 
 version=$found_ver
-@"
+"@
 
-	$content | Set-Content $file_name
+	$content | Set-Content $base_path\devops\bamboo\$file_name
 	return $found_ver
 }
 
@@ -91,11 +91,11 @@ function Stage_files {
 	    write-Host "Failure - no version detected"
 	    exit(1)
 	}
-	$base_path = "$env:bamboo_dbm_base_path"
+	$source_path = "$env:bamboo_dbm_source_path"
 	$base_schema = "$env:bamboo_dbm_base_schema"
 	$target_path = "$env:bamboo_dbm_staging_path\$pipeline"
-	write-host "#=> Copying $base_path\$version to $target_path\$base_schema\V$version"
-	Copy-Item "$base_path\$version" -Destination $target_path\$base_schema\V$version -force
+	write-host "#=> Copying $source_path\$version to $target_path\$base_schema\V$version"
+	Copy-Item "$source_path\$version" -Destination $target_path\$base_schema\V$version -force
 	
 }
 
