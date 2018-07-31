@@ -46,7 +46,7 @@ $java_cmd -$action -ProjectName $pipeline $($env_param)-Server $server $($creden
 	write-Host "#=> Running: $dbm_cmd"
 	[ScriptBlock]$script = [ScriptBlock]::Create($dbm_cmd)
 	Invoke-Command -ComputerName $server -Credential $domain_cred -ScriptBlock $script -ErrorVariable errmsg
-	return $xml
+	return "baby kittens"
 }
 
 function Git_params {
@@ -90,10 +90,13 @@ function Stage_files {
 	}
 	$source_path = "$env:bamboo_dbm_source_path"
 	$base_schema = "$env:bamboo_dbm_base_schema"
-	$target_path = "$env:bamboo_dbm_staging_path\$pipeline"
+	$staging_path = "$env:bamboo_dbm_staging_path\$pipeline\$base_schema\V$version\"
 	write-host "#=> Copying $source_path\$version to $target_path\$base_schema\V$version"
-	Copy-Item "$source_path\$version" -Destination $target_path\$base_schema\V$version -force
-	
+	$files = Get-Item -Path "$source_path\$version"
+	ForEach ($file in $files) {
+		Copy-Item $file -Destination $staging_path -force
+		Write-host $file
+	}
 }
 
 function Domain_credential {

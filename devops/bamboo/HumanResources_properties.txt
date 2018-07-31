@@ -13,6 +13,6 @@ domain_user=dbmguest
 domain_pwd=S1gleTr@ck#
 java_cmd=java -jar "C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar"
 source_path=C:\\Automation\\dbm_demo\\hr_demo\\versions
-staging_path=C:\\Automation\\MP
+staging_path=Z:\\pipelinescript\\HR
 environment=DEV
 action=package
