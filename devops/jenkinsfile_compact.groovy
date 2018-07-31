@@ -100,6 +100,7 @@ def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_
 def server = local_settings["general"]["server"]
 def java_cmd = local_settings["general"]["java_cmd"]
 def dbmNode = ""
+def dbcr_result = ""
 def staging_path = local_settings["general"]["staging_path"]
 // note key off of landscape variable
 def base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
