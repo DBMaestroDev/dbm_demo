@@ -4,7 +4,7 @@
 
 
 #=> Query to show relationships between databases
-select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target, srcdb.DBNAME as sourcedb, tgtdb.DBNAME as targetdb
+select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target, srcdb.DBNAME as sourcedb, tgtdb.DBNAME as targetdb, srcinst.SERVER_NAME as srcServer, tgtinst.SERVER_NAME as tgtServer
  from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID 
  JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID 
  JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID 
@@ -12,4 +12,23 @@ select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target, s
  JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID
  JOIN TBLMONITOREDDATABASES srcdb ON src.DBCID = srcdb.ID 
  JOIN TBLMONITOREDDATABASES tgtdb ON tgt.DBCID = tgtdb.ID
+ JOIN TBLMONITOREDSERVERINSTANCES srcinst ON srcinst.INSTANCEID = srcdb.SERVERINSTANCEID 
+ JOIN TBLMONITOREDSERVERINSTANCES tgtinst ON tgtinst.INSTANCEID = tgtdb.SERVERINSTANCEID 
+ 
+Less Detail:
+select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target
+ from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID 
+ JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID 
+ JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID 
+ JOIN TBL_LS srcenv ON srcenv.LSID = src.LSID 
+ JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID
+
+
+Environment Details:
+select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBNAME, inst.SERVER_NAME from TBL_FLOW p 
+JOIN TBL_FLOW_LAYOUT flt on flt.FLOWID = p.FLOWID 
+JOIN TBL_LS env ON env.LSID = flt.LSID 
+JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID 
+JOIN TBLMONITOREDDATABASES db ON mp.DBCID = db.ID
+JOIN TBLMONITOREDSERVERINSTANCES inst ON db.SERVERINSTANCEID = inst.INSTANCEID;
  
