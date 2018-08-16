@@ -200,6 +200,23 @@
 		  ]
 		}
 	]
-  }
-  
+  },
+  "tw_pipelines" : {
+    "name" : "Pipelines and environment relationships (teamwork migration)",
+    "usage" : "dbm_api.bat action=tw_pipelines",
+	"queries" : 
+  [
+		{ "connection" : "repo",
+		  "query": "select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target, srcdb.DBNAME as sourcedb, tgtdb.DBNAME as targetdb from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID  JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID JOIN TBL_LS srcenv ON srcenv.LSID = src.LSID JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID JOIN TBLMONITOREDDATABASES srcdb ON src.DBCID = srcdb.ID JOIN TBLMONITOREDDATABASES tgtdb ON tgt.DBCID = tgtdb.ID",
+  		"output": [
+				["FlowID",0,5],
+          ["Pipeline",1,20],
+		    ["SrcEnv",2,15],
+		    ["TgtEnv",3,15],
+        ["SrcDb",4,20],
+				["TgtDb",5,20]
+		  ]
+		}
+	]
+  }  
 }
