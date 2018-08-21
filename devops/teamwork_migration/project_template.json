@@ -1,0 +1,100 @@
+{
+  "ProjectGroupId": "${pipe["project_group_id"]}",
+  "ProjectName": "${pipe["project_name"]}",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by versions",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0,
+  "DatabaseType": "${pipe["db_platform"]}",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 10,
+  "Options": {
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "ConflictAction": "3",
+    "CustomCharactersToIgnore": "",
+    "CustomDataRestructureLogic": "0",
+    "DisableConstraintsInContentScript": false,
+    "DuplicationAction": "2",
+    "IncludeSchemaNamePrefix": false,
+    "IncludeUserScripts": true,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCase": true,
+    "IsIgnoreComments": true,
+    "IsIgnoreCustomCharacters": false,
+    "IsIgnoreDoubleQuotes": false,
+    "IsIgnoreForce": true,
+    "IsIgnoreWhitespaces": true,
+    "IsSaveDataInOldStructure": true,
+    "IsSupportTypesWithTablesDependents": false,
+    "LobOracleFolder": "",
+    "OracleMappingDirectory": "",
+    "Prefix": "OLD_",
+    "ReportsOutputFolder": "",
+    "SaveEncodingCodePage": "1252",
+    "ScriptOutputFolder": "${pipe["base_bath"]}\\${pipe["project_group"]}\\${pipe["project_name"]}",
+    "SeparateScriptForEachTarget": true,
+    "SpoolOutputFolder": "",
+    "SkipPostValidation": true,
+    "SkipPreValidation": false,
+    "IsUseSpoolFolder": true,
+    "DetectDefaultCompilationErrors": false,
+    "DetectCompilationWarnings": false
+  },
+  "AdditionalOptions": [],
+  "EnvironmentTypes": [
+    {
+      "Name": "Development",
+      "Environments": [
+			],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [
+			],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+			],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Testing",
+      "Environments": [
+			],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Acceptance",
+      "Environments": [
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Staging",
+      "Environments": [
+			],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Production",
+      "Environments": [
+				   ]
+        }
+      ],
+      "DriftDetection": false
+    }
+  ]
+}

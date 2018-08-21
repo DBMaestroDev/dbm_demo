@@ -702,3 +702,56 @@ def process_row(pipe, pipe_id, record, envs, env_info){
 	}
 	return record
 }
+
+def build_import_json {
+	env_types = ["rs", "qa", "uat", "staging", "prod"]
+	def engine = new groovy.text.GStringTemplateEngine()
+	// process import csv file
+	//read environment_export.csv
+	def envs = read_csv_file("${base_path}\\environment_export.csv")
+	def cur_env = [:]
+	// build map of info envinfo
+	//read pipeline_export.csv
+	def pipelines = read_csv_file("${base_path}\\pipeline_export.csv")
+	pipelines.each{ pipe ->
+		def ftemp = new File("${base_path}\\project_template.json")
+		def etemp = new File("${base_path}\\environment_template.json")
+		// Read project template json
+		def Template = engine.createTemplate(ftemp).make(pipe)
+		// read environment template json
+		cnt = 0
+		envs.each{ env ->
+			//swap in csv row values
+			
+			// Substitute environments in project template
+			Template["environment_types"][env_types[cnt]] << cur_env
+    	cnt += 1
+		}
+		def f = new File("${base_path}\\output_${pipe["project_name"]}.json")
+    
+	} 
+
+}
+
+def read_csv_file(filepath){
+	def fil = new File(filepath)
+	def res = []
+	def parts = []
+	def hsh = [:]
+	def header = []
+	def cnt = 0
+	fil.readLines{ line -> 
+		if( cnt == 0) { header = line.split }
+		else{
+			parts = line.split(",")
+			hsh = [:]
+			k = 0
+			header.each{ col -> 
+				hsh[col] = parts[k]
+				k += 1
+			}
+			
+		}
+	}
+	
+}

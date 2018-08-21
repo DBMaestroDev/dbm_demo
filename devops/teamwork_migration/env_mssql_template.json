@@ -1,0 +1,26 @@
+  {
+    "EnvironmentName": "${env_name}",
+    "EnvironmentDescription": null,
+    "ComparisonType": null,
+    "SuperUser": null,
+    "Schemas": [
+      {
+        "Name": "AH3111OSBX",
+        "SchemaCredentials": {
+          "AuthType": "1",
+          "DBName": "${schema_name}",
+					"Port" : ${port},
+          "Host": "${host}",
+          "UserName": "${username}",
+          "Password": "${password}"
+        },
+        "Order": 1,
+        "IsManaged": false,
+        "Safe": null,
+        "Folder": null,
+        "Object": null,
+        "additionalOptions": [],
+        "IsSuperUser": false
+      }
+    ]
+  }

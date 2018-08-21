@@ -1,0 +1,294 @@
+{
+  "ProjectGroupId": null,
+  "ProjectId": 9,
+  "ProjectName": "HumanResources",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by versions",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0,
+  "DatabaseType": "Oracle",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 10,
+  "Options": {
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "ConflictAction": "3",
+    "CustomCharactersToIgnore": "",
+    "CustomDataRestructureLogic": "0",
+    "DisableConstraintsInContentScript": false,
+    "DuplicationAction": "2",
+    "IncludeSchemaNamePrefix": false,
+    "IncludeUserScripts": true,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCase": true,
+    "IsIgnoreComments": true,
+    "IsIgnoreCustomCharacters": false,
+    "IsIgnoreDoubleQuotes": false,
+    "IsIgnoreForce": true,
+    "IsIgnoreWhitespaces": true,
+    "IsSaveDataInOldStructure": true,
+    "IsSupportTypesWithTablesDependents": false,
+    "LobOracleFolder": "",
+    "OracleMappingDirectory": "",
+    "Prefix": "OLD_",
+    "ReportsOutputFolder": "",
+    "SaveEncodingCodePage": "1252",
+    "ScriptOutputFolder": "C:\\Automation\\MP\\HumanResources",
+    "SeparateScriptForEachTarget": true,
+    "SpoolOutputFolder": "",
+    "SkipPostValidation": true,
+    "SkipPreValidation": false,
+    "IsUseSpoolFolder": true,
+    "DetectDefaultCompilationErrors": false,
+    "DetectCompilationWarnings": false
+  },
+  "AdditionalOptions": [],
+  "EnvironmentTypes": [
+    {
+      "Name": "Development",
+      "Environments": [
+        {
+          "EnvironmentId": 33,
+          "EnvironmentName": "Sandbox",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_SANDBOX",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_SANDBOX",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 32,
+              "IsManaged": true,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [
+        {
+          "EnvironmentId": 98,
+          "EnvironmentName": "PreRun",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_PCK",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_PCK",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 97,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+        {
+          "EnvironmentId": 34,
+          "EnvironmentName": "DIT",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_DEV",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_DEV",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 33,
+              "IsManaged": true,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Testing",
+      "Environments": [
+        {
+          "EnvironmentId": 35,
+          "EnvironmentName": "QA1",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_QA1",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_QA1",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 34,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        },
+        {
+          "EnvironmentId": 36,
+          "EnvironmentName": "QA2",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_QA2",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_QA2",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 35,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Acceptance",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Staging",
+      "Environments": [
+        {
+          "EnvironmentId": 37,
+          "EnvironmentName": "STAGE",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_STAGE",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_STAGE",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 36,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Production",
+      "Environments": [
+        {
+          "EnvironmentId": 38,
+          "EnvironmentName": "PROD",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "HR_LIVE",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_LIVE",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 37,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    }
+  ]
+}

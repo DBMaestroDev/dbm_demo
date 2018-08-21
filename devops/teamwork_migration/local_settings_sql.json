@@ -1,16 +1,15 @@
 {
-  "### Instructions ###": 
-    "Enter the local settings items for your installation",
-    "general" : {
-      "base_path" : "C:\\Automation\\dbm_demo",
-      "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
-      "staging_path" : "C:\\pipelinescript",
-      "server" : "teamwork2012",
-  	  "username" : "automation@dbmaestro.com",
-  	  "token" : "123456",
-	  "platform" : "mssql"
-    },
-    "connections" : {
+  "### Instructions ###": "Enter the local settings items for your installation",
+  "general" : {
+    "base_path" : "C:\\Automation\\dbm_demo",
+    "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+    "staging_path" : "C:\\pipelinescript",
+    "server" : "teamwork2012",
+	  "username" : "automation@dbmaestro.com",
+	  "token" : "123456",
+  	"platform" : "mssql"
+  },
+  "connections" : {
     "repository" : {
       "user" : "dbmadmin",
       "password" : "123456",
@@ -22,6 +21,28 @@
       "connect" : "dbmtemplate:1521/orcl"
     }
   },
+	"import" : {
+		"project_group_id" : 11,
+		"project_group" : "HR",
+		"db_platform" : "oracle",
+		"base_path" : "C:\\Automation",
+		"dev_environments" : "",
+		"pre_run_environments" : "",
+		"rs_environments" : "",
+		"qa_environments" : "",
+		"uat_environments" : "",
+		"staging_environments" : "",
+		"prod_environments" : "",
+		"project_name" : "hr_alt",
+		"schema_name" : "hr_dev",
+		"port" : "1521",
+		"host" : "teamwork2012",
+		"sid_service" : "sid",
+		"service_name" : "orcl",
+		"username" : "hr_dev",
+		"password" : "123456",
+		"is_managed" : true
+	},
 	"branch_map" : {
 		"release" : [
 		  {

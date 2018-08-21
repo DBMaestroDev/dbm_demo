@@ -531,13 +531,13 @@ def changeStagingDir() {
   println "New: ${new_path}"
   println ""
   println "=> Update Flow Record"
-  def query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
+  query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
   conn.execute(query)
   println "=> Update Script Import Records"
-  def query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
   conn.execute(query)
   println "=> Update Script Import Records"
-  def query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
   conn.execute(query)
 }
 

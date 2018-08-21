@@ -1,0 +1,793 @@
+{
+  "ProjectGroupId": null,
+  "ProjectId": 12,
+  "ProjectName": "HRMADM",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by versions",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0,
+  "DatabaseType": "MS-SQL",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 240,
+  "Options": {
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "ConflictAction": "3",
+    "CustomCharactersToIgnore": "",
+    "CustomDataRestructureLogic": "0",
+    "DisableConstraintsInContentScript": false,
+    "DuplicationAction": "2",
+    "IncludeSchemaNamePrefix": false,
+    "IncludeUserScripts": true,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCase": true,
+    "IsIgnoreComments": true,
+    "IsIgnoreCustomCharacters": false,
+    "IsIgnoreDoubleQuotes": false,
+    "IsIgnoreForce": true,
+    "IsIgnoreWhitespaces": true,
+    "IsSaveDataInOldStructure": true,
+    "IsSupportTypesWithTablesDependents": false,
+    "LobOracleFolder": "",
+    "OracleMappingDirectory": "",
+    "Prefix": "OLD_",
+    "ReportsOutputFolder": "",
+    "SaveEncodingCodePage": "1252",
+    "ScriptOutputFolder": "C:\\Automation\\MP\\HRMADM",
+    "SeparateScriptForEachTarget": true,
+    "SpoolOutputFolder": "",
+    "SkipPostValidation": true,
+    "SkipPreValidation": false,
+    "IsUseSpoolFolder": true,
+    "DetectDefaultCompilationErrors": false,
+    "DetectCompilationWarnings": false
+  },
+  "AdditionalOptions": [
+    {
+      "name": "Additional Deployment Contributor Arguments",
+      "type": "Textbox",
+      "value": null,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Additional Deployment Contributors",
+      "type": "Textbox",
+      "value": null,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Allow Drop Blocking Assemblies",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Allow Incompatible Platform",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Allow Unsafe Row Level Security Data Movement",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Block On Possible Data Loss",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Command Timeout",
+      "type": "Textbox",
+      "value": "60",
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Compare Using Target Collation",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Deploy Database In Single User Mode",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Disable And Reenable Ddl Triggers",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Do Not Alter Change Data Capture Objects",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Do Not Alter Replicated Objects",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Authorizer",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Column Collation",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Column Order",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Cryptographic Provider File Path",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Ddl Trigger Order",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Ddl Trigger State",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Default Schema",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Dml Trigger Order",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Dml Trigger State",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Extended Properties",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore File And Log File Path",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Increment",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Index Options",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Index Padding",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Lock Hints On Indexes",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Not For Replication",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Partition Schemes",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Permissions",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Quoted Identifiers",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Role Membership",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Semicolon Between Statements",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore Table Options",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore User Settings Objects",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore With Nocheck On Check Constraints",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Ignore With Nocheck On Foreign Keys",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Include Composite Objects",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Include Transactional Scripts",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "No Alter Statements To Change Clr Types",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Populate Files On File Groups",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Register Data Tier Application",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Run Deployment Plan Executors",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script Database Collation",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script Database Compatibility",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script Database Options",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script Deploy State Checks",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script File Size",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script New Constraint Validation",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Script Refresh Module",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Treat Verification Errors As Warnings",
+      "type": "Switch",
+      "value": false,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Unmodifiable Object Warnings",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Verify Collation Compatibility",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Verify Deployment",
+      "type": "Switch",
+      "value": true,
+      "validValue": [],
+      "multiSelection": false
+    },
+    {
+      "name": "Exclude DB types",
+      "type": "Combobox",
+      "value": [
+        "ServerTriggers",
+        "Routes",
+        "LinkedServerLogins",
+        "Endpoints",
+        "ErrorMessages",
+        "Logins",
+        "LinkedServers",
+        "Credentials",
+        "DatabaseScopedCredentials",
+        "DatabaseEncryptionKeys",
+        "MasterKeys",
+        "DatabaseAuditSpecifications",
+        "Audits",
+        "ServerAuditSpecifications",
+        "CryptographicProviders",
+        "ServerRoles",
+        "EventSessions",
+        "DatabaseOptions",
+        "EventNotifications",
+        "ServerRoleMembership",
+        "AssemblyFiles",
+        "Users",
+        "RoleMembership",
+        "Filegroups",
+        "DatabaseRoles",
+        "ApplicationRoles"
+      ],
+      "validValue": [
+        "Aggregates",
+        "ApplicationRoles",
+        "Assemblies",
+        "AssemblyFiles",
+        "AsymmetricKeys",
+        "BrokerPriorities",
+        "Certificates",
+        "ColumnEncryptionKeys",
+        "ColumnMasterKeys",
+        "Contracts",
+        "DatabaseOptions",
+        "DatabaseRoles",
+        "DatabaseTriggers",
+        "Defaults",
+        "ExtendedProperties",
+        "ExternalDataSources",
+        "ExternalFileFormats",
+        "ExternalTables",
+        "Filegroups",
+        "FileTables",
+        "FullTextCatalogs",
+        "FullTextStoplists",
+        "MessageTypes",
+        "PartitionFunctions",
+        "PartitionSchemes",
+        "Permissions",
+        "Queues",
+        "RemoteServiceBindings",
+        "RoleMembership",
+        "Rules",
+        "ScalarValuedFunctions",
+        "SearchPropertyLists",
+        "SecurityPolicies",
+        "Sequences",
+        "Services",
+        "Signatures",
+        "StoredProcedures",
+        "SymmetricKeys",
+        "Synonyms",
+        "Tables",
+        "TableValuedFunctions",
+        "UserDefinedDataTypes",
+        "UserDefinedTableTypes",
+        "ClrUserDefinedTypes",
+        "Users",
+        "Views",
+        "XmlSchemaCollections",
+        "Audits",
+        "Credentials",
+        "CryptographicProviders",
+        "DatabaseAuditSpecifications",
+        "DatabaseEncryptionKeys",
+        "DatabaseScopedCredentials",
+        "Endpoints",
+        "ErrorMessages",
+        "EventNotifications",
+        "EventSessions",
+        "LinkedServerLogins",
+        "LinkedServers",
+        "Logins",
+        "MasterKeys",
+        "Routes",
+        "ServerAuditSpecifications",
+        "ServerRoleMembership",
+        "ServerRoles",
+        "ServerTriggers"
+      ],
+      "multiSelection": true
+    },
+    {
+      "name": "Do Not Drop DB types",
+      "type": "Combobox",
+      "value": [],
+      "validValue": [
+        "Aggregates",
+        "ApplicationRoles",
+        "Assemblies",
+        "AssemblyFiles",
+        "AsymmetricKeys",
+        "BrokerPriorities",
+        "Certificates",
+        "ColumnEncryptionKeys",
+        "ColumnMasterKeys",
+        "Contracts",
+        "DatabaseOptions",
+        "DatabaseRoles",
+        "DatabaseTriggers",
+        "Defaults",
+        "ExtendedProperties",
+        "ExternalDataSources",
+        "ExternalFileFormats",
+        "ExternalTables",
+        "Filegroups",
+        "FileTables",
+        "FullTextCatalogs",
+        "FullTextStoplists",
+        "MessageTypes",
+        "PartitionFunctions",
+        "PartitionSchemes",
+        "Permissions",
+        "Queues",
+        "RemoteServiceBindings",
+        "RoleMembership",
+        "Rules",
+        "ScalarValuedFunctions",
+        "SearchPropertyLists",
+        "SecurityPolicies",
+        "Sequences",
+        "Services",
+        "Signatures",
+        "StoredProcedures",
+        "SymmetricKeys",
+        "Synonyms",
+        "Tables",
+        "TableValuedFunctions",
+        "UserDefinedDataTypes",
+        "UserDefinedTableTypes",
+        "ClrUserDefinedTypes",
+        "Users",
+        "Views",
+        "XmlSchemaCollections",
+        "Audits",
+        "Credentials",
+        "CryptographicProviders",
+        "DatabaseAuditSpecifications",
+        "DatabaseEncryptionKeys",
+        "DatabaseScopedCredentials",
+        "Endpoints",
+        "ErrorMessages",
+        "EventNotifications",
+        "EventSessions",
+        "LinkedServerLogins",
+        "LinkedServers",
+        "Logins",
+        "MasterKeys",
+        "Routes",
+        "ServerAuditSpecifications",
+        "ServerRoleMembership",
+        "ServerRoles",
+        "ServerTriggers"
+      ],
+      "multiSelection": true
+    },
+    {
+      "name": "Sql Command Values",
+      "type": "Textbox",
+      "value": null,
+      "validValue": [],
+      "multiSelection": false
+    }
+  ],
+  "EnvironmentTypes": [
+    {
+      "Name": "Development",
+      "Environments": [
+        {
+          "EnvironmentId": 48,
+          "EnvironmentName": "Sandbox",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "AH3111OSBX",
+              "SchemaCredentials": {
+                "AuthType": "1",
+                "DBName": "AH3111OSBX",
+                "Host": "teamwork2012",
+                "UserName": "hrm_admin",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 47,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+        {
+          "EnvironmentId": 49,
+          "EnvironmentName": "Day0",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "AH3111ODZ_DEVOPS",
+              "SchemaCredentials": {
+                "AuthType": "1",
+                "DBName": "AH3111ODZ_DEVOPS",
+                "Host": "teamwork2012",
+                "UserName": "hrm_admin",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 48,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Testing",
+      "Environments": [
+        {
+          "EnvironmentId": 50,
+          "EnvironmentName": "SHK",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "AH3111OSHK",
+              "SchemaCredentials": {
+                "AuthType": "1",
+                "DBName": "AH3111OSHK",
+                "Host": "teamwork2012",
+                "UserName": "hrm_admin",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 49,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Acceptance",
+      "Environments": [
+        {
+          "EnvironmentId": 51,
+          "EnvironmentName": "ST",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "AH3111OST",
+              "SchemaCredentials": {
+                "AuthType": "1",
+                "DBName": "AH3111OST",
+                "Host": "teamwork2012",
+                "UserName": "hrm_admin",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 50,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Staging",
+      "Environments": [
+        {
+          "EnvironmentId": 52,
+          "EnvironmentName": "QA",
+          "EnvironmentDescription": null,
+          "ComparisonType": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "AH3111OQA",
+              "SchemaCredentials": {
+                "AuthType": "1",
+                "DBName": "AH3111OQA",
+                "Host": "teamwork2012",
+                "UserName": "hrm_admin",
+                "Password": null
+              },
+              "Order": 1,
+              "SchemaId": 51,
+              "IsManaged": false,
+              "Safe": null,
+              "Folder": null,
+              "Object": null,
+              "additionalOptions": [],
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Production",
+      "Environments": [],
+      "DriftDetection": false
+    }
+  ]
+}
