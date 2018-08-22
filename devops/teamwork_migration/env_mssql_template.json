@@ -7,7 +7,7 @@
       {
         "Name": "AH3111OSBX",
         "SchemaCredentials": {
-          "AuthType": "1",
+          "AuthType": "${mssql_auth_type}",
           "DBName": "${schema_name}",
 					"Port" : ${port},
           "Host": "${host}",

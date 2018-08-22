@@ -623,25 +623,36 @@ def transfer_packages(){
   
 }
 
+// #--------- TEAMWORK EXPORT ROUTINES ------------#
+
 def teamwork_export(){
   def date = new Date()
   def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-  def filename = "${base_path}${sep}pipeline_export.csv"
-  def cols = ["ID", "Pipeline", "RS", "RS_Db", "RS_INST", "ENV1", "DB1", "INST1", "ENV2", "DB2", "INST2", "ENV3", "DB3", "INST3", "ENV4", "DB4", "INST4", "ENV5", "DB5", "INST5"]
-  env_info = [:]
+  def filename = "${base_path}${sep}env_export.csv"
+  def pipeline_header = ["ID", "Pipeline", "RS", "ENV1","ENV2","ENV3","ENV4","ENV5"]
+  env_info = []
   def src = ""
   def conn = sql_connection("repository") 
-  env_query = "select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBNAME, inst.SERVER_NAME from TBL_FLOW p JOIN TBL_FLOW_LAYOUT flt on flt.FLOWID = p.FLOWID JOIN TBL_LS env ON env.LSID = flt.LSID JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID JOIN TBLMONITOREDDATABASES db ON mp.DBCID = db.ID JOIN TBLMONITOREDSERVERINSTANCES inst ON db.SERVERINSTANCEID = inst.INSTANCEID ORDER BY FLOWNAME"
+  def env_query_oracle = "select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBCNAME, inst.SERVERMACHINENAME, inst.SERVICEINSTANCENAME, inst.SERVERSID, inst.ORACLEDBID from TBL_LS env JOIN TBL_FLOW p ON p.FLOWID = env.FLOWID JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID JOIN TBL_DBC db ON mp.DBCID = db.DBCID LEFT JOIN TBLMONITOREDDATABASES mdb ON mdb.ID = db.MONITOREDDATABASEID LEFT JOIN TBLMONITOREDSERVERINSTANCES inst ON mdb.SERVERINSTANCEID = inst.INSTANCEID ORDER BY FLOWNAME"
+  def env_query_mssql = "select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBCNAME, inst.SERVER_NAME, inst.USER_NAME, inst.PASSWORD, inst.PORT, inst.DB_AUTH_TYPE_ID from TBL_LS env JOIN TBL_FLOW p ON p.FLOWID = env.FLOWID JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID JOIN TBL_DBC db ON mp.DBCID = db.DBCID LEFT JOIN TBLMONITOREDDATABASES mdb ON mdb.ID = db.MONITOREDDATABASEID LEFT JOIN TBLMONITOREDSERVERINSTANCES inst ON mdb.SERVERINSTANCEID = inst.INSTANCEID ORDER BY FLOWNAME"
   def last_pipe = ""
+  def env_header = "ID,pipeline,environment,host,service_sid,service_name,port,schema_name,username,password,is_managed,mssql_auth_type"
+  def env_query = local_settings["general"]["platform"] == "oracle" ? env_query_oracle : env_query_mssql
   envs = conn.eachRow(env_query){ rec ->
-	if(last_pipe != rec.FLOWNAME) {
-		env_info[rec.FLOWNAME] = [:]
-		last_pipe = rec.FLOWNAME
-	}
-	env_info[rec.FLOWNAME][rec.LSNAME] = [rec.DBNAME,rec.SERVER_NAME]
+		if (local_settings["general"]["platform"] == "oracle") {
+			env_info << "${rec.FLOWID},${rec.FLOWNAME},${rec.LSNAME},${rec.SERVERMACHINENAME},${rec.SERVERSID},${rec.SERVICEINSTANCENAME},,${rec.DBCNAME},,,${rec.SERVERMACHINENAME != null },"
+		}else{
+			env_info << "${rec.FLOWID},${rec.FLOWNAME},${rec.LSNAME},${rec.SERVER_NAME},,,${rec.port},${rec.DBCNAME},${rec.USER_NAME},,FALSE,${rec.DB_AUTH_TYPE_ID}"
+		}
   }
+  def fil = new File(filename)
+  fil.append(env_header + "\r\n")
+  fil.append(env_info.join("\r\n"))
+	
   println "Env Info\r\n${env_info}"
-  def query_string = "select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID JOIN TBL_LS srcenv ON srcenv.LSID = src.LSID JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID"
+  
+  filename = "${base_path}${sep}pipeline_export.csv"
+	def query_string = "select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID JOIN TBL_LS srcenv ON srcenv.LSID = src.LSID JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID"
   last_pipe = ""
   last_id = ""
   def envs = []
@@ -650,42 +661,42 @@ def teamwork_export(){
   def val = ""
   def tmp = ""
   conn.eachRow(query_string){ rec ->
-	if(last_pipe != rec.FLOWNAME) {
-		if(last_pipe != ""){
-			println "Processing: ${last_pipe}"
-			rows << process_row(last_pipe, last_id, row, envs, env_info)
-			envs = []
-			row = []
+		if(last_pipe != rec.FLOWNAME) {
+			if(last_pipe != ""){
+				println "Processing: ${last_pipe}"
+				rows << process_row(last_pipe, last_id, row, envs, env_info)
+				envs = []
+				row = []
+			}
+			last_pipe = rec.FLOWNAME
+			last_id = rec.FLOWID
 		}
-		last_pipe = rec.FLOWNAME
-		last_id = rec.FLOWID
-	}
-	if(envs.contains(rec.source) && envs.contains(rec.target)){
-		val = envs.indexOf(rec.target)
-		println "double match at ${val}" 
-	}else if(!envs.contains(rec.target) && envs.contains(rec.target)){
-		val = envs.indexOf(rec.target)
-		println "${envs} tgt match at ${val}" 
-		tmp = envs[val]
-		envs[val] = rec.source
-		println envs
-		envs.size() > val ? envs = envs.plus(val + 1, tmp) : envs << tmp
-		println envs
-	}else if(envs.contains(rec.source) && !envs.contains(rec.target)){
-		val = envs.indexOf(rec.source)
-		println "${envs} src match at ${val}" 
-		envs.size() > val ? envs = envs.plus(val + 1, rec.target) : envs << rec.target
+		if(envs.contains(rec.source) && envs.contains(rec.target)){
+			val = envs.indexOf(rec.target)
+			println "double match at ${val}" 
+		}else if(!envs.contains(rec.target) && envs.contains(rec.target)){
+			val = envs.indexOf(rec.target)
+			println "${envs} tgt match at ${val}" 
+			tmp = envs[val]
+			envs[val] = rec.source
+			println envs
+			envs.size() > val ? envs = envs.plus(val + 1, tmp) : envs << tmp
+			println envs
+		}else if(envs.contains(rec.source) && !envs.contains(rec.target)){
+			val = envs.indexOf(rec.source)
+			println "${envs} src match at ${val}" 
+			envs.size() > val ? envs = envs.plus(val + 1, rec.target) : envs << rec.target
 	 
-	}else{
-		envs << rec.source
-		envs << rec.target
-	}
-	println envs
+		}else{
+			envs << rec.source
+			envs << rec.target
+		}
+		println envs
   }
   rows << process_row(last_pipe, last_id, row, envs, env_info)
 
-  def fil = new File(filename)
-  fil.append(cols.join(',') + "\r\n")
+  fil = new File(filename)
+  fil.append(pipeline_header.join(',') + "\r\n")
   rows.each{ item -> 
 	fil.append(item.join(',') + "\r\n")
   }
@@ -697,40 +708,68 @@ def process_row(pipe, pipe_id, record, envs, env_info){
 	envs.each{ env -> 
 		println "- ${env}"
 		record << env
-		record << env_info[pipe][env][0]
-		record << env_info[pipe][env][1]
+		//record << env_info["${pipe}"]["${env}"][0]
+		//record << env_info["${pipe}"]["${env}"][1]
 	}
 	return record
 }
 
-def build_import_json {
+def build_import_json() {
 	env_types = ["rs", "qa", "uat", "staging", "prod"]
-	def engine = new groovy.text.GStringTemplateEngine()
+	def pipe = local_settings["import"]
+	def db_platform = pipe["db_platform"]
+	def project_template = db_platform == "oracle" ? "project_oracle_template.json" : "project_mssql_template.json"
+	def env_template = db_platform == "oracle" ? "env_oracle_template.json" : "env_mssql_template.json"
+  def p_template = [:]
+	def e_template = [:]
 	// process import csv file
 	//read environment_export.csv
 	def envs = read_csv_file("${base_path}\\environment_export.csv")
 	def cur_env = [:]
-	// build map of info envinfo
 	//read pipeline_export.csv
 	def pipelines = read_csv_file("${base_path}\\pipeline_export.csv")
-	pipelines.each{ pipe ->
-		def ftemp = new File("${base_path}\\project_template.json")
-		def etemp = new File("${base_path}\\environment_template.json")
-		// Read project template json
-		def Template = engine.createTemplate(ftemp).make(pipe)
-		// read environment template json
+	pipelines.each{ item ->
+
+		p_template = read_json_file("${base_path}\\${project_template}"
+		println "Processing: ${item["Pipeline"]}"
+		pipe["project_name"] = item["Pipeline"]
+		p_template["ProjectName"] = item["Pipeline"]
+    p_template["ProjectGroupId"] = pipe["project_group"]
+    p_template["options"]["ScriptOutputFolder"] = "${pipe["base_bath"]}\\${pipe["project_group"]}\\${item["Pipeline"]}"
 		cnt = 0
-		envs.each{ env ->
-			//swap in csv row values
-			
-			// Substitute environments in project template
-			Template["environment_types"][env_types[cnt]] << cur_env
-    	cnt += 1
+		item.keySet.each{ env ->
+      if( cnt > 1){
+			  e_template = read_json_file("${base_path}\\${env_template}"
+        e_template["EnvironmentName"] = item[env]
+        cur_env = lookup_environment(envs, item["ID"], item[env])
+        e_template["Schemas"][0]["Name"] = cur_env["schema_name"]
+        e_template["Schemas"][0]["SchemaCredentials"]["Port"] = cur_env["port"]
+        e_template["Schemas"][0]["SchemaCredentials"]["Host"] = cur_env["host"] 
+        e_template["Schemas"][0]["SchemaCredentials"]["UserName"] = cur_env["username"] 
+        e_template["Schemas"][0]["SchemaCredentials"]["Password"] = cur_env["password"] 
+         
+        if( db_platform == "oracle") {
+          e_template["Schemas"][0]["SchemaCredentials"]["IdentifierType"] = cur_env["service_sid"]
+          e_template["Schemas"][0]["SchemaCredentials"]["Identifier"] = cur_env["service_name"]
+        }else{
+          e_template["Schemas"][0]["SchemaCredentials"]["AuthType"] = cur_env["auth_type"]
+        }
+        p_template["EnvironmentTypes"][cnt]["Environments"] << e_template
+      }
+		  cnt += 1
 		}
-		def f = new File("${base_path}\\output_${pipe["project_name"]}.json")
+		create_json_file("${base_path}\\output_${pipe["project_name"]}.json", p_template)
     
 	} 
 
+}
+
+def lookup_environment(env_info, pipe_id, env){
+	def result = [:]
+	env_info.each{ item ->
+		if(pipe_id == item["ID"] && env == item["environment"]){ result = item}
+	}
+	return result
 }
 
 def read_csv_file(filepath){
@@ -741,8 +780,9 @@ def read_csv_file(filepath){
 	def header = []
 	def cnt = 0
 	fil.readLines{ line -> 
-		if( cnt == 0) { header = line.split }
-		else{
+		if( cnt == 0) { 
+			header = line.split
+		}else{
 			parts = line.split(",")
 			hsh = [:]
 			k = 0
@@ -754,4 +794,25 @@ def read_csv_file(filepath){
 		}
 	}
 	
+}
+
+def get_json_file(filepath){
+  def jsonSlurper = new JsonSlurper()
+  def contents = [:]
+  println "JSON file: ${filepath}"
+  def json_file_obj = new File( filepath )
+  if (json_file_obj.exists() ) {
+    contents = jsonSlurper.parseText(json_file_obj.text)
+  }
+  return contents
+}
+
+def create_json_file(filepath, contents){
+  def jsonSlurper = new JsonSlurper()
+  println "Creating JSON file: ${filepath}"
+  val_file = new File(filepath)
+  val_file.withWriter('utf-8') { writer -> 
+    writer << JsonOutput.prettyPrint(JsonOutput.toJson(contents))
+  } 
+  
 }

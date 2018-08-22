@@ -1,6 +1,6 @@
 {
-  "ProjectGroupId": "${pipe["project_group_id"]}",
-  "ProjectName": "${pipe["project_name"]}",
+  "ProjectGroupId": "0",
+  "ProjectName": "__NONE__",
   "Description": null,
   "ScriptSource": null,
   "ProjectType": "deploy by versions",
@@ -8,7 +8,7 @@
   "AutoImportScriptInterval": 0,
   "AutoPackage": false,
   "AutoPackageInterval": 0,
-  "DatabaseType": "${pipe["db_platform"]}",
+  "DatabaseType": "oracle",
   "ConnectToCMS": false,
   "cmsId": null,
   "cmsType": null,
@@ -41,7 +41,7 @@
     "Prefix": "OLD_",
     "ReportsOutputFolder": "",
     "SaveEncodingCodePage": "1252",
-    "ScriptOutputFolder": "${pipe["base_bath"]}\\${pipe["project_group"]}\\${pipe["project_name"]}",
+    "ScriptOutputFolder": "__NONE__",
     "SeparateScriptForEachTarget": true,
     "SpoolOutputFolder": "",
     "SkipPostValidation": true,
@@ -54,46 +54,37 @@
   "EnvironmentTypes": [
     {
       "Name": "Development",
-      "Environments": [
-			],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "PreRun",
-      "Environments": [
-			],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "Release Source",
-      "Environments": [
-			],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "Testing",
-      "Environments": [
-			],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "Acceptance",
-      "Environments": [
-      ],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "Staging",
-      "Environments": [
-			],
+      "Environments": [],
       "DriftDetection": false
     },
     {
       "Name": "Production",
-      "Environments": [
-				   ]
-        }
-      ],
+      "Environments": []
       "DriftDetection": false
     }
   ]
