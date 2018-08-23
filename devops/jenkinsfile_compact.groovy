@@ -113,7 +113,8 @@ credential = credential.replaceFirst("_PASS_", local_settings["general"]["token"
 def source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
 local_settings = null
 
- echo "Working with: ${rootJobName}\n - Branch: ${branchName}\n - Pipe: ${pipeline}\n - Env: ${base_env}\n - Schema: ${base_schema}"
+echo message_box("DBmaestro Deploy", "title")
+echo "#=> Working with: ${rootJobName}\n - Branch: ${branchName}\n - Pipe: ${pipeline}\n - Env: ${base_env}\n - Schema: ${base_schema}"
 staging_dir = "${staging_path}${sep}${pipeline}${sep}${base_schema}"
 
 /*
@@ -122,9 +123,7 @@ staging_dir = "${staging_path}${sep}${pipeline}${sep}${base_schema}"
 */
 stage('GitParams') {
   node (dbmNode) {
-    echo '#---------------------- Summary ----------------------#'
-    echo "#  Validating Git Commit"
-    echo "#------------------------------------------------------#"
+    echo message_box("Validating Git Commit")
     echo "# Update git repo..."
     echo "# Reset local path - original:"
     bat "echo %PATH%"
@@ -174,22 +173,24 @@ stage(environment) {
   node (dbmNode) {
     //Copy from source to version folder
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
-    echo "#------------------- Copying files for ${version} ---------#"
-    bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
+    echo message_box("Cleaning Directory")
+		bat "del /q \"${stagingDir}\\*\""
+		bat "FOR /D %%p IN (\"${stagingDir}\\*.*\") DO rmdir \"%%p\" /s /q"
+		echo message_box("Copying files for ${version}")
     // This is for when files are prefixed with <dbcr_result>
     //bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
     //bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
     // This is for copying a whole directory
     bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
     // trigger packaging
-    echo "#----------------- Packaging Files for ${version} -------#"
-    bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
+    echo message_box("Packaging Files for ${version}")
+		bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
     // version = adhoc_package(version)
   }else{
-	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
+	  echo message_box("Skipping packaging step (parameter set)")
   }
     // Deploy to Dev
-    echo "#------------------- Performing Deploy on ${environment} -------------#"
+    echo message_box("Performing Deploy on ${environment}")
     try {
       bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
 		} catch (Exception e) {
@@ -213,7 +214,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		echo '#------------------- Performing Deploy on ${environment} --------------#'
+		echo message_box("Performing Deploy on ${environment}")
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}"
 		if (do_pair) {
 			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}"
@@ -231,7 +232,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		echo '#------------------- Performing Deploy on ${environment} --------------#'
+		echo message_box("Performing Deploy on ${environment}")
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
 	}   
 } 
@@ -246,7 +247,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		echo '#------------------- Performing Deploy on ${environment} --------------#'
+		echo message_box("Performing Deploy on ${environment}")
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
 	}   
 } 
