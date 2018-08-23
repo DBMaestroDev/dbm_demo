@@ -679,7 +679,7 @@ def teamwork_export(){
 		if(envs.contains(rec.source) && envs.contains(rec.target)){
 			val = envs.indexOf(rec.target)
 			println "double match at ${val}" 
-		}else if(!envs.contains(rec.target) && envs.contains(rec.target)){
+		}else if(!envs.contains(rec.source) && envs.contains(rec.target)){
 			val = envs.indexOf(rec.target)
 			println "${envs} tgt match at ${val}" 
 			tmp = envs[val]
