@@ -1,0 +1,9 @@
+ID,Pipeline,RS,ENV1,ENV2,ENV3,ENV4,ENV5,ENV6,ENV7,ENV8
+12,HRMADM,Day0,QA,ST,SHK
+15,Pharmacy,Sandbox,DIT,QA
+12,HRMADM,Sandbox,Day0
+15,Pharmacy,DIT,PROD
+9,HumanResources,DIT,PROD,STAGE,QA2,QA1,Sandbox,DIT,PreRun,DIT
+1,MP_Dev,DEV,QA
+2,MP_Dev2,DEV,QA
+3,MP_Release,SIT,PROD,Staging

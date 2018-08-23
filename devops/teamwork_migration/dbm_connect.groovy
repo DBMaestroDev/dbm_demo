@@ -70,6 +70,9 @@ if (arg_map.containsKey("action")) {
     case "teamwork_export":
       teamwork_export()
       break
+    case "build_import_json":
+      build_import_json()
+      break
     default:
       perform_query()
       break
@@ -628,8 +631,9 @@ def transfer_packages(){
 def teamwork_export(){
   def date = new Date()
   def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-  def filename = "${base_path}${sep}env_export.csv"
-  def pipeline_header = ["ID", "Pipeline", "RS", "ENV1","ENV2","ENV3","ENV4","ENV5"]
+  def db_platform = local_settings["general"]["platform"]
+  def filename = "${base_path}${sep}env_${db_platform}_export.csv"
+  def pipeline_header = ["ID", "Pipeline", "RS", "ENV1","ENV2","ENV3","ENV4","ENV5","ENV6","ENV7","ENV8"]
   env_info = []
   def src = ""
   def conn = sql_connection("repository") 
@@ -638,8 +642,9 @@ def teamwork_export(){
   def last_pipe = ""
   def env_header = "ID,pipeline,environment,host,service_sid,service_name,port,schema_name,username,password,is_managed,mssql_auth_type"
   def env_query = local_settings["general"]["platform"] == "oracle" ? env_query_oracle : env_query_mssql
+  message_box("Performing pipeline export (${db_platform} platform)","title")
   envs = conn.eachRow(env_query){ rec ->
-		if (local_settings["general"]["platform"] == "oracle") {
+		if (db_platform == "oracle") {
 			env_info << "${rec.FLOWID},${rec.FLOWNAME},${rec.LSNAME},${rec.SERVERMACHINENAME},${rec.SERVERSID},${rec.SERVICEINSTANCENAME},,${rec.DBCNAME},,,${rec.SERVERMACHINENAME != null },"
 		}else{
 			env_info << "${rec.FLOWID},${rec.FLOWNAME},${rec.LSNAME},${rec.SERVER_NAME},,,${rec.port},${rec.DBCNAME},${rec.USER_NAME},,FALSE,${rec.DB_AUTH_TYPE_ID}"
@@ -651,7 +656,7 @@ def teamwork_export(){
 	
   println "Env Info\r\n${env_info}"
   
-  filename = "${base_path}${sep}pipeline_export.csv"
+  filename = "${base_path}${sep}pipeline_${db_platform}_export.csv"
 	def query_string = "select p.FLOWID, p.FLOWNAME, srcenv.LSNAME as source, tgtenv.LSNAME as target from TBL_LS_RELATIONSHIP rel inner join TBL_FLOW p ON p.FLOWID = rel.FLOWID JOIN TBL_LS_DBC_MAPPING src ON src.MAPPINGID = rel.SOURCEMAPPINGID JOIN TBL_LS_DBC_MAPPING tgt ON tgt.MAPPINGID = rel.TARGETMAPPINGID JOIN TBL_LS srcenv ON srcenv.LSID = src.LSID JOIN TBL_LS tgtenv ON tgtenv.LSID = tgt.LSID"
   last_pipe = ""
   last_id = ""
@@ -715,31 +720,33 @@ def process_row(pipe, pipe_id, record, envs, env_info){
 }
 
 def build_import_json() {
-	env_types = ["rs", "qa", "uat", "staging", "prod"]
+	env_types = ["Development", "PreRun", "Release Source", "Testing", "Staging", "Production"]
 	def pipe = local_settings["import"]
-	def db_platform = pipe["db_platform"]
+	def db_platform = local_settings["general"]["platform"]
 	def project_template = db_platform == "oracle" ? "project_oracle_template.json" : "project_mssql_template.json"
 	def env_template = db_platform == "oracle" ? "env_oracle_template.json" : "env_mssql_template.json"
   def p_template = [:]
 	def e_template = [:]
 	// process import csv file
 	//read environment_export.csv
-	def envs = read_csv_file("${base_path}\\environment_export.csv")
+	def envs = read_csv_file("${base_path}\\env_${db_platform}_export.csv")
+	println "Environments:\r\n${envs}"
 	def cur_env = [:]
 	//read pipeline_export.csv
-	def pipelines = read_csv_file("${base_path}\\pipeline_export.csv")
+	def pipelines = read_csv_file("${base_path}\\pipeline_${db_platform}_export.csv")
+	println "Pipelines:\r\n${pipelines}"
 	pipelines.each{ item ->
 
-		p_template = read_json_file("${base_path}\\${project_template}"
+		p_template = read_json_file("${base_path}\\${project_template}")
 		println "Processing: ${item["Pipeline"]}"
 		pipe["project_name"] = item["Pipeline"]
 		p_template["ProjectName"] = item["Pipeline"]
     p_template["ProjectGroupId"] = pipe["project_group"]
-    p_template["options"]["ScriptOutputFolder"] = "${pipe["base_bath"]}\\${pipe["project_group"]}\\${item["Pipeline"]}"
+    p_template["Options"]["ScriptOutputFolder"] = "${pipe["base_bath"]}\\${pipe["project_group"]}\\${item["Pipeline"]}"
 		cnt = 0
 		item.keySet.each{ env ->
       if( cnt > 1){
-			  e_template = read_json_file("${base_path}\\${env_template}"
+			  e_template = read_json_file("${base_path}\\${env_template}")
         e_template["EnvironmentName"] = item[env]
         cur_env = lookup_environment(envs, item["ID"], item[env])
         e_template["Schemas"][0]["Name"] = cur_env["schema_name"]
@@ -774,29 +781,37 @@ def lookup_environment(env_info, pipe_id, env){
 
 def read_csv_file(filepath){
 	def fil = new File(filepath)
-	def res = []
+	def result = []
 	def parts = []
 	def hsh = [:]
 	def header = []
 	def cnt = 0
-	fil.readLines{ line -> 
+	lines = fil.readLines()
+	lines.each{ line -> 
+		println "Process Line: ${line}"
 		if( cnt == 0) { 
-			header = line.split
+			header = line.split(",")
 		}else{
 			parts = line.split(",")
 			hsh = [:]
 			k = 0
 			header.each{ col -> 
-				hsh[col] = parts[k]
+				if(parts.size() > k ){
+					hsh[col] = parts[k]
+				}else{
+					hsh[col] = ""
+				}
+				result << hsh
 				k += 1
 			}
 			
 		}
+		cnt += 1
 	}
-	
+	return result
 }
 
-def get_json_file(filepath){
+def read_json_file(filepath){
   def jsonSlurper = new JsonSlurper()
   def contents = [:]
   println "JSON file: ${filepath}"
