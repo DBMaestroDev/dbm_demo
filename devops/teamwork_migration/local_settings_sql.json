@@ -10,7 +10,7 @@
   	"platform" : "oracle"
   },
   "connections" : {
-    "repo" : {
+    "repo_mssql" : {
       "user" : "dbmadmin",
       "password" : "123456",
       "connect" : "teamwork2012:1433;databaseName=TeamWorkRepository"

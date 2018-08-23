@@ -187,14 +187,14 @@ def sql_connection(conn_type) {
   def user = ""
   def password = ""
   def conn = ""
-  if (conn_type == "repo" || conn_type == "repository") {
-    user = local_settings["connections"]["repository"]["user"]
-    if (local_settings["connections"]["repository"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
+  if (conn_type == "repo" || conn_type == "repository" || conn+type == "repo_mssql") {
+    user = local_settings["connections"][conn_type]["user"]
+    if (local_settings["connections"][conn_type].containsKey("password_enc")) {
+      password = password_decrypt(local_settings["connections"][conn_type]["password_enc"])
     }else{
-      password = local_settings["connections"]["repository"]["password"]
+      password = local_settings["connections"][conn_type]["password"]
     }
-    conn = local_settings["connections"]["repository"]["connect"]
+    conn = local_settings["connections"][conn_type]["connect"]
   }else if (conn_type == "remote") {
     // FIXME find instance for named environment and build it
     user = local_settings["connections"]["remote"]["user"]
@@ -636,7 +636,8 @@ def teamwork_export(){
   def pipeline_header = ["ID", "Pipeline", "RS", "ENV1","ENV2","ENV3","ENV4","ENV5","ENV6","ENV7","ENV8"]
   env_info = []
   def src = ""
-  def conn = sql_connection("repository") 
+  repo = db_platform == "oracle" ? "repository" : "repo_mssql"
+  def conn = sql_connection(repo) 
   def env_query_oracle = "select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBCNAME, inst.SERVERMACHINENAME, inst.SERVICEINSTANCENAME, inst.SERVERSID, inst.ORACLEDBID from TBL_LS env JOIN TBL_FLOW p ON p.FLOWID = env.FLOWID JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID JOIN TBL_DBC db ON mp.DBCID = db.DBCID LEFT JOIN TBLMONITOREDDATABASES mdb ON mdb.ID = db.MONITOREDDATABASEID LEFT JOIN TBLMONITOREDSERVERINSTANCES inst ON mdb.SERVERINSTANCEID = inst.INSTANCEID ORDER BY FLOWNAME"
   def env_query_mssql = "select p.FLOWID, p.FLOWNAME, env.LSNAME, db.DBCNAME, inst.SERVER_NAME, inst.USER_NAME, inst.PASSWORD, inst.PORT, inst.DB_AUTH_TYPE_ID from TBL_LS env JOIN TBL_FLOW p ON p.FLOWID = env.FLOWID JOIN TBL_LS_DBC_MAPPING mp ON mp.LSID = env.LSID JOIN TBL_DBC db ON mp.DBCID = db.DBCID LEFT JOIN TBLMONITOREDDATABASES mdb ON mdb.ID = db.MONITOREDDATABASEID LEFT JOIN TBLMONITOREDSERVERINSTANCES inst ON mdb.SERVERINSTANCEID = inst.INSTANCEID ORDER BY FLOWNAME"
   def last_pipe = ""
