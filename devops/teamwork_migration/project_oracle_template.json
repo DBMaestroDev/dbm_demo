@@ -84,7 +84,7 @@
     },
     {
       "Name": "Production",
-      "Environments": []
+      "Environments": [],
       "DriftDetection": false
     }
   ]

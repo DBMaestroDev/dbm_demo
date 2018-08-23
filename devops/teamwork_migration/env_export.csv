@@ -1,7 +1,0 @@
-ID,pipeline,environment,host,service_sid,service_name,port,schema_name,username,password,is_managed,mssql_auth_type
-2,hrmadm,day0,TEAMWORK2012,,,null,ah3111odz_devops,dbm_admin,,FALSE,1
-2,hrmadm,sandbox,TEAMWORK2012,,,null,ah3111osbx,dbm_admin,,FALSE,1
-2,hrmadm,shk,TEAMWORK2012,,,null,ah3111oshk,dbm_admin,,FALSE,1
-2,hrmadm,systemtest,TEAMWORK2012,,,null,ah3111ost,dbm_admin,,FALSE,1
-1,pharmacy,dev,TEAMWORK2012,,,null,pharmacy-dev,dbm_admin,,FALSE,1
-1,pharmacy,qa,TEAMWORK2012,,,null,pharmacy-test,dbm_admin,,FALSE,1
