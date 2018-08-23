@@ -33,3 +33,4 @@ JOIN TBLMONITOREDDATABASES db ON mp.DBCID = db.ID
 JOIN TBLMONITOREDSERVERINSTANCES inst ON db.SERVERINSTANCEID = inst.INSTANCEID;
  
 java -jar DBmaestroAgent.jar -ExportProject -ProjectName HumanResource -FilePath "C:\Automation\HRExport.json" -Server teamwork2012 -AuthType DBmaestroAccount -UserName "automation@dbmaestro.com" -Password "123456"
+java -jar DBmaestroAgent.jar -ImportProject -FilePath "C:\Automation\HRImport.json" -Server teamwork2012 -AuthType DBmaestroAccount -UserName "automation@dbmaestro.com" -Password "123456"

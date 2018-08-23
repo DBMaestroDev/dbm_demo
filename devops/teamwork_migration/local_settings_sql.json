@@ -30,14 +30,7 @@
 		"info" : "### Enter the project group and id where the new projects will be imported to ###",
 		"project_group_id" : 11,
 		"project_group" : "HR",
-		"base_path" : "C:\\Automation",
-		"port" : "1521",
-		"host" : "teamwork2012",
-		"sid_service" : "sid",
-		"service_name" : "orcl",
-		"username" : "hr_dev",
-		"password" : "123456",
-		"is_managed" : true
+		"base_path" : "C:\\Automation"
 	},
 	"branch_map" : {
 		"release" : [
