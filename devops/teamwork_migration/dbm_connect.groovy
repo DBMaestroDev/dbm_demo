@@ -187,7 +187,7 @@ def sql_connection(conn_type) {
   def user = ""
   def password = ""
   def conn = ""
-  if (conn_type == "repo" || conn_type == "repository" || conn+type == "repo_mssql") {
+  if (conn_type == "repo" || conn_type == "repository" || conn_type == "repo_mssql") {
     user = local_settings["connections"][conn_type]["user"]
     if (local_settings["connections"][conn_type].containsKey("password_enc")) {
       password = password_decrypt(local_settings["connections"][conn_type]["password_enc"])
