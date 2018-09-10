@@ -5,11 +5,11 @@
     "SuperUser": null,
     "Schemas": [
       {
-        "Name": "AH3111OSBX",
+        "Name": "${schema_name}",
         "SchemaCredentials": {
           "AuthType": "${mssql_auth_type}",
           "DBName": "${schema_name}",
-					"Port" : ${port},
+					"Port" : "${port}",
           "Host": "${host}",
           "UserName": "${username}",
           "Password": "${password}"

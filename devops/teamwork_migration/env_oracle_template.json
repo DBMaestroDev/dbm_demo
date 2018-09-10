@@ -7,7 +7,7 @@
 	    {
 	      "Name": "${schema_name}",
 	      "SchemaCredentials": {
-	        "Port": ${port},
+	        "Port": "${port}",
 	        "IdentifierType": "${sid_service}",
 	        "Identifier": "${service_name}",
 	        "Host": "${host}",
@@ -15,7 +15,7 @@
 	        "Password": "${password}"
 	      },
 	      "Order": 1,
-	      "IsManaged": ${is_managed},
+	      "IsManaged": "${is_managed}",
 	      "Safe": null,
 	      "Folder": null,
 	      "Object": null,
