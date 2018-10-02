@@ -30,7 +30,10 @@
 		"info" : "### Enter the project group and id where the new projects will be imported to ###",
 		"project_group_id" : 11,
 		"project_group" : "HR",
-		"base_path" : "C:\\Automation"
+		"base_path" : "C:\\Automation",
+		"sys_user" : "sys",
+		"sys_password" : "123456",
+		"tablespace" : "users"
 	},
 	"branch_map" : {
 		"release" : [

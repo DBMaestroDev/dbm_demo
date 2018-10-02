@@ -76,6 +76,9 @@ if (arg_map.containsKey("action")) {
     case "add_to_source_control":
       add_schemas_to_source_control()
       break
+    case "import_pipelines":
+      import_pipelines()
+      break     
     case "initialize_pipelines":
       init_pipelines()
       break     
@@ -861,6 +864,7 @@ def add_schemas_to_source_control() {
   println "EnvironmentsRaw:${envs}"
 	for(env in envs){
     println "EnvironmentRaw:${env}"
+    sid_ident = "SERVICE_NAME"
 	if(env["is_managed"] == "true"){
 		separator()
 		println "Environment: ${env["environment"]}"
@@ -873,7 +877,27 @@ def add_schemas_to_source_control() {
       println result
     }
   }
-	
+
+def import_projects() {
+  message_box("Adding Projects", "title")
+  def db_platform = local_settings["general"]["platform"]
+	def java_cmd = local_settings["general"]["java_cmd"]
+	def server = local_settings["general"]["server"]
+	def credential = "-AuthType DBmaestroAccount -UserName ${local_settings["general"]["username"]} -Password \"${local_settings["general"]["token"]}\""
+	def result = ""
+  def filepath = ""
+  //read environment_export.csv
+  def projects = read_csv_file("${base_path}\\pipeline_${db_platform}_export.csv")
+  for(proj in projects){
+    println "Project: ${proj["Pipeline"]}"
+    filepath = "${base_path}\\output_${proj["Pipeline"]}.json"
+  	separator()
+      dbm_cmd = "${java_cmd} -ImportProject -FilePath ${filepath} -Server ${server} ${credential}"
+      println "Executing: ${dbm_cmd}"
+      result = shell_execute(dbm_cmd)
+      println result
+    }
+  }	
 
 }
 
@@ -906,7 +930,7 @@ def init_pipelines() {
     dbm_cmd = "mkdir ${staging_path}\\${base_pkg}"
     result = shell_execute(dbm_cmd)
     println result
-    dbm_cmd = "copy file_path ${staging_path}\\${base_pkg}\\"
+    dbm_cmd = "copy ${file_path} ${staging_path}\\${base_pkg}\\"
     result = shell_execute(dbm_cmd)
     println result
     dbm_cmd = "${java_cmd} -Package -ProjectName ${pipe["Pipeline"]} -Server ${server} ${credential}"
@@ -936,3 +960,54 @@ def shell_execute(cmd, path = "none"){
   return outtxt
 }
 
+def update_exclusion_list(){
+	def jsonSlurper = new JsonSlurper()
+	def now = new Date()
+	def exclusions = [:]
+	def src = ""
+	def do_it = false
+	def cur_ver = ""
+	if (!arg_map.containsKey("exclusion_file")){
+		println "Error: Give path to discovery_exclusion.json as argument"
+		System.exit(1)
+	}
+	result = "#----- Updating Discovery Exclusion -------#\n"
+	println "JSON Exclusion config: ${arg_map["exclusion_file"]}"
+	def json_file_obj = new File( arg_map["exclusion_file"] )
+	if (json_file_obj.exists() ) {
+	  exclusions = jsonSlurper.parseText(json_file_obj.text)  
+	}
+  def clause = ""
+	def base_query = "UPDATE TWMANAGEDB.TBLSETTINGS SET SETTINGVALUE = 'ARG1' WHERE SETTINGNAME = 'DISCOVERY_FILTER'"
+  def bcls = "D.OBJECT_NAME NOT LIKE(''ARG2'')"
+  /*  Build Query
+  Ex:
+UPDATE TWMANAGEDB.TBLSETTINGS 
+SET SETTINGVALUE = ' D.OBJECT_NAME NOT LIKE (''BIN$%'')
+AND D.OBJECT_NAME NOT LIKE(''MLOG$%'')
+AND D.OBJECT_NAME NOT LIKE(''RUPD$%'')
+AND D.OBJECT_NAME NOT LIKE(''ISEQ$$_%'')
+AND D.OBJECT_NAME NOT LIKE(''SYS_%$'')
+AND D.OBJECT_NAME NOT LIKE(''SYS_%'')'
+WHERE SETTINGNAME = 'DISCOVERY_FILTER'
+  */
+  def bfirst = true
+  println "Querying Repository Db"
+	def conn = sql_connection(repo)
+	
+  println "Parsing criteria exclusions:"
+  for (crit in exclusions["global"]) {
+    def k = bfirst ? "" : " AND"
+    println "- ${crit}"
+    clause += "${k} ${bcls.replaceAll("ARG2",crit)}"
+    bfirst = false
+  }
+	// Perform update query
+  def query_string = base_query.replaceAll("ARG1",clause)
+  println "Update Query:"
+  println query_string
+  def result = conn.execute(query_string)
+  println "Result: ${result}"
+  conn.close()
+
+}
