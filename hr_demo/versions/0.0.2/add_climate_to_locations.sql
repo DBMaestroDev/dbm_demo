@@ -1,0 +1,1 @@
+alter table locations add (climate varchar2(20));

@@ -9,7 +9,7 @@ import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
-sep = "/" // "\\" //FIXME Reset for windows
+sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 def settings_file = "${this_path}${sep}parser_input.json"
 settings = [:]
@@ -209,6 +209,7 @@ def process_oracle(){
 	def conn = sql_connection(connection)
 	sql = sql.replaceAll("__LABELNAME__", label_name)
 	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
+	println "Query: ${sql}"
 	conn.eachRow(sql){ row ->
 		cur_date = new Date()
 		hdr = ""
@@ -356,7 +357,9 @@ def update_git(){
 	*/
 	def now = new Date()
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}"
+	def branch = settings["general"]["default_branch"]
 	def cmd = "cd ${base_path} && git status"
+	def build_no = System.getenv("BUILD_NUMBER")
 	def result = shell_execute(cmd)
 	println "out> " + result["stdout"]
 	println "err> " + result["stderr"]
@@ -370,7 +373,10 @@ def update_git(){
 	cmd = "cd ${base_path} && git add *"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
-	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]}\""
+	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no}\""
+	result = shell_execute(cmd)
+	display_result(cmd, result)	
+	cmd = "cd ${base_path} && git push origin ${branch}"
 	result = shell_execute(cmd)
 	display_result(cmd, result)	
 }
