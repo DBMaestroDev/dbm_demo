@@ -1,0 +1,1 @@
+alter table locations add (planet varchar(50));
