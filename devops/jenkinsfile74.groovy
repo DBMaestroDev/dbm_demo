@@ -135,11 +135,11 @@ stage(environment) {
   }
     // Deploy to Dev
     echo "#------------------- Performing Deploy on ${environment} -------------#"
-    try {
-      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
-		} catch (Exception e) {
-			echo e.getMessage();
-		}
+    //try {
+      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
+	//	} catch (Exception e) {
+	//		echo e.getMessage();
+	//	}
     
   }
 }
@@ -159,9 +159,9 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}" ${credential}
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server} ${credential}"
 		if (do_pair) {
-			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}" ${credential}
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server} ${credential}"
 		}
 	}   
 } 
@@ -177,7 +177,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
 if(environments.size() < 4) {
@@ -192,7 +192,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
 
