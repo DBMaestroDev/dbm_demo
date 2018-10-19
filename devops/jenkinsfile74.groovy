@@ -2,7 +2,7 @@ import groovy.json.*
 
 // N8 Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "develop"
+def landscape = "rlm"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
@@ -13,7 +13,7 @@ rootJobName = "$env.JOB_NAME";
 branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
-def settings_file = "local_settings74.json"
+def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
 def git_message = ""
@@ -136,7 +136,7 @@ stage(environment) {
     // Deploy to Dev
     echo "#------------------- Performing Deploy on ${environment} -------------#"
     try {
-      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
 		} catch (Exception e) {
 			echo e.getMessage();
 		}
@@ -159,9 +159,9 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}" ${credential}
 		if (do_pair) {
-			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}"
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}" ${credential}
 		}
 	}   
 } 
@@ -177,7 +177,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
 	}   
 } 
 if(environments.size() < 4) {
@@ -192,7 +192,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}" ${credential}
 	}   
 } 
 
