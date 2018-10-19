@@ -2,33 +2,88 @@
   "### Instructions ###": 
     "Enter the local settings items for the parser",
     "general" : {
-      "base_path" : "C:\\Automation\\dbm_demo\\devops\\git_revisions",
-      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBm\"",
-      "code_separator" : "GO",
-      "repository_name" : "REPO"
+      "base_path" : "C:\\Automation",
+      "base_path_mac" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
+      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBmaestro\" && git push origin master",
+	  "default_branch" : "master",
+      "repository_name" : "REPO",
+			"postgres_path_mac" : "/Library/PostgreSQL/9.3/bin",
+			"postgres_path" : "c:\\Program Files (x86)\\PostgreSQL\\9.4\\bin"
+	},
+	"connections" : {
+		"repo_mssql" : {
+			"platform" : "mssql",
+			"code_separator" : "GO",
+			"user" : "dbmadmin",
+			"password" : "123456",
+			"connect" : "dbmJohnHancock:1433;databaseName=TeamWorkRepository"
+		},
+		"repository" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "twmanagedb",
+			"password" : "manage#2009",
+			"connect" : "dbmJohnHancock:1521/orcl"
+		 },
+		"hr_dev" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "HR_QA2",
+			"password" : "hr_qa2",
+			"connect" : "dbmJohnHancock:1521/orcl"
+		 },
+		"monkey" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "10.0.0.165",
+			"password" : "bugsy",
+			"database" : "monkey",
+			"connect" : "10.0.0.165:5432/monkey"
+		 },
+		"Fantasy" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "localhost",
+			"password" : "bugsy",
+			"database" : "rbc48_fantasy",
+			"connect" : "localhost:5432/rbc48_fantasy"
+		 },
+		"DesignDocs" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "localhost",
+			"password" : "bugsy",
+			"database" : "design_docs_production",
+			"connect" : "teamwork2012:1521/orcl"
+		 }
     },
-    "objects" : {
-      "CREATE VIEW" : "VIEWS",
-      "CREATE TABLE" : "TABLES",
-      "ALTER TABLE" : "ALTER_TABLE",
-      "CREATE INDEX" : "INDEXES",
-      "CREATE CLUSTERED INDEX" : "INDEXES",
-      "CREATE NONCLUSTERED INDEX" : "INDEXES",
-      "CREATE UNIQUE NONCLUSTERED INDEX" : "INDEXES",
-      "CREATE UNIQUE INDEX" : "INDEXES",
-      "CREATE FUNCTION" : "FUNCTIONS",
-      "CREATE PROCEDURE" : "PROCEDURES",
-      "CREATE TRIGGER" : "TRIGGERS",
-      "prefix" : ""
-    },
-    "sub_objects" : {
-      "ADD CONSTRAINT" : "CONSTRAINTS",
-      "prefix" : "sub_"
-    },
-    "sub_modifiers" : {
-      "NOCHECK CONSTRAINT" : "CONSTRAINTS",
-      "prefix" : "mod_"
-    }
+	"mssql_map" : {
+		"objects" : {
+		  "CREATE VIEW" : "VIEWS",
+		  "CREATE TABLE" : "TABLES",
+		  "ALTER TABLE" : "ALTER_TABLE",
+		  "CREATE INDEX" : "INDEXES",
+		  "CREATE CLUSTERED INDEX" : "INDEXES",
+		  "CREATE NONCLUSTERED INDEX" : "INDEXES",
+		  "CREATE UNIQUE NONCLUSTERED INDEX" : "INDEXES",
+		  "CREATE UNIQUE INDEX" : "INDEXES",
+		  "CREATE FUNCTION" : "FUNCTIONS",
+		  "CREATE PROCEDURE" : "PROCEDURES",
+		  "CREATE TRIGGER" : "TRIGGERS",
+		  "prefix" : ""
+		},
+		"sub_objects" : {
+		  "ADD CONSTRAINT" : "CONSTRAINTS",
+		  "prefix" : "sub_"
+		},
+		"sub_modifiers" : {
+		  "NOCHECK CONSTRAINT" : "CONSTRAINTS",
+		  "prefix" : "mod_"
+		}
+	}
   }
 }
 

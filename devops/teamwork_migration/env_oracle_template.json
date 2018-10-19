@@ -1,0 +1,26 @@
+	{
+	  "EnvironmentName": "${env_name}",
+	  "EnvironmentDescription": null,
+	  "ComparisonType": null,
+	  "SuperUser": null,
+	  "Schemas": [
+	    {
+	      "Name": "${schema_name}",
+	      "SchemaCredentials": {
+	        "Port": "${port}",
+	        "IdentifierType": "${sid_service}",
+	        "Identifier": "${service_name}",
+	        "Host": "${host}",
+	        "UserName": "${username}",
+	        "Password": "${password}"
+	      },
+	      "Order": 1,
+	      "IsManaged": "${is_managed}",
+	      "Safe": null,
+	      "Folder": null,
+	      "Object": null,
+	      "additionalOptions": [],
+	      "IsSuperUser": false
+	    }
+	  ]
+	}

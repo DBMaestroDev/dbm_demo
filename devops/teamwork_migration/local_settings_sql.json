@@ -1,20 +1,24 @@
 {
-  "### Instructions ###": 
-    "Enter the local settings items for your installation",
-    "general" : {
-      "base_path" : "C:\\Automation\\dbm_demo",
-      "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
-      "staging_path" : "C:\\pipelinescript",
-      "server" : "teamwork2012",
-  	  "username" : "automation@dbmaestro.com",
-  	  "token" : "123456",
-	  "platform" : "mssql"
-    },
-    "connections" : {
-    "repository" : {
+  "### Instructions ###": "Enter the local settings items for your installation",
+  "general" : {
+    "base_path" : "C:\\Automation\\dbm_demo",
+    "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+    "staging_path" : "C:\\pipelinescript",
+    "server" : "teamwork2012",
+	  "username" : "automation@dbmaestro.com",
+	  "token" : "123456",
+  	"platform" : "oracle"
+  },
+  "connections" : {
+    "repo_mssql" : {
       "user" : "dbmadmin",
       "password" : "123456",
       "connect" : "teamwork2012:1433;databaseName=TeamWorkRepository"
+    },
+    "repository" : {
+      "user" : "twmanagedb",
+      "password" : "manage#2009",
+      "connect" : "teamwork2012:1521/orcl"
     },
     "remote" : {
       "user" : "dbmaestro_teamwork",
@@ -22,6 +26,15 @@
       "connect" : "dbmtemplate:1521/orcl"
     }
   },
+	"import" : {
+		"info" : "### Enter the project group and id where the new projects will be imported to ###",
+		"project_group_id" : 11,
+		"project_group" : "HR",
+		"base_path" : "C:\\Automation",
+		"sys_user" : "sys",
+		"sys_password" : "123456",
+		"tablespace" : "users"
+	},
 	"branch_map" : {
 		"release" : [
 		  {
