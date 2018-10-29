@@ -8,7 +8,7 @@
 	  "default_branch" : "master",
       "repository_name" : "REPO",
 			"postgres_path_mac" : "/Library/PostgreSQL/9.3/bin",
-			"postgres_path" : "c:\\Program Files (x86)\\PostgreSQL\\9.4\\bin"
+			"postgres_path" : "c:\\Program Files\\PostgreSQL\\10\\bin"
 	},
 	"connections" : {
 		"repo_mssql" : {
@@ -32,14 +32,14 @@
 			"password" : "hr_qa2",
 			"connect" : "dbmJohnHancock:1521/orcl"
 		 },
-		"monkey" : {
+		"rlm" : {
 			"platform" : "postgres",
 			"code_separator" : "-- Name: ",
 			"username" : "deploy",
-			"host" : "10.0.0.165",
-			"password" : "bugsy",
-			"database" : "monkey",
-			"connect" : "10.0.0.165:5432/monkey"
+			"host" : "localhost",
+			"password_enc" : "ITY1NDMyMWxhaXJUNzkzZmtmayMwYmtqMTNqa2c5MDVqa2prYXM=",
+			"database" : "rlm48_rs",
+			"connect" : "localhost:5432/rlm48_rs"
 		 },
 		"Fantasy" : {
 			"platform" : "postgres",

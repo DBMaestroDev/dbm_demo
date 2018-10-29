@@ -13,7 +13,9 @@ import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
+import DbmSecure
 def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
+//evaluate(new File("${base_path}\\DbmSecure.groovy"))
 def jsonSlurper = new JsonSlurper()
 def json_file = "dbm_queries.json"
 def settings_file = "local_settings.json"
@@ -22,6 +24,7 @@ file_contents = [:]
 contents = [:]
 local_settings = [:]
 sep = "/" //FIXME Reset for windows
+
 for (arg in this.args) {
   //println arg
   pair = arg.split("=")
@@ -66,6 +69,9 @@ if (arg_map.containsKey("action")) {
       break
     case "transfer_packages":
       transfer_packages()
+      break
+    case "encrypt":
+      password_encrypt()
       break
     default:
       perform_query()
@@ -444,16 +450,6 @@ def path_from_pipeline(pipe_name){
   return result
 }
 
-def password_decrypt(password_enc){
-  def slug = "__sj8kl3LM77g903ugbn_KG="
-  def result = ""
-  byte[] decoded = password_enc.decodeBase64()
-  def res = new String(decoded)
-  res = res.replaceAll(slug,"")
-  result = new String(res.decodeBase64())
-  return result
-}
-
 def ensure_dir(pth) {
   folder = new File(pth)
   if ( !folder.exists() ) {
@@ -612,4 +608,18 @@ def transfer_packages(){
   arg_map["action"] = "package_export"
   perform_query()
   
+}
+
+def password_encrypt(pwd_enc = ""){
+	def pwdTools = new DbmSecure()
+	if(pwd_enc == "") {pwd_enc = arg_map["password"] }
+	result = pwdTools.encrypt(["password" : pwd_enc])
+	return result
+}
+
+def password_decrypt(pwd_enc = ""){
+	def pwdTools = new DbmSecure()
+	if(pwd_enc == "") {pwd_enc = arg_map["password"] }
+	result = pwdTools.decrypt(["password" : pwd_enc])
+	return result
 }

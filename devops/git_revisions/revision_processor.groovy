@@ -1,8 +1,8 @@
 /*
-####### SQL Method Parser ################
-#  Based on Microsoft DAC pac onverted output files
-
-=> BJB 7/2/18
+####### SQL Revision Parser ################
+#  
+# Parses object revisions from dbm or platform dumpfiles into object ddl and pushes into git
+=> BJB 9/18/18
 */
 import java.sql.Connection
 import groovy.sql.Sql
@@ -47,7 +47,7 @@ if (arg_map.containsKey("action")) {
 }else{
 	message_box("ERROR: enter an action argument", "title")
 	help()
-   }
+}
 
 def process_mssql(){
 	def connection = arg_map["connection"]
@@ -152,12 +152,17 @@ def generate_pg_dump(){
 	message_box("Generate PG Dump: ${connection}", "title")
 	def base_path = settings["general"]["base_path"]
 	def pass = ""
+	def pwd = ""
 	def database = settings["connections"][connection]["database"]
 	def pg_dump = "${settings["general"]["postgres_path"]}${sep}pg_dump"
 	def dump_path = "${base_path}${sep}DUMP"
 	ensure_dir(dump_path)
 	def user = settings["connections"][connection]["username"]
-	def pwd = settings["connections"][connection]["password"]
+	if (settings["connections"][connection].containsKey("password_enc")) {
+      pwd = password_decrypt(settings["connections"][connection]["password_enc"])
+    }else{
+      pwd = settings["connections"][connection]["password"]
+    }
 	def host = settings["connections"][connection]["host"]
 	def output_file = "${dump_path}${sep}${database}.sql"
 	def cmd = "-s -U ${user} -f ${output_file} -h ${host} ${database}"
@@ -166,7 +171,7 @@ def generate_pg_dump(){
 		cmd = "${pass}${pg_dump} ${cmd}"
 	
 	}else{
-		pass = "set PGPASSWORD=${pwd} && "
+		pass = "set \"PGPASSWORD=${pwd}\" && "
 		cmd = "${pass}\"${pg_dump}\" ${cmd}"
 	}
 	println "Updating structure dump"
@@ -530,4 +535,16 @@ def help(){
 		println "=> ${item["title"]}"
 		println "Description: ${item["body"].join("\r\n")}"
 	}
+}
+
+
+def password_decrypt(stg) {
+	println("Decrypting")
+	def salt = "sakjkj509gkj31jkb0#kfkf397"
+	println("Start: ${stg}")
+	def res = new String(stg.decodeBase64())
+	def mix = res.reverse()
+	def result = mix.replaceAll(salt, "")
+	println("Finish: ${result}")
+	return(result)
 }
