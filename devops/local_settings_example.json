@@ -28,6 +28,7 @@
 		  "base_env" : "DIT",
 		  "base_schema" : "HR_DEV",
   	  "source_dir" : "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+	  	"platform" : "oracle",
 		  "environments" : [
 			 "DIT",
 			 "QA1,QA2",
@@ -48,6 +49,7 @@
 		  "base_env" : "Day0",
 		  "base_schema" : "AH3111ODZ_DEVOPS",
 		  "source_dir" : "C:\\Automation\\dbm_demo\\hrm_demo\\3.11.2\\db_request\\SQLSRV",
+		  	"platform" : "mssql",
 		  "environments" : [
 			 "Day0",
 			 "SHK",

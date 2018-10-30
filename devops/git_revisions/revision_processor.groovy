@@ -129,7 +129,7 @@ def process_postgres(){
 	def dec_line = "-- Name: unknown; Type: COMMENT; Schema: -; Owner: \n"
 	obj_ddl = dec_line
 	def hand = new File(file_path).eachLine {line -> 
-	  if(line.length() < 1 || icnt > 3000){ // || icnt > 3000){
+	  if(line.length() < 1 ){ // || icnt > 3000){
 	    //skip it
 	  }else if(line.startsWith(delim) && last_line == "--"){
 	    pg_save_object(obj_dll, dec_line)
@@ -365,6 +365,7 @@ def update_git(){
 	def branch = settings["general"]["default_branch"]
 	def cmd = "cd ${base_path} && git status"
 	def build_no = System.getenv("BUILD_NUMBER")
+	def commit_txt = System.getenv("COMMIT_TEXT")
 	def result = shell_execute(cmd)
 	println "out> " + result["stdout"]
 	println "err> " + result["stderr"]
@@ -378,7 +379,7 @@ def update_git(){
 	cmd = "cd ${base_path} && git add *"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
-	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no}\""
+	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""
 	result = shell_execute(cmd)
 	display_result(cmd, result)	
 	cmd = "cd ${base_path} && git push origin ${branch}"
