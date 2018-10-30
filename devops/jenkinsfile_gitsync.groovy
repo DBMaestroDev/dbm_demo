@@ -149,17 +149,17 @@ stage(environment) {
 if(env.Git_Sync && env.Git_Sync == "Yes"){
 	stage("Git Sync") {
 	  node (dbmNode) {
-		def base_cmd = "${base_path}${sep}git_revisions"
+		def base_cmd = "${base_path}${sep}git_revisions${sep}dbm_revisions.bat"
 		def cmd = ""
 		echo "#------------------- Git Sync -------------------------#"
 		if(platform == "postgres" ) {
-			cmd = "${base_path}${sep}dbm_revisions.bat action=generate_pg_dump connection=${pipeline}"
+			cmd = "${base_cmd} action=generate_pg_dump connection=${pipeline}"
 			echo "Creating Dump: ${cmd}"
 			bat "${cmd}"
-			cmd = "${base_path}${sep}dbm_revisions.bat action=process_postgres connection=${pipeline}"
+			cmd = "${base_cmd} action=process_postgres connection=${pipeline}"
 			echo "Calling revision processor: ${cmd}"
 			bat "${cmd}"
-			cmd = "${base_path}${sep}dbm_revisions.bat action=update_git connection=${pipeline}"
+			cmd = "${base_cmd} action=update_git connection=${pipeline}"
 			echo "Updating git: ${cmd}"
 			bat "${cmd}"
 		}
