@@ -154,13 +154,13 @@ if(env.Git_Sync && env.Git_Sync == "Yes"){
 		echo "#------------------- Git Sync -------------------------#"
 		if(platform == "postgres" ) {
 			cmd = "${base_path}${sep}dbm_revisions.bat action=generate_pg_dump connection=${pipeline}"
-			echo "Creating Dump: ${cmd}
+			echo "Creating Dump: ${cmd}"
 			bat "${cmd}"
 			cmd = "${base_path}${sep}dbm_revisions.bat action=process_postgres connection=${pipeline}"
-			echo "Calling revision processor: ${cmd}
+			echo "Calling revision processor: ${cmd}"
 			bat "${cmd}"
 			cmd = "${base_path}${sep}dbm_revisions.bat action=update_git connection=${pipeline}"
-			echo "Updating git: ${cmd}
+			echo "Updating git: ${cmd}"
 			bat "${cmd}"
 		}
 	  }
