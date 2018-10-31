@@ -540,12 +540,12 @@ def help(){
 
 
 def password_decrypt(stg) {
-	println("Decrypting")
+	//println("Decrypting")
 	def salt = "sakjkj509gkj31jkb0#kfkf397"
-	println("Start: ${stg}")
+	//println("Start: ${stg}")
 	def res = new String(stg.decodeBase64())
 	def mix = res.reverse()
 	def result = mix.replaceAll(salt, "")
-	println("Finish: ${result}")
+	//println("Finish: ${result}")
 	return(result)
 }
