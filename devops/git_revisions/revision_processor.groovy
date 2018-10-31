@@ -31,11 +31,13 @@ if (arg_map.containsKey("action")) {
       process_oracle()
       break
 	case "process_postgres":
-		generate_pg_dump()
-    	process_postgres()
+		process_postgres()
     	break
 	case "update_git":
     	update_git()
+	    break
+	case "postgres_all":
+    	postgres_all()
 	    break
     case "generate_pg_dump":
       generate_pg_dump()
@@ -180,6 +182,11 @@ def generate_pg_dump(){
 
 }
 
+def postgres_all(){
+		generate_pg_dump()
+		process_postgres()
+		update_git()
+}
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
 def process_oracle(){
@@ -377,6 +384,9 @@ def update_git(){
 	result = shell_execute(cmd)
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git add *"
+	result = shell_execute(cmd)
+	display_result(cmd, result)
+	cmd = "cd ${base_path} && git read-tree --reset HEAD"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""
