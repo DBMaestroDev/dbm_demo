@@ -158,9 +158,7 @@ if(env.Git_Sync && env.Git_Sync == "Yes"){
 			bat "${cmd}"
 			cmd = "${base_cmd} action=process_postgres connection=${landscape}"
 			echo "Calling revision processor: ${cmd}"
-			bat "${cmd}"
-			cmd = "cd C:\\Automation\\REPO && git read-tree --reset HEAD"
-			bat "${cmd}"
+			bat "${cmd} action=update_git connection=${landscape}"
 			echo "Updating git: ${cmd}"
 			bat "${cmd}"
 		}
