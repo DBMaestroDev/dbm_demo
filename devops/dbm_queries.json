@@ -169,21 +169,22 @@
 	]
   },
   "environment_history" : {
-    "name" : "Package history for an Environment",
-    "usage" : "dbm_api.bat action=environment_history ARG1=<pipeline> ARG2=<environment>",
+  "name" : "Package history for an Environment",
+  "usage" : "dbm_api.bat action=environment_history ARG1=<pipeline> ARG2=<environment>",
 	"queries" : 
-  [
+	[
 		{ "connection" : "repo",
-		  "query": "select v.NAME as Version, f.flowname as pipeline, e.lsname as environment, s.dbcname as schema, script.NAME as Script, h.id, h.schema_id, h.END_EXEC_TIME as Finish, h.script_id, h.script_history_id, h.target_schema_id from TWMANAGEDB.TBL_SMG_DEPLOY_COMMAND_HISTORY h INNER JOIN TWMANAGEDB.TBL_DBC s on s.dbcid = h.schema_id INNER JOIN TWMANAGEDB.TBL_LS_DBC_MAPPING jt ON jt.DBCID = s.DBCID INNER JOIN TWMANAGEDB.TBL_LS e ON jt.LSID = e.LSID INNER JOIN TWMANAGEDB.TBL_FLOW f ON e.FLOWID = f.FLOWID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON h.SCRIPT_ID = jt.SCRIPT_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR script ON script.script_id = jt.script_id INNER JOIN TWMANAGEDB.TBL_SMG_VERSION v ON jt.VERSION_ID = v.ID WHERE command_type_id = 4 AND f.FLOWNAME = 'ARG1' AND e.LSNAME = 'ARG2' ORDER BY h.END_EXEC_TIME",
-  		"output": [
-          ["Version",0,20],
-		    ["Schema",3,20],
-		    ["Script",4,30],
-        ["Finish",7,15]
+		  "query": "select f.FLOWNAME as pipeline, f.FLOWID, e.LSNAME as environment, e.LSID, v.NAME as VERSION, l.NAME as label, To_CHAR(a.CREATE_DATETIME, 'MM-DD-YY HH24:MI') as FINISH from TWMANAGEDB.TBL_SMG_ACTIVITIES a INNER JOIN TWMANAGEDB.TBL_LS e ON a.ENVIRONMENT_ID = e.LSID INNER JOIN TWMANAGEDB.TBL_FLOW f ON e.FLOWID = f.FLOWID JOIN  TWMANAGEDB.TBL_SMG_VERSION v on v.ID = a.VERSION_ID JOIN TWMANAGEDB.TWLABELS l ON v.POST_LABEL_ID = l.ID where a.ACTIVITY_TYPE = 0 and f.FLOWNAME = 'ARG1' and e.LSNAME = 'ARG2' ORDER BY f.FLOWNAME, e.LSNAME, a.CREATE_DATETIME",
+			"output": [
+	      ["Pipeline",0,18],
+	      ["Environment",2,15],
+		    ["Version",4,20],
+		    ["Label",5,25],
+	      ["Finish",6,15]
 		  ]
 		}
 	]
-  },
+},
   "revisions_in_label" : {
     "name" : "DDL Revisions for all objects in a label",
     "usage" : "dbm_api.bat action=revisions_in_label ARG1=<pipeline> ARG2=<label_name>",

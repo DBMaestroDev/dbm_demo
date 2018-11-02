@@ -227,7 +227,7 @@
   [
 		{ "connection" : "repo",
 		  "query": "select act.create_datetime, prj.FLOWNAME, env.LSNAME, act.project_id, act.environment_id, ver.NAME, act.version_id 
-			from TBL_SMG_ACTIVITIES act INNER JOIN TBL_FLOW prj on act.project_id = prj.FLOWID INNER JOIN TBL_LS env on env.LSID = act.ENVIRONMENT_ID INNER JOIN TBL_SMG_VERSION ver on ver.id = act.version_id ORDER BY prj.FLOWNAME, act.create_datetime",
+			from TBL_SMG_ACTIVITIES act INNER JOIN TBL_FLOW prj on act.project_id = prj.FLOWID INNER JOIN TBL_LS env on env.LSID = act.ENVIRONMENT_ID INNER JOIN TBL_SMG_VERSION ver on ver.id = act.version_id WHERE prj.FLOWNAME like 'ARG1' and env.LSNAME like 'ARG2' ORDER BY prj.FLOWNAME, act.create_datetime",
   		"output": [
 				["Created",0,12],
           ["Pipeline",1,20],

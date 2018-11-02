@@ -34,3 +34,18 @@ JOIN TBLMONITOREDSERVERINSTANCES inst ON db.SERVERINSTANCEID = inst.INSTANCEID;
  
 java -jar DBmaestroAgent.jar -ExportProject -ProjectName HumanResource -FilePath "C:\Automation\HRExport.json" -Server teamwork2012 -AuthType DBmaestroAccount -UserName "automation@dbmaestro.com" -Password "123456"
 java -jar DBmaestroAgent.jar -ImportProject -FilePath "C:\Automation\HRImport.json" -Server teamwork2012 -AuthType DBmaestroAccount -UserName "automation@dbmaestro.com" -Password "123456"
+
+
+For Oracle Migration
+    Remove from Teamwork:
+        drop dbmaestro_teamwork schema, drop trigger
+    Add to source control
+        run api command for each schema on the instance:    
+        -AddSchema -DisplayName "<DisplayName>" -Host "<Host>" -Port "<Port>" -ServerInstance "<ServerInstance>" -ServiceInstanceIdentification "<ServiceInstanceIdentification>" -DBUser "<DBUser>" -DBPassword "<DBPassword>" -SysUser "<SysUser>" -SysPassword "<SysPassword>" -Tablespace "<Tablespace>" -Server "<Server>" -AuthType "<AuthType>" -UserName "<UserName>" -Password "<Password>" 
+    Add Project
+    Add objects to source control - json file (7.5 only)
+Pipeline Initialization
+    For each pipeline:
+        create 0 package with dummy script
+        run in all environments
+    Script that calls jenkins via REST for each pipeline
