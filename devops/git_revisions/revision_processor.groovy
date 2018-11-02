@@ -13,7 +13,7 @@ sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 def settings_file = "${this_path}${sep}parser_input.json"
 log_file = "${this_path}${sep}dbm_log.txt"
-silent_log = true
+silent_log = false
 settings = [:]
 settings = get_settings(settings_file)
 arg_map = [:]
@@ -69,7 +69,6 @@ def process_mssql(){
 	logit "  Database: ${settings["connections"][connection]["connect"]}"
 	def file_name = arg_map["dacpac_file"]
 	logit "  DACPAC: ${file_name}"
-	def rpt = true
 	file_path = "${base_path}${sep}${file_name}"
 	// FIXME - build routine to unpack the dacpac file
 	// "C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\DacUnpack.exe" "%1"
@@ -86,7 +85,7 @@ def process_mssql(){
 	    rpt = true
 	  }else{
 	    obj_dll += line + "\n"
-	    if(rpt){logit "accumulate ${icnt}"}
+	    logit "accumulate ${icnt}", "DEBUG", true
 	    rpt = false
 	  }
 	  //logit "#=> Line: ${line}"
@@ -119,7 +118,6 @@ def process_postgres(){
 	def file_path = ""
 	def obj_dll = ""
 	def database = settings["connections"][connection]["database"]
-	def rpt = true
 	message_box("PostgreSQL - Dump Processor", "title")
 	logit "=> Processes a structure dump file into individual object revisions."
 	logit "Using Connection: ${connection}"
@@ -142,7 +140,7 @@ def process_postgres(){
 	    rpt = true
 	  }else{
 	    obj_dll += line + "\n"
-	    if(rpt){logit "lines: ${icnt}"}
+	    logit "lines: ${icnt}", "DEBUG", true
 	    rpt = false
 	  }
 	  //logit "#=> Line: ${line}"
@@ -234,7 +232,7 @@ def process_oracle(){
     content = hdr + content
     name = "${row.OBJECT_NAME}.sql"    
     def hnd = new File("${path}${sep}${name}")
-    logit "Saving: ${path}${sep}${name}"
+    logit "Saving: ${path}${sep}${name}", "DEBUG", true
     hnd.write content
 	}
 	separator(100)
@@ -255,14 +253,14 @@ def pg_save_object(content, declaration){
 	def info = [:]
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}postgres"
 	
-	logit "Parts: ${parts}"
+	logit "Parts: ${parts}", "DEBUG", true
   parts.each{ item->
 		pair = item.split(": ")
 		//logit "Got: ${item}"
 		def val = pair.size() > 1 ? pair[1] : ""
 		info[pair[0].trim()] = val.trim()
 	}
-	logit "Info: ${info}"
+	logit "Info: ${info}", "DEBUG", true
   def prefix = ""
   obj_schema = info["Schema"]
   obj_name = info["Name"]
@@ -272,7 +270,7 @@ def pg_save_object(content, declaration){
   def name = obj_name.replaceAll(/\;/,"").trim()
   name = "${prefix}${name}.sql"    
   def hnd = new File("${path}${sep}${name}")
-  logit "Saving: ${path}${sep}${name}"
+  logit "Saving: ${path}${sep}${name}", "DEBUG", true
   hnd.write content
   
 }
@@ -293,12 +291,12 @@ def save_object(content){
   def dec_line = ""
   def icnt = 0
   for(ln in lines){
-    logit "#=> Line: ${ln}"
+    logit "#=> Line: ${ln}", "DEBUG", true
     if(icnt < 4){
       obj_type = has_declaration(ln)
       if(obj_type != "not found"){
         cur_line = ln
-        logit "Found: ${cur_line}"
+        logit "Found: ${cur_line}", "DEBUG", true
         break
       }
     }else{
@@ -323,22 +321,22 @@ def save_object(content){
         prefix = settings["mssql_map"]["sub_objects"]["prefix"]      
         obj_type = subobj_type
         obj_name = dec_line.replaceFirst(sub_reg, '$1')
-        logit "SUB: ${obj_type}: ${obj_name}"
+        logit "SUB: ${obj_type}: ${obj_name}", "DEBUG", true
       }else{
-        logit "PRIMARY: ${obj_type}: ${obj_name}"
+        logit "PRIMARY: ${obj_type}: ${obj_name}", "DEBUG", true
       }
     }else{
       prefix = settings["mssql_map"]["sub_modifiers"]["prefix"]
       obj_type = mod_type
       obj_name = cur_line.replaceFirst(mod_reg, '$1')
-      logit "MOD: ${obj_type}: ${obj_name}"
+      logit "MOD: ${obj_type}: ${obj_name}", "DEBUG", true
     }
     def path = "${base_path}${sep}${obj_type}"
     ensure_dir(path)
     def name = obj_name.replaceAll(/\;/,"").trim()
     name = "${prefix}${name}.sql"    
     def hnd = new File("${path}${sep}${name}")
-    logit "Saving: ${path}${sep}${name}"
+    logit "Saving: ${path}${sep}${name}", "DEBUG", true
     hnd.write content
   }
 }
@@ -348,12 +346,12 @@ def has_declaration(line, p_type = "objects"){
   if(line == null || line.length() < 2){
     return obj_type
   }
-  logit "Type: ${p_type}\r\n${settings["objects"]}"
+  logit "Type: ${p_type}\r\n${settings["objects"]}", "DEBUG", true
   def declarations = settings["mssql_map"][p_type]
   for(term in declarations.keySet()) {
     if(line.indexOf(term) > -1){
         obj_type = declarations[term]
-        logit "Found declaration: ${term}"
+        logit "Found declaration: ${term}", "DEBUG", true
         break
      }
    }
@@ -565,10 +563,10 @@ def password_decrypt(stg) {
 def init_log(){
 	logit("#------------- New Run ---------------#")
 	logit("# ARGS:")
-	logit(arg_map)
+	logit(arg_map.toString())
 }
 
-def logit(message, log_type = "INFO"){
+def logit(String message, log_type = "INFO", log_only = false){
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def cur_date = new Date()
 	def hnd = new File(log_file)
@@ -577,7 +575,7 @@ def logit(message, log_type = "INFO"){
 	}
   def stamp = "${sdf.format(cur_date)}|${log_type}> "
   message.eachLine { line->
-		if(!silent_log){
+		if(!silent_log && !log_only){
 			println "${stamp}${line.trim()}"
 		}
 		hnd.append("\r\n${stamp}${line}")
