@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat
 sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 def settings_file = "${this_path}${sep}parser_input.json"
+log_file = "${this_path}${sep}dbm_log.txt"
+silent_log = true
 settings = [:]
 settings = get_settings(settings_file)
 arg_map = [:]
@@ -22,7 +24,7 @@ if (arg_map.containsKey("action")) {
 	  message_box("ERROR: No connection argument given", "title")
 	  System.exit(1)
 	}
-	
+	init_log()
   switch (arg_map["action"].toLowerCase()) {
     case "process_mssql":
       process_mssql()
@@ -43,7 +45,7 @@ if (arg_map.containsKey("action")) {
       generate_pg_dump()
       break
     default:
-		println "No acceptable argument given - e.g. action=process_dump"
+		logit "No acceptable argument given - e.g. action=process_dump"
 	break
 	}
 }else{
@@ -57,16 +59,16 @@ def process_mssql(){
 	def delim = settings["connections"][connection]["code_separator"]
 	def obj_dll = ""
 	if (!arg_map.containsKey("dacpac_file")){
-	  println message_box("ERROR: No dacpac_file argument given", "title")
+	  logit message_box("ERROR: No dacpac_file argument given", "title")
 	  System.exit(1)
 	}
 	message_box("MSSQL - DACPAC Processor", "title")
-	println "=> Processes an exploded DACPAC file (the sql file) into individual object revisions."
-	println "Using Connection: ${connection}"
-	println "  Platform: ${settings["connections"][connection]["platform"]}"
-	println "  Database: ${settings["connections"][connection]["connect"]}"
+	logit "=> Processes an exploded DACPAC file (the sql file) into individual object revisions."
+	logit "Using Connection: ${connection}"
+	logit "  Platform: ${settings["connections"][connection]["platform"]}"
+	logit "  Database: ${settings["connections"][connection]["connect"]}"
 	def file_name = arg_map["dacpac_file"]
-	println "  DACPAC: ${file_name}"
+	logit "  DACPAC: ${file_name}"
 	def rpt = true
 	file_path = "${base_path}${sep}${file_name}"
 	// FIXME - build routine to unpack the dacpac file
@@ -84,10 +86,10 @@ def process_mssql(){
 	    rpt = true
 	  }else{
 	    obj_dll += line + "\n"
-	    if(rpt){println "accumulate ${icnt}"}
+	    if(rpt){logit "accumulate ${icnt}"}
 	    rpt = false
 	  }
-	  //println "#=> Line: ${line}"
+	  //logit "#=> Line: ${line}"
 	  last_line = line
 	  icnt += 1  
 	}
@@ -98,7 +100,7 @@ def process_mssql(){
  
 def parse_arguments(args){
   for (arg in args) {
-    //println arg
+    //logit arg
     pair = arg.split("=")
     if(pair.size() == 2) {
       arg_map[pair[0].trim()] = pair[1].trim()
@@ -119,13 +121,13 @@ def process_postgres(){
 	def database = settings["connections"][connection]["database"]
 	def rpt = true
 	message_box("PostgreSQL - Dump Processor", "title")
-	println "=> Processes a structure dump file into individual object revisions."
-	println "Using Connection: ${connection}"
-	println "  Platform: ${settings["connections"][connection]["platform"]}"
-	println "  Database: ${database}"
+	logit "=> Processes a structure dump file into individual object revisions."
+	logit "Using Connection: ${connection}"
+	logit "  Platform: ${settings["connections"][connection]["platform"]}"
+	logit "  Database: ${database}"
 	def dump_path = "${base_path}${sep}DUMP"
 	file_path = "${dump_path}${sep}${database}.sql"
-	println "# File: ${file_path}"
+	logit "# File: ${file_path}"
 	def icnt = 0
 	def last_line = "--"
 	def dec_line = "-- Name: unknown; Type: COMMENT; Schema: -; Owner: \n"
@@ -140,10 +142,10 @@ def process_postgres(){
 	    rpt = true
 	  }else{
 	    obj_dll += line + "\n"
-	    if(rpt){println "lines: ${icnt}"}
+	    if(rpt){logit "lines: ${icnt}"}
 	    rpt = false
 	  }
-	  //println "#=> Line: ${line}"
+	  //logit "#=> Line: ${line}"
 	  last_line = line
 	  icnt += 1  
 	}
@@ -176,7 +178,7 @@ def generate_pg_dump(){
 		pass = "set \"PGPASSWORD=${pwd}\" && "
 		cmd = "${pass}\"${pg_dump}\" ${cmd}"
 	}
-	println "Updating structure dump"
+	logit "Updating structure dump"
 	def result = shell_execute(cmd)
 	display_result(cmd.replaceAll(pwd, "*******"), result)
 
@@ -203,7 +205,7 @@ def process_oracle(){
 		if(arg_map.containsKey("labelname")){
 			label_name = arg_map["labelname"]
 		}else{
-			println message_box("ERROR: No labelname argument given", "title")
+			logit message_box("ERROR: No labelname argument given", "title")
 			System.exit(1)
 		}
 	}
@@ -214,14 +216,14 @@ def process_oracle(){
 	def content = ""
 	java.sql.Clob clob = null
 	message_box("Oracle - DDL Processor", "title")
-	println "=> Processes either raw ddl or DBmaestro revisions to files."
-	println "Using Connection: ${connection}"
-	println "  Platform: ${settings["connections"][connection]["platform"]}"
-	println "  Database: ${schema_name}"
+	logit "=> Processes either raw ddl or DBmaestro revisions to files."
+	logit "Using Connection: ${connection}"
+	logit "  Platform: ${settings["connections"][connection]["platform"]}"
+	logit "  Database: ${schema_name}"
 	def conn = sql_connection(connection)
 	sql = sql.replaceAll("__LABELNAME__", label_name)
 	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
-	println "Query: ${sql}"
+	logit "Query: ${sql}"
 	conn.eachRow(sql){ row ->
 		cur_date = new Date()
 		hdr = ""
@@ -232,7 +234,7 @@ def process_oracle(){
     content = hdr + content
     name = "${row.OBJECT_NAME}.sql"    
     def hnd = new File("${path}${sep}${name}")
-    println "Saving: ${path}${sep}${name}"
+    logit "Saving: ${path}${sep}${name}"
     hnd.write content
 	}
 	separator(100)
@@ -253,14 +255,14 @@ def pg_save_object(content, declaration){
 	def info = [:]
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}postgres"
 	
-	println "Parts: ${parts}"
+	logit "Parts: ${parts}"
   parts.each{ item->
 		pair = item.split(": ")
-		//println "Got: ${item}"
+		//logit "Got: ${item}"
 		def val = pair.size() > 1 ? pair[1] : ""
 		info[pair[0].trim()] = val.trim()
 	}
-	println "Info: ${info}"
+	logit "Info: ${info}"
   def prefix = ""
   obj_schema = info["Schema"]
   obj_name = info["Name"]
@@ -270,7 +272,7 @@ def pg_save_object(content, declaration){
   def name = obj_name.replaceAll(/\;/,"").trim()
   name = "${prefix}${name}.sql"    
   def hnd = new File("${path}${sep}${name}")
-  println "Saving: ${path}${sep}${name}"
+  logit "Saving: ${path}${sep}${name}"
   hnd.write content
   
 }
@@ -291,16 +293,16 @@ def save_object(content){
   def dec_line = ""
   def icnt = 0
   for(ln in lines){
-    println "#=> Line: ${ln}"
+    logit "#=> Line: ${ln}"
     if(icnt < 4){
       obj_type = has_declaration(ln)
       if(obj_type != "not found"){
         cur_line = ln
-        println "Found: ${cur_line}"
+        logit "Found: ${cur_line}"
         break
       }
     }else{
-      println "Did not find declaration in first 4 lines"
+      logit "Did not find declaration in first 4 lines"
       break
     }
     icnt += 1
@@ -321,22 +323,22 @@ def save_object(content){
         prefix = settings["mssql_map"]["sub_objects"]["prefix"]      
         obj_type = subobj_type
         obj_name = dec_line.replaceFirst(sub_reg, '$1')
-        println "SUB: ${obj_type}: ${obj_name}"
+        logit "SUB: ${obj_type}: ${obj_name}"
       }else{
-        println "PRIMARY: ${obj_type}: ${obj_name}"
+        logit "PRIMARY: ${obj_type}: ${obj_name}"
       }
     }else{
       prefix = settings["mssql_map"]["sub_modifiers"]["prefix"]
       obj_type = mod_type
       obj_name = cur_line.replaceFirst(mod_reg, '$1')
-      println "MOD: ${obj_type}: ${obj_name}"
+      logit "MOD: ${obj_type}: ${obj_name}"
     }
     def path = "${base_path}${sep}${obj_type}"
     ensure_dir(path)
     def name = obj_name.replaceAll(/\;/,"").trim()
     name = "${prefix}${name}.sql"    
     def hnd = new File("${path}${sep}${name}")
-    println "Saving: ${path}${sep}${name}"
+    logit "Saving: ${path}${sep}${name}"
     hnd.write content
   }
 }
@@ -346,12 +348,12 @@ def has_declaration(line, p_type = "objects"){
   if(line == null || line.length() < 2){
     return obj_type
   }
-  println "Type: ${p_type}\r\n${settings["objects"]}"
+  logit "Type: ${p_type}\r\n${settings["objects"]}"
   def declarations = settings["mssql_map"][p_type]
   for(term in declarations.keySet()) {
     if(line.indexOf(term) > -1){
         obj_type = declarations[term]
-        println "Found declaration: ${term}"
+        logit "Found declaration: ${term}"
         break
      }
    }
@@ -374,8 +376,8 @@ def update_git(){
 	def build_no = System.getenv("BUILD_NUMBER")
 	def commit_txt = System.getenv("COMMIT_TEXT")
 	def result = shell_execute(cmd)
-	println "out> " + result["stdout"]
-	println "err> " + result["stderr"]
+	logit "out> " + result["stdout"]
+	logit "err> " + result["stderr"]
 	if(result["stderr"].indexOf("fatal:") > -1){
 	  message_box("ERROR: Not a git repository - please initialize", "title")
 	  System.exit(1)
@@ -400,7 +402,7 @@ def update_git(){
 def get_settings(file_path) {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
-	println "JSON Settings Document: ${file_path}"
+	logit "JSON Settings Document: ${file_path}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
@@ -423,13 +425,13 @@ def message_box(msg, def mtype = "sep") {
     res += "${start}${" " * (tot - start.size() + 1)}#\n"
     res += "#${"-" * tot}#\n"   
   }
-  println res
+  logit res
   return res
 }
 
 def separator( def ilength = 82){
   def dashy = "-" * (ilength - 2)
-  println "#${dashy}#"
+  logit "#${dashy}#"
 }
 
 def ensure_dir(pth){
@@ -460,9 +462,9 @@ def shell_execute(cmd, path = "none"){
 
 def display_result(command, result){
 	separator()
-	println "Running: ${command}"
-	println "out> " + result["stdout"]
-	println "err> " + result["stderr"]
+	logit "Running: ${command}"
+	logit "out> " + result["stdout"]
+	logit "err> " + result["stderr"]
 }
 
 def sql_connection(conn_type) {
@@ -475,11 +477,11 @@ def sql_connection(conn_type) {
   platform = settings["connections"][conn_type]["platform"]
   if (platform == "oracle") {
 	  // Assign local settings
-	  println "Querying oracle ${conn_type} Db: ${conn}"
+	  logit "Querying oracle ${conn_type} Db: ${conn}"
 	  return Sql.newInstance("jdbc:oracle:thin:@${conn}", user, password)
 	}else{
 	  dbDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
-	  println "Querying MSSQL ${conn_type} Db: ${conn}"
+	  logit "Querying MSSQL ${conn_type} Db: ${conn}"
 	  return Sql.newInstance("jdbc:sqlserver://${conn}", user, password, dbDriver)		
 	}
 }
@@ -496,7 +498,7 @@ def result_query(query, grab = []){
   query["output"].each{arr ->
     header += "| ${arr[0].padRight(arr[2])}"
   }
-  println header
+  logit header
   separator(100)
   conn.eachRow(query["query"])
   { row ->
@@ -507,10 +509,10 @@ def result_query(query, grab = []){
 	grab.each {item ->
 		result[item].add(row.getAt(item))
 	}
-    println " "
+    logit " "
   }
   separator(100)
-  println ""
+  logit ""
   conn.close()
   return result
 }
@@ -550,12 +552,34 @@ def help(){
 
 
 def password_decrypt(stg) {
-	//println("Decrypting")
+	//logit("Decrypting")
 	def salt = "sakjkj509gkj31jkb0#kfkf397"
-	//println("Start: ${stg}")
+	//logit("Start: ${stg}")
 	def res = new String(stg.decodeBase64())
 	def mix = res.reverse()
 	def result = mix.replaceAll(salt, "")
-	//println("Finish: ${result}")
+	//logit("Finish: ${result}")
 	return(result)
+}
+
+def init_log(){
+	logit("#------------- New Run ---------------#")
+	logit("# ARGS:")
+	logit(arg_map)
+}
+
+def logit(message, log_type = "INFO"){
+	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+	def cur_date = new Date()
+	def hnd = new File(log_file)
+	if( !hnd.exists() ){
+		hnd.createNewFile()
+	}
+  def stamp = "${sdf.format(cur_date)}|${log_type}> "
+  message.eachLine { line->
+		if(!silent_log){
+			println "${stamp}${line.trim()}"
+		}
+		hnd.append("\r\n${stamp}${line}")
+	}
 }
