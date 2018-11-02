@@ -2,12 +2,13 @@
   "### Instructions ###": 
     "Enter the local settings items for the parser",
     "general" : {
-      "base_path_win" : "C:\\Automation\\git_revisions",
-      "base_path" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
-      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBmaestro\"",
+      "base_path" : "C:\\Automation",
+      "base_path_mac" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
+      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBmaestro\" && git push origin master",
+	  "default_branch" : "master",
       "repository_name" : "REPO",
-			"postgres_path" : "/Library/PostgreSQL/9.3/bin",
-			"postgres_path_win" : "c:\\Program Files (x86)\\PostgreSQL\\9.4\\bin"
+			"postgres_path_mac" : "/Library/PostgreSQL/9.3/bin",
+			"postgres_path" : "c:\\Program Files\\PostgreSQL\\10\\bin"
 	},
 	"connections" : {
 		"repo_mssql" : {
@@ -15,30 +16,30 @@
 			"code_separator" : "GO",
 			"user" : "dbmadmin",
 			"password" : "123456",
-			"connect" : "teamwork2012:1433;databaseName=TeamWorkRepository"
+			"connect" : "dbmJohnHancock:1433;databaseName=TeamWorkRepository"
 		},
 		"repository" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "twmanagedb",
 			"password" : "manage#2009",
-			"connect" : "teamwork2012:1521/orcl"
+			"connect" : "dbmJohnHancock:1521/orcl"
 		 },
 		"hr_dev" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "HR_QA2",
 			"password" : "hr_qa2",
-			"connect" : "teamwork2012:1521/orcl"
+			"connect" : "dbmJohnHancock:1521/orcl"
 		 },
-		"monkey" : {
+		"rlm" : {
 			"platform" : "postgres",
 			"code_separator" : "-- Name: ",
 			"username" : "deploy",
-			"host" : "10.0.0.165",
-			"password" : "bugsy",
-			"database" : "monkey",
-			"connect" : "10.0.0.165:5432/monkey"
+			"host" : "localhost",
+			"password_enc" : "ITY1NDMyMWxhaXJUNzkzZmtmayMwYmtqMTNqa2c5MDVqa2prYXM=",
+			"database" : "rlm48_rs",
+			"connect" : "localhost:5432/rlm48_rs"
 		 },
 		"Fantasy" : {
 			"platform" : "postgres",

@@ -40,7 +40,8 @@ def server = local_settings["general"]["server"]
 properties([
 	parameters([
 		//choice(name: 'Landscape', description: "Develop/Release to specify deployment target", choices: 'MP_Dev\nMP_Dev2,MP_Release'),
-		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes')
+		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes'),
+		choice(name: 'Git_Sync', description: "Yes/No to sync ddl with git", choices: 'No\nYes')
 	])
 ])
 
@@ -51,6 +52,7 @@ def staging_path = local_settings["general"]["staging_path"]
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
+platform = local_settings["branch_map"][landscape][flavor]["platform"]
 environments = local_settings["branch_map"][landscape][flavor]["environments"]
 def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
 credential = credential.replaceFirst("_USER_", local_settings["general"]["username"])
@@ -140,9 +142,30 @@ stage(environment) {
 	//	} catch (Exception e) {
 	//		echo e.getMessage();
 	//	}
-    
+
   }
 }
+
+if(env.Git_Sync && env.Git_Sync == "Yes"){
+	stage("Git Sync") {
+	  node (dbmNode) {
+		def base_cmd = "${base_path}${sep}git_revisions${sep}dbm_revisions.bat"
+		def cmd = ""
+		echo "#------------------- Git Sync -------------------------#"
+		if(platform == "postgres" ) {
+			cmd = "${base_cmd} action=postgres_all connection=${landscape}"
+			echo "Updating Postgres Revisions: ${cmd}"
+			bat "${cmd}"
+			//cmd = "${base_cmd} action=process_postgres connection=${landscape}"
+			//echo "Calling revision processor: ${cmd}"
+			//bat "${cmd} action=update_git connection=${landscape}"
+			//echo "Updating git: ${cmd}"
+			//bat "${cmd}"
+		}
+	  }
+	}
+}
+
 if(environments.size() < 2) {
 	currentBuild.result = "SUCCESS"
 	return

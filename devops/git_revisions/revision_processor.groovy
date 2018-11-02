@@ -1,15 +1,15 @@
 /*
-####### SQL Method Parser ################
-#  Based on Microsoft DAC pac onverted output files
-
-=> BJB 7/2/18
+####### SQL Revision Parser ################
+#  
+# Parses object revisions from dbm or platform dumpfiles into object ddl and pushes into git
+=> BJB 9/18/18
 */
 import java.sql.Connection
 import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
-sep = "/" // "\\" //FIXME Reset for windows
+sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 def settings_file = "${this_path}${sep}parser_input.json"
 settings = [:]
@@ -31,11 +31,13 @@ if (arg_map.containsKey("action")) {
       process_oracle()
       break
 	case "process_postgres":
-		generate_pg_dump()
-    	process_postgres()
+		process_postgres()
     	break
 	case "update_git":
     	update_git()
+	    break
+	case "postgres_all":
+    	postgres_all()
 	    break
     case "generate_pg_dump":
       generate_pg_dump()
@@ -47,7 +49,7 @@ if (arg_map.containsKey("action")) {
 }else{
 	message_box("ERROR: enter an action argument", "title")
 	help()
-   }
+}
 
 def process_mssql(){
 	def connection = arg_map["connection"]
@@ -129,7 +131,7 @@ def process_postgres(){
 	def dec_line = "-- Name: unknown; Type: COMMENT; Schema: -; Owner: \n"
 	obj_ddl = dec_line
 	def hand = new File(file_path).eachLine {line -> 
-	  if(line.length() < 1 || icnt > 3000){ // || icnt > 3000){
+	  if(line.length() < 1 ){ // || icnt > 3000){
 	    //skip it
 	  }else if(line.startsWith(delim) && last_line == "--"){
 	    pg_save_object(obj_dll, dec_line)
@@ -152,12 +154,17 @@ def generate_pg_dump(){
 	message_box("Generate PG Dump: ${connection}", "title")
 	def base_path = settings["general"]["base_path"]
 	def pass = ""
+	def pwd = ""
 	def database = settings["connections"][connection]["database"]
 	def pg_dump = "${settings["general"]["postgres_path"]}${sep}pg_dump"
 	def dump_path = "${base_path}${sep}DUMP"
 	ensure_dir(dump_path)
 	def user = settings["connections"][connection]["username"]
-	def pwd = settings["connections"][connection]["password"]
+	if (settings["connections"][connection].containsKey("password_enc")) {
+      pwd = password_decrypt(settings["connections"][connection]["password_enc"])
+    }else{
+      pwd = settings["connections"][connection]["password"]
+    }
 	def host = settings["connections"][connection]["host"]
 	def output_file = "${dump_path}${sep}${database}.sql"
 	def cmd = "-s -U ${user} -f ${output_file} -h ${host} ${database}"
@@ -166,7 +173,7 @@ def generate_pg_dump(){
 		cmd = "${pass}${pg_dump} ${cmd}"
 	
 	}else{
-		pass = "set PGPASSWORD=${pwd} && "
+		pass = "set \"PGPASSWORD=${pwd}\" && "
 		cmd = "${pass}\"${pg_dump}\" ${cmd}"
 	}
 	println "Updating structure dump"
@@ -175,6 +182,11 @@ def generate_pg_dump(){
 
 }
 
+def postgres_all(){
+		generate_pg_dump()
+		process_postgres()
+		update_git()
+}
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
 def process_oracle(){
@@ -209,6 +221,7 @@ def process_oracle(){
 	def conn = sql_connection(connection)
 	sql = sql.replaceAll("__LABELNAME__", label_name)
 	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
+	println "Query: ${sql}"
 	conn.eachRow(sql){ row ->
 		cur_date = new Date()
 		hdr = ""
@@ -356,7 +369,10 @@ def update_git(){
 	*/
 	def now = new Date()
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}"
+	def branch = settings["general"]["default_branch"]
 	def cmd = "cd ${base_path} && git status"
+	def build_no = System.getenv("BUILD_NUMBER")
+	def commit_txt = System.getenv("COMMIT_TEXT")
 	def result = shell_execute(cmd)
 	println "out> " + result["stdout"]
 	println "err> " + result["stderr"]
@@ -370,7 +386,13 @@ def update_git(){
 	cmd = "cd ${base_path} && git add *"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
-	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]}\""
+	cmd = "cd ${base_path} && git read-tree --reset HEAD"
+	result = shell_execute(cmd)
+	display_result(cmd, result)
+	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""
+	result = shell_execute(cmd)
+	display_result(cmd, result)	
+	cmd = "cd ${base_path} && git push origin ${branch}"
 	result = shell_execute(cmd)
 	display_result(cmd, result)	
 }
@@ -524,4 +546,16 @@ def help(){
 		println "=> ${item["title"]}"
 		println "Description: ${item["body"].join("\r\n")}"
 	}
+}
+
+
+def password_decrypt(stg) {
+	//println("Decrypting")
+	def salt = "sakjkj509gkj31jkb0#kfkf397"
+	//println("Start: ${stg}")
+	def res = new String(stg.decodeBase64())
+	def mix = res.reverse()
+	def result = mix.replaceAll(salt, "")
+	//println("Finish: ${result}")
+	return(result)
 }
