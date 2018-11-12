@@ -877,6 +877,8 @@ def add_schemas_to_source_control() {
       println result
     }
   }
+}
+}
 
 def import_projects() {
   message_box("Adding Projects", "title")
