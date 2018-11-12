@@ -49,13 +49,13 @@ separator()
 // ========================== INPUT PARAMS ========================
 local_settings = [
 	"general" : [
-		"plaform" : "oracle"
+		"platform" : "oracle"
 	],
 	"connections" : [
 		"repository" : [
 			"user" : "twmanagedb",
 			"password" : "manage#2009",
-			"connect" : "dbmtemplate:1521/orcl"
+			"connect" : "dbmjohnhancock:1521/orcl"
 		]
 	]
 ]
@@ -65,7 +65,7 @@ local_settings = [
 
 
 
-init_log
+init_log()
 
 if (arg_map.containsKey("action")) {
   switch (arg_map["action"].toLowerCase()) {
@@ -76,7 +76,7 @@ if (arg_map.containsKey("action")) {
       init_pipelines()
       break     
     default:
-      perform_query()
+      println "Action argument not found"
       break
   }
 }else{
@@ -90,20 +90,15 @@ def update_script_order(){
   def date = new Date()
   def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
   def db_platform = local_settings["general"]["platform"]
-  
-  def json_file_obj = new File( filepath )
-  if (json_file_obj.exists() ) {
-    contents = jsonSlurper.parseText(json_file_obj.text)
-  }
   if (!arg_map.containsKey("order_file")) {
     println "Send pipeline= and order_file= arguments"
     System.exit(1)
   }
-  def filename = arg_map["order_file"]
+  def order_file = arg_map["order_file"]
 	def version = arg_map["version"]
   def pipeline = arg_map["pipeline"]
-	hnd = new File(order_file)
-	if(!hnd.exists) {
+	def hnd = new File(order_file)
+	if(!hnd.exists()) {
     println "order_file: ${filename} does not exist"
     System.exit(1)
   }
@@ -111,27 +106,34 @@ def update_script_order(){
 	def script_order = [:]
 	def id_buff = 100
 	def new_order = 0
-	hnd.text().eachLine{ line, cnt ->
+	hnd.text.eachLine{ line, cnt ->
 		script_order[line.trim()] = cnt
 	}
 	def res = ""
-  def conn = sql_connection(repository)
-	def update_query = "update TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR set EXCUTION_ORDER = __NEW__"
-  def order_query = "select  p.FLOWNAME, v.name, ss.script_id, s.name as script, ss.excution_order as order FROM twmanagedb.TBL_SMG_VERSION v JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR ss ON ss.VERSION_ID = v.ID JOIN TWMANAGEDB.TBL_FLOW p ON p.FLOWID = v.PIPELINE_ID JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.SCRIPT_ID = ss.SCRIPT_ID WHERE p.FLOWNAME = '__PIPELINE__' AND v.NAME = '__VERSION__'"
-	def query = query_string.replaceAll("__PIPELINE__", pipeline).replaceAll("__VERSION__", version)
+  def conn = sql_connection("repository")
+	def update_query = "update TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR set EXCUTION_ORDER = __NEW__ WHERE SCRIPT_ID = __ID__"
+  def order_query = "select  p.FLOWNAME, v.name, ss.script_id, s.name as script, ss.excution_order as pos FROM twmanagedb.TBL_SMG_VERSION v JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR ss ON ss.VERSION_ID = v.ID JOIN TWMANAGEDB.TBL_FLOW p ON p.FLOWID = v.PIPELINE_ID JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.SCRIPT_ID = ss.SCRIPT_ID WHERE p.FLOWNAME = '__PIPELINE__' AND v.NAME = '__VERSION__'"
+	def query = order_query.replaceAll("__PIPELINE__", pipeline)
+	query = query.replaceAll("__VERSION__", version)
+	logit "Scripts Order File:"
+	logit script_order.toString()
 	logit "| Script             | Orig | New  |"
-	def result = ""
+	def result = ""; def qry = "";
   conn.eachRow(query){ rec ->
-		if(script_order.containsKey()){
+		if(script_order.containsKey(rec.script)){
 			result += "Found - ${rec.script}\r\n"
 			new_order = script_order[rec.script] + id_buff
 		}else{
 			result += "NOT - Found - ${rec.script}\r\n"
-			new_order = rec.order + 1000
+			new_order = rec.pos + 1000
 		}
-		res = conn.execute(update_query.replaceAll("__NEW__", new_order))
-	logit "|${rec.script.padRight(21)}|${rec.order.toString().padRight(6)}|${new_order.toString().padRight(6)}|"
+		qry = update_query.replaceAll("__NEW__", new_order.toString())
+		qry = qry.replaceAll("__ID__", rec.SCRIPT_ID.toString())
+		logit "Updating: ${qry}"
+		res = conn.execute(qry)
+	logit "|${rec.script.padRight(21)}|${rec.pos.toString().padRight(6)}|${new_order.toString().padRight(6)}|"
   }
+  logit result, "INFO", true
 }
 
 def sql_connection(conn_type) {
@@ -317,10 +319,10 @@ def shell_execute(cmd, path = "none"){
 def init_log(){
 	logit("#------------- New Run ---------------#")
 	logit("# ARGS:")
-	logit(arg_map)
+	logit(arg_map.toString())
 }
 
-def logit(message, log_type = "INFO"){
+def logit(message, log_type = "INFO", force = false){
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def cur_date = new Date()
 	def hnd = new File(log_file)
@@ -329,8 +331,8 @@ def logit(message, log_type = "INFO"){
 	}
   def stamp = "${sdf.format(cur_date)}|${log_type}> "
   message.eachLine { line->
-		if(!silent_log){
-			logit "${stamp}${line.trim()}"
+		if(!silent_log || force){
+			println "${stamp}${line.trim()}"
 		}
 		hnd.append("\r\n${stamp}${line}")
 	}
