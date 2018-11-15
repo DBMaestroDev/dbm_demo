@@ -62,9 +62,6 @@ local_settings = [
 
 // ========================== INPUT PARAMS ========================
 
-
-
-
 init_log()
 
 if (arg_map.containsKey("action")) {
