@@ -135,7 +135,7 @@ stage(environment) {
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
     // Deploy to Dev
-	execute_prerun_script(pipeline, environment)
+	execute_prerun_script(source_dir, pipeline, environment)
 	echo "#------------------- Performing Deploy on ${environment} -------------#"
     //try {
       bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
@@ -160,10 +160,11 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		execute_prerun_script(pipeline, environment)
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server} ${credential}"
 		if (do_pair) {
+			execute_prerun_script(source_dir, pipeline, pair[1])
 			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server} ${credential}"
 		}
 	}   
@@ -179,7 +180,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		execute_prerun_script(pipeline, environment)
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
@@ -195,7 +196,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
-		execute_prerun_script(pipeline, environment)
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
@@ -260,11 +261,12 @@ def separator( def ilength = 82){
   //println "#${dashy}#"
 }
 
-def execute_prerun_script(pipeline, environment) {
+def execute_prerun_script(source, pipeline, environment) {
 	echo "> Pre-Deploy Setup"
-	fil = File.new("${source_dir}${sep}ENV${sep}${prerun_script}"})
+	def prerun_script = "prerun.bat"
+	fil = File.new("${source}${sep}ENV${sep}${prerun_script}"})
 	if( fil.exists() ) {
-		bat "${source_dir}${sep}ENV${sep}${prerun_script} pipeline=${pipeline} environment=${environment}"
+		bat "${source}${sep}ENV${sep}${prerun_script} pipeline=${pipeline} environment=${environment}"
 	}
     return "ok"
 }
