@@ -264,7 +264,7 @@ def separator( def ilength = 82){
 def execute_prerun_script(source, pipeline, environment) {
 	echo "> Pre-Deploy Setup"
 	def prerun_script = "prerun.bat"
-	fil = File.new("${source}${sep}ENV${sep}${prerun_script}"})
+	fil = new File("${source}${sep}ENV${sep}${prerun_script}"})
 	if( fil.exists() ) {
 		bat "${source}${sep}ENV${sep}${prerun_script} pipeline=${pipeline} environment=${environment}"
 	}
