@@ -1,6 +1,12 @@
+#-----------------------  Hooks Receiver for git processing ----------------------
+The batch script is called from the hook and passed and argument of the json file path
 
 
-#-----------------------  SAMPLE OUTPUT ----------------------#
+
+
+
+
+#-----------------------  SAMPLE OUTPUT ----------------------
 
 C:\Automation\HR_Deploy>devops\git_hook.bat C:\Automation\HR_Deploy\devops\hook_input_wchange.json
 
