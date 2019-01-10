@@ -13,7 +13,7 @@ import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
-import DbmSecure
+//import DbmSecure
 def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 //evaluate(new File("${base_path}\\DbmSecure.groovy"))
 def jsonSlurper = new JsonSlurper()
@@ -190,7 +190,7 @@ def sql_connection(conn_type) {
   if (conn_type == "repo" || conn_type == "repository") {
     user = local_settings["connections"]["repository"]["user"]
     if (local_settings["connections"]["repository"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
+      //password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
     }else{
       password = local_settings["connections"]["repository"]["password"]
     }
@@ -199,7 +199,7 @@ def sql_connection(conn_type) {
     // FIXME find instance for named environment and build it
     user = local_settings["connections"]["remote"]["user"]
     if (local_settings["remote"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["remote"]["password_enc"])
+     // password = password_decrypt(local_settings["connections"]["remote"]["password_enc"])
     }else{
       password = local_settings["connections"]["remote"]["password"]
     }
@@ -610,6 +610,7 @@ def transfer_packages(){
   
 }
 
+/*
 def password_encrypt(pwd_enc = ""){
 	def pwdTools = new DbmSecure()
 	if(pwd_enc == "") {pwd_enc = arg_map["password"] }
@@ -623,3 +624,4 @@ def password_decrypt(pwd_enc = ""){
 	result = pwdTools.decrypt(["password" : pwd_enc])
 	return result
 }
+*/
