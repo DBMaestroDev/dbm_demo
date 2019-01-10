@@ -9,7 +9,7 @@ sep = "\\"
 def base_path = "C:\\Automation\\dbm_demo\\devops"
 
 rootJobName = "$env.JOB_NAME";
-if(landscape == "job"){ landscape = rootJobName }
+if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
 //FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
 branchName = "master"
 branchVersion = ""
