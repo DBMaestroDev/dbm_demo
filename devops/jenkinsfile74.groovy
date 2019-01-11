@@ -2,7 +2,7 @@ import groovy.json.*
 
 // N8 Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "rlm"
+def landscape = "job"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
@@ -13,6 +13,7 @@ rootJobName = "$env.JOB_NAME";
 branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
+if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
 def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
