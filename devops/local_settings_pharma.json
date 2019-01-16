@@ -5,7 +5,10 @@
       "base_path" : "C:\\Automation\\dbm_demo\\devops",
       "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
       "staging_path" : "c:\\Scripts\\POC",
-      "server" : "DBmPaychexPOC:8017"
+      "server" : "DBmPaychexPOC:8017",
+	  "username" : "automation@paychex.com",
+  	  "token" : "cRn5jp6EbPEHZ7HetUenCBquWKHYVisx"
+
     },
     "connections" : {
 		"repository" : {

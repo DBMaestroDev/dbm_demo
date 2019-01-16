@@ -34,6 +34,7 @@ def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
 local_settings = get_settings("${base_path}${sep}${settings_file}")
 def server = local_settings["general"]["server"]
+def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
 
 // Add a properties for Platform and Skip_Packaging
 properties([
@@ -53,6 +54,8 @@ pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
 environments = local_settings["branch_map"][landscape][flavor]["environments"]
 def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
 source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
+credential = credential.replaceFirst("_USER_", local_settings["general"]["username"])
+credential = credential.replaceFirst("_PASS_", local_settings["general"]["token"])
 local_settings = null
 
  echo "Working with: ${rootJobName}\n - Branch: ${branchName}\n - Pipe: ${pipeline}\n - Env: ${base_env}\n - Schema: ${base_schema}"
@@ -129,7 +132,7 @@ stage(environment) {
   }
     // Deploy to Dev
     echo "#------------------- Performing Deploy on ${environment} -------------#"
-    bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+    bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
   }
 }
 environment = environments[1]
@@ -144,9 +147,9 @@ stage("QA") {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server} ${credential}"
 		if (do_pair) {
-			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}"
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server} ${credential}"
 		}
 	}   
 } 
@@ -158,7 +161,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
 if(environments.size > 3){
@@ -170,7 +173,7 @@ if(environments.size > 3){
 		node (dbmNode) {
 			//  Deploy to QA
 			echo '#------------------- Performing Deploy on ${environment} --------------#'
-			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 		}   
 	}
 } 
