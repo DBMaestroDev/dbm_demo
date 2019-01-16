@@ -6,7 +6,7 @@ def landscape = "Northwind"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
-def base_path = "C:\\Automation\\jenkins_pipe"
+def base_path = "C:\\Automation\\dbm_demo\\devops"
 
 rootJobName = "$env.JOB_NAME";
 //FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
