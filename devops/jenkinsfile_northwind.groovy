@@ -126,7 +126,7 @@ stage(environment) {
     bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
       // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
-    bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server}"
+    bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
   }else{
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
