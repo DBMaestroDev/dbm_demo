@@ -34,7 +34,7 @@ def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
 def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
-local_settings = get_settings("${base_path}${sep}${settings_file}")
+local_settings = get_settings("${base_path}${sep}${settings_file}", landscape)
 def server = local_settings["general"]["server"]
 
 // Add a properties for Platform and Skip_Packaging
