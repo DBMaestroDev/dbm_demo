@@ -221,16 +221,19 @@ def ensure_dir(pth){
   }
 }
 
-def get_settings(file_path) {
+def get_settings(file_path, project = "none") {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
 	println "JSON Settings Document: ${file_path}"
+	println "Project: ${project}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
+	println ""Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
+
 
 def message_box(msg, def mtype = "sep") {
   def tot = 80
