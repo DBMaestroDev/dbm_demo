@@ -48,7 +48,7 @@ def java_cmd = local_settings["general"]["java_cmd"]
 def dbmNode = ""
 def staging_path = local_settings["general"]["staging_path"]
 // note key off of landscape variable
-echo "Matching: ${landscape} in the ${settings_file} file"
+println "Matching: ${landscape} in the ${settings_file} file"
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
