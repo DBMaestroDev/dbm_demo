@@ -2,7 +2,7 @@ import groovy.json.*
 
 // N8 Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "HumanResources"
+def landscape = "HR_Tasks"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
