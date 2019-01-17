@@ -230,7 +230,7 @@ def get_settings(file_path, project = "none") {
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
-	println ""Project Configurations: ${settings["branch_map"].keySet()}"
+	println "Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
 
