@@ -11,52 +11,55 @@ import java.io.File
 import java.text.SimpleDateFormat
 sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
-def settings_file = "${this_path}${sep}parser_input.json"
+def settings_file = "${this_path}${sep}database_info.json"
 log_file = "${this_path}${sep}dbm_log.txt"
 silent_log = false
 // #---- Localize Your paths and settings" ------#
-settings = [
-	"base_path" : "C:\\Automation",
-	"repository_name" : "REPO",
-	"another" : ""
-	]
+settings = [:]
+settings = get_settings(settings_file)
 	
-input_file = this.args[0]
 init_log()
-message_box("Processing Hook for git Sync","title")
-logit "InputFile: ${input_file}"
-params = [:]
-params = get_settings(input_file)
-process_hook()
+message_box("Building DDL Revisions","title")
+arg_map = [:]
+parse_arguments(this.args)
 
-
-def process_hook() {
-		def pipeline = params["FlowDetails"]["FlowName"]
-		def environment = params["Environment"]["name"]
-		def version = params["Version"]["versionString"]
-		def db_type = params["FlowDetails"]["DBTypeId"]
-		logit "Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
-		logit "Pipeline: ${pipeline}, Environment: ${environment}, Version: ${version}"
-		logit "#=> Scripts:"
-		logit "${"Name".padRight(25)}| ${"Schema".padRight(15)}"
-		params["Scripts"].each{ script -> 
-			logit "${script["name"].padRight(25)}| ${script["schemaName"].padRight(15)}"  
-		}
-		def platform = "oracle"
-		msg = "DBm Hook update - ${pipeline} => ${environment} for version: ${version}"
-		switch (db_type) {
-			case 3:
-				platform = "oracle"
-				break
-			case 1:
-				platform = "postgres"
-				break
-		}
-		process_db_changes(pipeline,environment,version,platform)
-		update_git(msg)
-				
+if (arg_map.containsKey("action")) {
+	if (!arg_map.containsKey("connection")){
+	  message_box("ERROR: No connection argument given", "title")
+	  System.exit(1)
+	}
+	if (!arg_map.containsKey("pipeline")){
+	  message_box("ERROR: No pipeline argument given", "title")
+	  System.exit(1)
+	}
+	init_log()
+  switch (arg_map["action"].toLowerCase()) {
+    case "process_mssql":
+      process_mssql()
+      break
+    case "process_oracle":
+      process_oracle()
+      break
+	case "process_postgres":
+		process_postgres()
+    	break
+	case "update_git":
+    	update_git()
+	    break
+	case "postgres_all":
+    	postgres_all()
+	    break
+    case "generate_pg_dump":
+      generate_pg_dump()
+      break
+    default:
+		logit "No acceptable argument given - e.g. action=process_dump"
+	break
+	}
+}else{
+	message_box("ERROR: enter an action argument", "title")
+	help()
 }
-
  
 def parse_arguments(args){
   for (arg in args) {
@@ -72,31 +75,65 @@ def parse_arguments(args){
 }
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
-def process_db_changes(pipeline,environment,version, dbType){
-	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle"
-	def schema_name = params["Schemas"][0]["name"]
-	def path = ''
+
+def process_oracle(){
+	def connection = arg_map["connection"]
+	def base_path = settings["general"]["base_path"]
+	def delim = settings["connections"][connection]["code_separator"]
+	def schema_name = settings["connections"][connection]["user"]
+	def oracle_src = "repo"
+	def pipeline = arg_map["pipeline"]
+	def label_name = ""
+	if (arg_map.containsKey("oracle_source")){
+	  oracle_src = arg_map["oracle_source"]
+	}
+	if (oracle_src == "repo"){
+		if(arg_map.containsKey("labelname")){
+			label_name = arg_map["labelname"]
+		}else{
+			logit message_box("ERROR: No labelname argument given", "title")
+			System.exit(1)
+		}
+	}
+	def sql = oracle_object_ddl_query(oracle_src)
+	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle${sep}${pipeline}"
+	def path = ''; def hdr = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def content = ""
+	java.sql.Clob clob = null
 	message_box("Oracle - DDL Processor", "title")
-	logit "=> Processes DBmaestro revisions to files."
-	logit "  Platform: Oracle"
-	params["ChangedObjects"].each{ schema ->
-		schema_name = schema["SchemaName"]
-		logit "  Database: ${schema_name}"
-		schema["Objects"].each { dbobj ->
-			path = "${base_path}${sep}${schema_name}${sep}${type_lookup(dbobj["Type"])}"
-			ensure_dir(path)
-			content = dbobj["TargetCreationScript"]
-			name = "${dbobj["Name"]}.sql"    
-			def hnd = new File("${path}${sep}${name}")
-			logit "Saving: ${path}${sep}${name}", "DEBUG", true
-			hnd.write content	
-		}
-    }
+	logit "=> Processes either raw ddl or DBmaestro revisions to files."
+	logit "Using Connection: ${connection}"
+	logit "  Pipeline: ${pipeline}"
+	logit "  Platform: ${settings["connections"][connection]["platform"]}"
+	logit "  Database: ${schema_name}"
+	def conn = sql_connection(connection)
+	sql = sql.replaceAll("__LABELNAME__", label_name)
+	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
+	logit "Query: ${sql}\n"
+	conn.eachRow(sql){ row ->
+		cur_date = new Date()
+		hdr = ""
+		path = "${base_path}${sep}${row.SCHEMANAME}${sep}${row.OBJECT_TYPE}"
+		ensure_dir(path)
+		clob = (java.sql.Clob) row.DDL
+	    content = clob.getAsciiStream().getText()
+		content = hdr + content
+		name = "${row.OBJECT_NAME}.sql"    
+		def hnd = new File("${path}${sep}${name}")
+		logit "Saving: ${path}${sep}${name}", "DEBUG", true
+		hnd.write content
+	}
 	separator(100)
 }
 
+def oracle_object_ddl_query(src = "repo") {
+	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
+	if(src == "raw"){
+		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
+	}
+	return sql
+}
 
 def process_mssql(){
 	def connection = arg_map["connection"]
@@ -255,54 +292,6 @@ def postgres_all(){
 		generate_pg_dump()
 		process_postgres()
 		update_git()
-}
-//  Oracle Methods
-// REPO/ORACLE/SCHEMA
-def process_oracle_generate(pipeline,environment,version){
-	def connection = "repository"
-	def base_path = settings["general"]["base_path"]
-	def delim = settings["connections"][connection]["code_separator"]
-	def schema_name = settings["connections"][connection]["user"]
-	def oracle_src = "repo"
-	def label_name = "${version}-post"
-	
-	def sql = oracle_object_ddl_query(oracle_src)
-	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle"
-	def path = ''; def hdr = ''
-	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-	def content = ""
-	java.sql.Clob clob = null
-	message_box("Oracle - DDL Processor", "title")
-	logit "=> Processes either raw ddl or DBmaestro revisions to files."
-	logit "Using Connection: ${connection}"
-	logit "  Platform: ${settings["connections"][connection]["platform"]}"
-	logit "  Database: ${schema_name}"
-	def conn = sql_connection(connection)
-	sql = sql.replaceAll("__LABELNAME__", label_name)
-	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
-	logit "Query: ${sql}"
-	conn.eachRow(sql){ row ->
-		cur_date = new Date()
-		hdr = ""
-		path = "${base_path}${sep}${row.SCHEMANAME}${sep}${row.OBJECT_TYPE}"
-		ensure_dir(path)
-		clob = (java.sql.Clob) row.DDL
-	    content = clob.getAsciiStream().getText()
-    content = hdr + content
-    name = "${row.OBJECT_NAME}.sql"    
-    def hnd = new File("${path}${sep}${name}")
-    logit "Saving: ${path}${sep}${name}", "DEBUG", true
-    hnd.write content
-	}
-	separator(100)
-}
-
-def oracle_object_ddl_query(src = "repo") {
-	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
-	if(src == "raw"){
-		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
-	}
-	return sql
 }
 
 //Postgres Save
