@@ -1,0 +1,86 @@
+{
+  "### Instructions ###": 
+    "Enter the local settings items for your installation",
+    "general" : {
+      "base_path" : "C:\\Automation\\dbm_demo\\devops",
+      "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+      "staging_path" : "c:\\Scripts\\POC",
+      "server" : "DBmPaychexPOC:8017",
+	  "username" : "automation@paychex.com",
+  	  "token" : "cRn5jp6EbPEHZ7HetUenCBquWKHYVisx"
+
+    },
+    "connections" : {
+		"repository" : {
+		  "user" : "twmanagedb",
+		  "password" : "manage#2009",
+		  "connect" : "DBmPaychexPOC:1521/orcl"
+		},
+		"remote" : {
+		  "user" : "dbmaestro_teamwork",
+		  "password" : "Remote#2009",
+		  "connect" : "DBmPaychexPOC:1521/orcl"
+		}
+	 },
+	"branch_map" : {
+		"release" : [
+		  {
+		  "pipeline" : "HumanResources",
+		  "base_env" : "DIT",
+		  "base_schema" : "HR_DEV",
+  	  "source_dir" : "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+		  "environments" : [
+			 "DIT",
+			 "QA1,QA2",
+			 "STAGE",
+			 "PROD"
+		   ],
+ 		  "approvers" : [
+ 			 "teamwork",
+ 			 "teamwork",
+ 			 "teamwork",
+ 			 "teamwork"
+ 		   ]
+		  }
+		],
+		"pharmacy" : [
+		  {
+		  "pipeline" : "Pharmacy",
+		  "base_env" : "DIT",
+		  "base_schema" : "Pharmacy-DEV",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\hr_demo\\versions_sql",
+		  "environments" : [
+			 "DIT",
+			 "QA",
+			 "PROD"
+		   ],
+		  "approvers" : [
+			 "teamwork",
+			 "teamwork",
+			 "teamwork",
+			 "teamwork"
+		   ]
+		  }
+		],
+		"Northwind" : [
+		  {
+		  "pipeline" : "Northwind",
+		  "base_env" : "N2A_RS",
+		  "base_schema" : "Northwind_N2A",
+		  "source_dir" : "C:\\Automation\\dbm_demo\\northwind",
+		  "environments" : [
+			 "N2A_RS",
+			 "N1",
+			 "PROD"
+		   ],
+		  "approvers" : [
+			 "automation",
+			 "automation",
+			 "automation",
+			 "automation"
+		   ]
+		  }
+		]
+	}
+}
+

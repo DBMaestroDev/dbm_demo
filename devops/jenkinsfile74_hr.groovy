@@ -2,7 +2,7 @@ import groovy.json.*
 
 // N8 Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "HumanResources"
+def landscape = "HR_Tasks"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
@@ -33,7 +33,7 @@ def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
 def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
-local_settings = get_settings("${base_path}${sep}${settings_file}")
+local_settings = get_settings("${base_path}${sep}${settings_file}", landscape)
 def server = local_settings["general"]["server"]
 
 // Add a properties for Platform and Skip_Packaging
@@ -48,6 +48,7 @@ def java_cmd = local_settings["general"]["java_cmd"]
 def dbmNode = ""
 def staging_path = local_settings["general"]["staging_path"]
 // note key off of landscape variable
+println "Matching: ${landscape} in the ${settings_file} file"
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
@@ -220,14 +221,16 @@ def ensure_dir(pth){
   }
 }
 
-def get_settings(file_path) {
+def get_settings(file_path, project = "none") {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
 	println "JSON Settings Document: ${file_path}"
+	println "Project: ${project}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
+	println ""Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
 
