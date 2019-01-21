@@ -151,7 +151,7 @@ def process_mssql(){
 	logit "  Database: ${settings["connections"][connection]["connect"]}"
 	def file_name = arg_map["dacpac_file"]
 	logit "  DACPAC: ${file_name}"
-	file_path = "${base_path}${sep}${file_name}"
+	file_path = file_name.contains(sep) ? file_name : "${base_path}${sep}${file_name}"
 	// FIXME - build routine to unpack the dacpac file
 	// "C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\DacUnpack.exe" "%1"
 	// unpack_file(file_name)
@@ -162,7 +162,7 @@ def process_mssql(){
 	    //skip it
 	  }else if(line == delim && last_line == ""){
 	    obj_dll += "\n" + line + "\n"
-	    save_object(obj_dll)
+	    mssql_save_object(obj_dll)
 	    obj_dll = ""
 	    rpt = true
 	  }else{
@@ -324,9 +324,10 @@ def pg_save_object(content, declaration){
 }
 
 // MSSQL Parsing
-def save_object(content){
+def mssql_save_object(content){
 	def connection = arg_map["connection"]
-	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}mssql${sep}${connection}"
+	def pipeline = arg_map["pipeline"]
+	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}mssql${sep}${pipeline}"
 	ensure_dir(base_path)
 	def pri_reg = /^.*\s?\[(.*)\]\.\[(.*)\].*/
   def pri_reg2 = /^.*\s?\[(.*)\].*/

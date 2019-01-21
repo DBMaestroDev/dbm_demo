@@ -15,8 +15,8 @@
 			"platform" : "mssql",
 			"code_separator" : "GO",
 			"user" : "dbm_user",
-			"password" : "123456",
-			"connect" : "localhost:1433;databaseName=TeamWorkRepository"
+			"password" : "POc.123!",
+			"connect" : "localhost:1433;databaseName=Northwind_N2A"
 		},
 		"repository" : {
 			"platform" : "oracle",
