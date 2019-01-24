@@ -1,0 +1,1 @@
+alter table CONTRACTORS add (BADGE_ID varchar2(50));

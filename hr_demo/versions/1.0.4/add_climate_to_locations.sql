@@ -1,1 +1,0 @@
-alter table locations add (climate_region varchar2(50));
