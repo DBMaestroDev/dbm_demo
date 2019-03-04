@@ -239,7 +239,7 @@ def process_oracle(){
 }
 
 def oracle_object_ddl_query(src = "repo") {
-	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
+	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
 	if(src == "raw"){
 		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
 	}
