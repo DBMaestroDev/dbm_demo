@@ -27,4 +27,9 @@ BJB 2/25/18 Set Version for deployment
 2/27/18 set for Oracle - 1.0.2
 Reset for SQLServ pipeline
 Test adhoc
+<<<<<<< HEAD
+CHange for 3.5.0
+some change
+=======
 CHange for Northwind more more
+>>>>>>> 6631a0c63a97b0022ba39664233fde5ecef1a7e2
