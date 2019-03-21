@@ -17,7 +17,7 @@ Added package directory
 
 BJB 1/11/18 Reorg folders for multiple apps
 BJB 1/11/18 merge from master
-a change
+a changebr
 
 BJB 2/1/18 SQL Files
 	set earlier version on commit
@@ -27,4 +27,3 @@ BJB 2/25/18 Set Version for deployment
 2/27/18 set for Oracle - 1.0.2
 Reset for SQLServ pipeline
 Test adhoc
-CHange for 3.5.0 REviews
