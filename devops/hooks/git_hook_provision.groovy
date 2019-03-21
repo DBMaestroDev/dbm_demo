@@ -11,92 +11,47 @@ import java.io.File
 import java.text.SimpleDateFormat
 sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
-def settings_file = "${this_path}${sep}parser_input.json"
+def settings_file = "${this_path}${sep}provision_settings.json"
 log_file = "${this_path}${sep}dbm_log.txt"
 silent_log = false
-// #---- Localize Your paths and settings" ------#
-settings = [
-	"base_path" : "C:\\Automation",
-	"repository_name" : "REPO",
-	"another" : ""
-	]
-	
-input_file = this.args[0]
-init_log()
-message_box("Processing Hook for git Sync","title")
-logit "InputFile: ${input_file}"
-params = [:]
-params = get_settings(input_file)
-process_hook()
+settings = [:]
+settings = get_settings(settings_file)
+arg_map = [:]
+parse_arguments(this.args)
 
-
-def process_hook() {
-		def pipeline = params["FlowDetails"]["FlowName"]
-		def environment = params["Environment"]["name"]
-		def version = params["Version"]["versionString"]
-		def db_type = params["FlowDetails"]["DBTypeId"]
-		logit "Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
-		logit "Pipeline: ${pipeline}, Environment: ${environment}, Version: ${version}"
-		logit "#=> Scripts:"
-		logit "${"Name".padRight(25)}| ${"Schema".padRight(15)}"
-		params["Scripts"].each{ script -> 
-			logit "${script["name"].padRight(25)}| ${script["schemaName"].padRight(15)}"  
-		}
-		def platform = "oracle"
-		msg = "DBm Hook update - ${pipeline} => ${environment} for version: ${version}"
-		switch (db_type) {
-			case 3:
-				platform = "oracle"
-				break
-			case 1:
-				platform = "postgres"
-				break
-		}
-		process_db_changes(pipeline,environment,version,platform)
-		update_git(msg)
-				
+if (arg_map.containsKey("action")) {
+	if (!arg_map.containsKey("connection")){
+	  message_box("ERROR: No connection argument given", "title")
+	  System.exit(1)
+	}
+	init_log()
+  switch (arg_map["action"].toLowerCase()) {
+    case "process_mssql":
+      process_mssql()
+      break
+    case "process_oracle":
+      process_oracle()
+      break
+	case "process_postgres":
+		process_postgres()
+    	break
+	case "update_git":
+    	update_git()
+	    break
+	case "postgres_all":
+    	postgres_all()
+	    break
+    case "generate_pg_dump":
+      generate_pg_dump()
+      break
+    default:
+		logit "No acceptable argument given - e.g. action=process_dump"
+	break
+	}
+}else{
+	message_box("ERROR: enter an action argument", "title")
+	help()
 }
-
- 
-def parse_arguments(args){
-  for (arg in args) {
-    //logit arg
-    pair = arg.split("=")
-    if(pair.size() == 2) {
-      arg_map[pair[0].trim()] = pair[1].trim()
-    }else{
-      arg_map[arg] = ""
-    }
-  }
-  
-}
-//  Oracle Methods
-// REPO/ORACLE/SCHEMA
-def process_db_changes(pipeline,environment,version, dbType){
-	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle"
-	def schema_name = params["Schemas"][0]["name"]
-	def path = ''
-	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-	def content = ""
-	message_box("Oracle - DDL Processor", "title")
-	logit "=> Processes DBmaestro revisions to files."
-	logit "  Platform: Oracle"
-	params["ChangedObjects"].each{ schema ->
-		schema_name = schema["SchemaName"]
-		logit "  Database: ${schema_name}"
-		schema["Objects"].each { dbobj ->
-			path = "${base_path}${sep}${schema_name}${sep}${type_lookup(dbobj["Type"])}"
-			ensure_dir(path)
-			content = dbobj["TargetCreationScript"]
-			name = "${dbobj["Name"]}.sql"    
-			def hnd = new File("${path}${sep}${name}")
-			logit "Saving: ${path}${sep}${name}", "DEBUG", true
-			hnd.write content	
-		}
-    }
-	separator(100)
-}
-
 
 def process_mssql(){
 	def connection = arg_map["connection"]
@@ -141,46 +96,22 @@ def process_mssql(){
 // FIXME - now add all the files to git and commit
 // update_scm
 
+ 
+def parse_arguments(args){
+  for (arg in args) {
+    //logit arg
+    pair = arg.split("=")
+    if(pair.size() == 2) {
+      arg_map[pair[0].trim()] = pair[1].trim()
+    }else{
+      arg_map[arg] = ""
+    }
+  }
+  
+}
+
 // ### Postgres Processing
 def process_postgres(){
-	def connection = arg_map["connection"]
-	def base_path = settings["general"]["base_path"]
-	def delim = settings["connections"][connection]["code_separator"]
-	def file_path = ""
-	def obj_dll = ""
-	def database = settings["connections"][connection]["database"]
-	message_box("PostgreSQL - Dump Processor", "title")
-	logit "=> Processes a structure dump file into individual object revisions."
-	logit "Using Connection: ${connection}"
-	logit "  Platform: ${settings["connections"][connection]["platform"]}"
-	logit "  Database: ${database}"
-	def dump_path = "${base_path}${sep}DUMP"
-	file_path = "${dump_path}${sep}${database}.sql"
-	logit "# File: ${file_path}"
-	def icnt = 0
-	def last_line = "--"
-	def dec_line = "-- Name: unknown; Type: COMMENT; Schema: -; Owner: \n"
-	obj_ddl = dec_line
-	def hand = new File(file_path).eachLine {line -> 
-	  if(line.length() < 1 ){ // || icnt > 3000){
-	    //skip it
-	  }else if(line.startsWith(delim) && last_line == "--"){
-	    pg_save_object(obj_dll, dec_line)
-	    dec_line = line
-	    obj_dll = "${line}\n"
-	    rpt = true
-	  }else{
-	    obj_dll += line + "\n"
-	    logit "lines: ${icnt}", "DEBUG", true
-	    rpt = false
-	  }
-	  //logit "#=> Line: ${line}"
-	  last_line = line
-	  icnt += 1  
-	}
-}
-// ### Postgres Processing
-def process_postgres_generate(){
 	def connection = arg_map["connection"]
 	def base_path = settings["general"]["base_path"]
 	def delim = settings["connections"][connection]["code_separator"]
@@ -258,14 +189,24 @@ def postgres_all(){
 }
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
-def process_oracle_generate(pipeline,environment,version){
-	def connection = "repository"
+def process_oracle(){
+	def connection = arg_map["connection"]
 	def base_path = settings["general"]["base_path"]
 	def delim = settings["connections"][connection]["code_separator"]
 	def schema_name = settings["connections"][connection]["user"]
 	def oracle_src = "repo"
-	def label_name = "${version}-post"
-	
+	def label_name = ""
+	if (arg_map.containsKey("oracle_source")){
+	  oracle_src = arg_map["oracle_source"]
+	}
+	if (oracle_src == "repo"){
+		if(arg_map.containsKey("labelname")){
+			label_name = arg_map["labelname"]
+		}else{
+			logit message_box("ERROR: No labelname argument given", "title")
+			System.exit(1)
+		}
+	}
 	def sql = oracle_object_ddl_query(oracle_src)
 	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle"
 	def path = ''; def hdr = ''
@@ -420,7 +361,7 @@ def has_declaration(line, p_type = "objects"){
 /*
 ####  Utility Routines
 */
-def update_git(commit_msg = ""){
+def update_git(){
 	/*
 	Check if git repo
 	add objects
@@ -430,17 +371,14 @@ def update_git(commit_msg = ""){
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}"
 	def branch = settings["general"]["default_branch"]
 	def cmd = "cd ${base_path} && git status"
-	//def build_no = System.getenv("BUILD_NUMBER")
-	def commit_txt = commit_msg //System.getenv("COMMIT_TEXT")
+	def build_no = System.getenv("BUILD_NUMBER")
+	def commit_txt = System.getenv("COMMIT_TEXT")
 	def result = shell_execute(cmd)
 	logit "out> " + result["stdout"]
 	logit "err> " + result["stderr"]
 	if(result["stderr"].indexOf("fatal:") > -1){
 	  message_box("ERROR: Not a git repository - please initialize", "title")
 	  System.exit(1)
-	}
-	if(commit_msg == ""){
-		commit_txt = "Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}"
 	}
 	cmd = "cd ${base_path} && git status"
 	result = shell_execute(cmd)
@@ -451,7 +389,7 @@ def update_git(commit_msg = ""){
 	cmd = "cd ${base_path} && git read-tree --reset HEAD"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
-	cmd = "cd ${base_path} && git commit -a -m \"${commit_txt}\""
+	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""
 	result = shell_execute(cmd)
 	display_result(cmd, result)	
 	cmd = "cd ${base_path} && git push origin ${branch}"
@@ -461,27 +399,13 @@ def update_git(commit_msg = ""){
 
 def get_settings(file_path) {
 	def jsonSlurper = new JsonSlurper()
-	def cur_settings = [:]
+	def settings = [:]
 	logit "JSON Settings Document: ${file_path}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
-	  cur_settings = jsonSlurper.parseText(json_file_obj.text)  
+	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
-	return cur_settings
-}
-
-def type_lookup(typeNo){
-	switch (typeNo) {
-	case 0:
-		"TABLE"
-		break
-	case 1:
-		"VIEW"
-		break
-	default:
-		"UNDEFINED"
-		break	
-	}
+	return settings
 }
 
 def message_box(msg, def mtype = "sep") {
@@ -638,8 +562,8 @@ def password_decrypt(stg) {
 
 def init_log(){
 	logit("#------------- New Run ---------------#")
-	//logit("# ARGS:")
-	//logit(arg_map.toString())
+	logit("# ARGS:")
+	logit(arg_map.toString())
 }
 
 def logit(String message, log_type = "INFO", log_only = false){
