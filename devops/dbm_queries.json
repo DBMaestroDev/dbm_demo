@@ -185,6 +185,25 @@
 		}
 	]
 },
+  "environment_tags" : {
+  "name" : "Package history for Environments with tags",
+  "usage" : "dbm_api.bat action=environment_tags ARG1=<pipeline>",
+	"queries" : 
+	[
+		{ "connection" : "repo",
+		  "query": "select f.FLOWNAME as pipeline, f.FLOWID, e.LSNAME as environment, e.LSID, v.NAME as VERSION, tag.TAG_VALUE, To_CHAR(a.CREATE_DATETIME, 'MM-DD-YYHH24:MI') as FINISH from TWMANAGEDB.TBL_SMG_ACTIVITIES a INNER JOIN TWMANAGEDB.TBL_LS e ON a.ENVIRONMENT_ID = e.LSID INNER JOIN TWMANAGEDB.TBL_FLOW f ON e.FLOWID = f.FLOWID JOIN  TWMANAGEDB.TBL_SMG_VERSION v on v.ID = a.VERSION_ID JOIN TWMANAGEDB.TWLABELS l ON v.POST_LABEL_ID = l.ID
+LEFT JOIN TWmanagedb.TBL_TAGS tag join TWmanagedb.TBL_TAGS_TYPES y on y.ID = tag.TAG_TYPE_ID join TWmanagedb.TBL_OBJECT_TYPES_MAPPING m on m.ID = tag.OBJECT_MAPPING_ID ON m.OBJECT_TYPE_ID = 1 and m.OBJECT_ID = v.ID where a.ACTIVITY_TYPE = 0 and f.FLOWNAME = 'ARG1' 
+ORDER BY f.FLOWNAME, e.LSNAME, a.CREATE_DATETIME;",
+			"output": [
+	      ["Pipeline",0,18],
+	      ["Environment",2,15],
+		    ["Version",4,20],
+		    ["Tag",5,25],
+	      ["Finish",6,15]
+		  ]
+		}
+	]
+},
   "revisions_in_label" : {
     "name" : "DDL Revisions for all objects in a label",
     "usage" : "dbm_api.bat action=revisions_in_label ARG1=<pipeline> ARG2=<label_name>",

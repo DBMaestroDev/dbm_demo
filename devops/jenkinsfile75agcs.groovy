@@ -1,13 +1,14 @@
 import groovy.json.*
 
 // OPKR
-def landscape = "job"
+def landscape = "develop"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
 // Outboard Local Settings - set this to be able to find the settings file
 def settings_file = "local_settings.json"
-def base_path = "C:\\AutomationScriptsMaestro\\DEVOPS"
+//def base_path = "C:\\AutomationScriptsMaestro\\DEVOPS"
+def base_path = "C:\\Automation\\Jenkins_pipe"
 
 rootJobName = "$env.JOB_NAME";
 if (landscape == "job") { landscape = rootJobName.toLowerCase()}
@@ -84,7 +85,7 @@ if (raw_version.startsWith("V")) {
 }else{
 	version = raw_version
 }
-version = version + "__" + snow_id
+version = "${version}_${snow_id}"
 echo message_box("${pipeline} Deployment", "title")
 echo "# FINAL PACKAGE VERSION: ${version}"
 environment = environments[0]
@@ -96,10 +97,14 @@ stage(environment) {
     bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
     bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
     echo "#------------------- Copying DDL ---------#"
+    def tmp_path = "${source_dir}${sep}${snow_id}${sep}ddl"
+    def filelist = bat(script: "dir /B ${tmp_path}${sep}*.sql", returnStdout: true)
     //bat "copy \"${source_dir}${sep}${snow_id}${sep}ddl${sep}*.sql\" \"${staging_dir}${sep}${version}\""
-	def icnt = prefix_files("${source_dir}${sep}${snow_id}${sep}ddl", "${staging_dir}${sep}${version}", 0)
-    echo "#------------------- Copying DML ---------#"
-	icnt = prefix_files("${source_dir}${sep}${snow_id}${sep}dml", "${staging_dir}${sep}${version}", icnt)
+	def icnt = prefix_files(filelist, tmp_path, "${staging_dir}${sep}${version}", 0)
+    echo "#------------------- Copying DML (${icnt}) ---------#"
+	tmp_path = "${source_dir}${sep}${snow_id}${sep}dml"
+    filelist = bat(script: "dir /B ${tmp_path}${sep}*.sql", returnStdout: true)
+    icnt = prefix_files(filelist, tmp_path, "${staging_dir}${sep}${version}", icnt)
     //bat "copy \"${source_dir}${sep}${snow_id}${sep}dml${sep}*.sql\" \"${staging_dir}${sep}${version}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
@@ -181,21 +186,34 @@ def adhoc_package(full_package_name){
 	return package_name
 }
 
-def prefix_files(path, target, icnt = 0){
+@NonCPS
+def prefix_files(flist, path, target, icnt = 0){
+	def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+	'Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
 	def files = []
-	def result = bat(script: "dir /B ${path}${sep}*.sql", returnStdout: true)
 	def new_name = ""
 	def ilen = 0
-	result.eachLine{
-		println "Line: ${it}"
-		ilen = it.length()
-		println "Len: ${ilen}, Cmd: ${it.toLowerCase().contains("dir /b")}"
-		if(ilen > 2 && !it.toLowerCase().contains("dir /b")){
-			new_name = "${sortable(icnt)}_${ it}"
-			bat("copy ${path}${sep}${fil} ${target}${sep}${new_name}")
+	def sv = ""
+	def iter = 0
+	def remain = 0
+	def is_cmd = true
+	def items = flist.split("\r\n")
+	for (item in items){
+		ilen = item.length()
+		is_cmd = item.toLowerCase().contains("dir /b")
+		if(ilen > 2 && !is_cmd){
+			iter = (icnt/36).toInteger()
+			remain = icnt % 36
+			sv = "${seq.get(iter)}${seq.get(remain)}"
+			new_name = "${sv}_${item}"
+			println "copy ${path}${sep}${item} ${target}${sep}${new_name}"
+			src = new File("${path}${sep}${item}")
+			trg = new File("${target}${sep}${new_name}")
+			trg << src.text
 			icnt += 1
 		}
 	}
+	return icnt
 }
 
 @NonCPS
@@ -221,7 +239,7 @@ def get_settings(file_path, project = "none") {
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
-	println "Project Configurations: ${settings["branch_map"].keySet()}"
+	println "\r\nProject Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
 
@@ -241,7 +259,7 @@ def message_box(msg, def mtype = "sep") {
     res += "#${"-" * tot}#\n"   
   }
   //println res
-  return res
+  return(res)
 }
 
 def separator( def ilength = 82){
@@ -250,11 +268,14 @@ def separator( def ilength = 82){
 }
 
 def sortable(inum){
-  ans = "00"
+  String ans = "00"
+  println "Process ${inum}"
   def icnt = inum.toInteger()
   //incoming int
   def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
   def iter = (icnt/36).toInteger()
   def remain = icnt % 36
-  return "${seq.get(iter)}${seq.get(remain)}"
+  ans = "${seq.get(iter)}${seq.get(remain)}"
+  println ans
+  return(ans)
 }
