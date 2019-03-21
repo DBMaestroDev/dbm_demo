@@ -14,7 +14,7 @@ import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
 import DbmSecure
-def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
+base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 //evaluate(new File("${base_path}\\DbmSecure.groovy"))
 def jsonSlurper = new JsonSlurper()
 def json_file = "dbm_queries.json"
@@ -69,6 +69,9 @@ if (arg_map.containsKey("action")) {
       break
     case "transfer_packages":
       transfer_packages()
+      break
+    case "environment_report":
+      environment_report()
       break
     case "encrypt":
       password_encrypt()
@@ -335,6 +338,95 @@ def disable_package() {
   conn.close()
 }
 
+def empty_package(){
+  def contents = file_contents["package_content"]
+  def version = arg_map["ARG2"]
+  def pipeline = arg_map["ARG1"]
+  def cnt = 0
+  message_box("Task: Empty Package - ")
+  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
+  def query = contents["queries"][0]
+  ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  ver_query = ver_query.replaceAll('ARG2', version)
+  query["query"] = ver_query
+  def results = result_query(query, ["SCRIPT_ID","script","SCRIPT_SORCE_DATA_REFERENCE"])
+  println " Processed Query: ${query["query"]}"
+  def conn = sql_connection("repo")
+  results["SCRIPT_ID"].each {script_id -> 
+    println "Removing script_id = ${script_id}"
+    conn.call("{call PKG_RM.DELETE_SCRIPT(?,?)}", [script_id, Sql.VARCHAR]) { was_deleted ->
+		if (was_deleted == 'TRUE') {println "Deleted Successfully (${was_deleted})"}
+	}
+    println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
+	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
+	fil.delete()
+	cnt += 1
+  }
+  conn.close()
+}
+
+def changeStagingDir() {
+  // Change the product staging directory
+  if (!arg_map.containsKey("pipeline")) {
+    println "Send pipeline= and path= arguments"
+    System.exit(1)
+  }
+  def flowid = 0
+  def old_path = ""
+  def pipeline = arg_map["pipeline"]
+  def query = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
+  println message_box("Change Staging Folder", "title")
+  def new_path = arg_map["path"]
+  println "Pipeline: ${pipeline}"
+  def conn = sql_connection("repo")
+  conn.eachRow(query) { rec ->
+    old_path = rec["SCRIPTOUTPUTFOLDER"]
+    println "Existing: ${old_path}"
+    flowid = rec["FLOWID"]
+  }
+  ensure_dir()
+  println "New: ${new_path}"
+  println ""
+  println "=> Update Flow Record"
+  query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
+}
+
+def environment_report(){
+	// Reports on environments versions and tags
+  if (!arg_map.containsKey("pipeline")) {
+    println "Send pipeline= and path= arguments"
+    System.exit(1)
+  }
+  def contents = file_contents["environment_tags"]
+  def pipeline = arg_map["pipeline"]
+  def file_path = base_path + sep + "Env_report.sql"
+  if (!arg_map.containsKey("path")) {
+	file_path = arg_map["path"]
+  }
+  def cnt = 0
+  message_box("Task: Environment Report")
+  def query = contents["queries"][0]
+  ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  query["query"] = ver_query
+  def results = result_query(query)
+  println " Processed Query: ${query["query"]}"
+  //def conn = sql_connection("repo")
+  
+  //conn.close()
+
+}
+
+// #--------- UTILITY ROUTINES ------------#
+
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
   conn.eachRow(query_string)
@@ -345,8 +437,6 @@ def show_object_ddl(query_string, conn) {
     println bodyText
   }
 }
-
-// #--------- UTILITY ROUTINES ------------#
 
 def get_export_json_file(target, path_only = false){
   def jsonSlurper = new JsonSlurper()
@@ -474,67 +564,6 @@ def create_file(pth, name, content){
 def read_file(pth, name){
   def fil = new File(pth,name)
   return fil.text
-}
-
-def empty_package(){
-  def contents = file_contents["package_content"]
-  def version = arg_map["ARG2"]
-  def pipeline = arg_map["ARG1"]
-  def cnt = 0
-  message_box("Task: Empty Package - ")
-  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
-  def query = contents["queries"][0]
-  ver_query = query["query"]
-  ver_query = ver_query.replaceAll('ARG1', pipeline)
-  ver_query = ver_query.replaceAll('ARG2', version)
-  query["query"] = ver_query
-  def results = result_query(query, ["SCRIPT_ID","script","SCRIPT_SORCE_DATA_REFERENCE"])
-  println " Processed Query: ${query["query"]}"
-  def conn = sql_connection("repo")
-  results["SCRIPT_ID"].each {script_id -> 
-    println "Removing script_id = ${script_id}"
-    conn.call("{call PKG_RM.DELETE_SCRIPT(?,?)}", [script_id, Sql.VARCHAR]) { was_deleted ->
-		if (was_deleted == 'TRUE') {println "Deleted Successfully (${was_deleted})"}
-	}
-    println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
-	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
-	fil.delete()
-	cnt += 1
-  }
-  conn.close()
-}
-
-def changeStagingDir() {
-  // Change the product staging directory
-  if (!arg_map.containsKey("pipeline")) {
-    println "Send pipeline= and path= arguments"
-    System.exit(1)
-  }
-  def flowid = 0
-  def old_path = ""
-  def pipeline = arg_map["pipeline"]
-  def query = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
-  println message_box("Change Staging Folder", "title")
-  def new_path = arg_map["path"]
-  println "Pipeline: ${pipeline}"
-  def conn = sql_connection("repo")
-  conn.eachRow(query) { rec ->
-    old_path = rec["SCRIPTOUTPUTFOLDER"]
-    println "Existing: ${old_path}"
-    flowid = rec["FLOWID"]
-  }
-  ensure_dir()
-  println "New: ${new_path}"
-  println ""
-  println "=> Update Flow Record"
-  query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
-  conn.execute(query)
-  println "=> Update Script Import Records"
-  query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
-  conn.execute(query)
-  println "=> Update Script Import Records"
-  query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
-  conn.execute(query)
 }
 
 def getNextVersion(optionType){
