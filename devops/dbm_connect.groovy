@@ -405,24 +405,43 @@ def environment_report(){
     println "Send pipeline= and path= arguments"
     System.exit(1)
   }
+  def html = ""
+  def tmp_html = ""
   def contents = file_contents["environment_tags"]
   def pipeline = arg_map["pipeline"]
-  def file_path = base_path + sep + "Env_report.sql"
+  def output_path = base_path
+  def template_path = base_path + sep + "env_report_template.html"
   if (!arg_map.containsKey("path")) {
-	file_path = arg_map["path"]
+	output_path = arg_map["path"]
   }
   def cnt = 0
   message_box("Task: Environment Report")
+  html = read_file(base_path,"env_report_template.html" )
   def query = contents["queries"][0]
   ver_query = query["query"]
   ver_query = ver_query.replaceAll('ARG1', pipeline)
-  query["query"] = ver_query
-  def results = result_query(query)
-  println " Processed Query: ${query["query"]}"
-  //def conn = sql_connection("repo")
+  def conn = sql_connection("repo")
+  tmp_html += "<tr>\n"
+  query["output"].each{arr ->
+    tmp_html += "<th>${arr[0]}</th>\n"
+  }
+  tmp_html += "</tr>\n"
+  html = html.replaceAll('__HEADER__', tmp_html)
+  tmp_html = ""
+  conn.eachRow(ver_query)
+  { row ->
+	  tmp_html += "<tr>\n"
+      query["output"].each{arr ->
+      def val = row.getAt(arr[1])
+      tmp_html += "<td>${val.toString().trim()}</td>\n"
+    }
+	tmp_html += "</tr>\n"
+  }
+  html = html.replaceAll('__BODY__', tmp_html)
   
-  //conn.close()
-
+  conn.close()
+   println " Processed Query: ${query["query"]}"
+   create_file(output_path, "env_report.html", html)
 }
 
 // #--------- UTILITY ROUTINES ------------#
