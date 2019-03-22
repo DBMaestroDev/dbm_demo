@@ -406,6 +406,7 @@ def environment_report(){
     System.exit(1)
   }
   def html = ""
+  def grid = [:]
   def tmp_html = ""
   def contents = file_contents["environment_tags"]
   def pipeline = arg_map["pipeline"]
@@ -423,29 +424,60 @@ def environment_report(){
   ver_query = ver_query.replaceAll('ARG1', pipeline)
   def conn = sql_connection("repo")
   def ipos = 0
+  sdf = new SimpleDateFormat("MM/dd/yyyy")
+  sdft = new SimpleDateFormat("HH:mm:ss")
   html = html.replaceAll('__PIPELINE__', pipeline)
+  def package_list = get_packages(pipeline, conn)
   def script_tags = get_script_tags(pipeline, conn)
-  tmp_html += "<tr>\n"
-  query["output"].each{arr ->
-    tmp_html += "<th>${arr[0]}</th>\n"
+  def environments = get_environments(pipeline, conn)
+  // Build master dictionary
+  package_list.keySet().each{ ver ->
+	stf = [:]
+	stf["tags"] = ""
+	environments.each{ env,v -> 
+		stf[env] = ""
+	}
+	println "Ver: ${ver}"
+	grid[ver] = stf
+	
   }
+  // Now loop through deployment data
+  // pipeline, environment, VERSION, TAG_VALUE
+  conn.eachRow(ver_query){ row ->
+	tag = row["TAG_VALUE"] == null ? "" : row["TAG_VALUE"]
+	ver = row["VERSION"]
+	String dep_at = row["FINISH"]
+	grid[ver]["tags"] = tag
+	grid[ver][row["environment"]] = "${dep_at.split(" ")[0]}<br>${dep_at.split(" ")[1]}"
+  }
+  
+  
+	tmp_html += "<tr>\n"
+	tmp_html += "<th>Version</th>\n"
+	tmp_html += "<th>Tags</th>\n"
+	
+	environments.each{ env,v -> 
+		tmp_html += "<th>${env}</th>\n"	
+	}
   tmp_html += "</tr>\n"
   html = html.replaceAll('__HEADER__', tmp_html)
   tmp_html = ""
   // pipeline, environment, VERSION, TAG_VALUE
-  conn.eachRow(ver_query)
-  { row ->
-	  tmp_html += "<tr>\n"
-      query["output"].each{arr ->
-	  ipos = arr[1]
-      def val = row.getAt(ipos)
-	  if(ipos == 5 && script_tags.containsKey(row["VERSION"])){
-		val == null ? val = "${script_tags[row["VERSION"]].join(",")}" : "${val},${script_tags[row["VERSION"]].join(",")}"
-	  }
-      tmp_html += "<td>${val.toString().trim()}</td>\n"
+	grid.each{ ver,vals ->
+		tag = vals["tags"]
+		tmp_html += "<tr>\n"
+		tmp_html += "<td>${ver}</td>\n"
+		if(script_tags.containsKey(ver)){
+			println "Found ver: ${ver}"
+			tag == "" ? tag = "${script_tags[ver].join(",")}" : "${tag},${script_tags[ver].join(",")}"
+		}
+
+		tmp_html += "<td>${tag}</td>\n"
+		environments.each{ env,v -> 
+			tmp_html += "<td>${vals[env].toString().trim()}</td>\n"	
+		}
     }
 	tmp_html += "</tr>\n"
-  }
   html = html.replaceAll('__BODY__', tmp_html)
   
   conn.close()
@@ -461,14 +493,40 @@ def get_script_tags(pipeline, cxn){
   ver_query = ver_query.replaceAll('ARG1', pipeline)
   cxn.eachRow(ver_query)
   { row ->
-	println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+	//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
      if(row["TAG_VALUE"] != null){
 	  if(!returnVal.containsKey(row["version"])){returnVal[row["version"]] = []}
 	  returnVal[row["version"]] << row["TAG_VALUE"]
 	 }
   }
-  println "Got this: ${returnVal}"
   return returnVal
+}
+
+def get_packages(pipeline, cxn){
+	def sql = "select p.FLOWNAME, v.id, v.name as version, v.IS_ENABLED as enabled from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.ID"
+	def returnVal = [:]
+	def ver_query = sql
+	ver_query = ver_query.replaceAll('ARG1', pipeline)
+	cxn.eachRow(ver_query)
+	{ row ->
+		//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal[row["version"]] = ["id" : row["ID"]]
+	}
+	return returnVal
+}
+
+def get_environments(pipeline, cxn){
+	def sql = "select p.FLOWNAME, e.LSNAME as environment, e.LSID, e.ENV_TYPE, et.T_ORDER from TWMANAGEDB.TBL_LS e INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = e.FLOWID INNER JOIN TWMANAGEDB.TBL_SMG_ENV_TYPES et on et.ID = e.ENV_TYPE where p.FLOWNAME = 'ARG1' AND e.ENV_TYPE <> 8 order by et.T_ORDER"
+	def returnVal = [:]
+	def ver_query = sql
+	ver_query = ver_query.replaceAll('ARG1', pipeline)
+	cxn.eachRow(ver_query)
+	{ row ->
+		//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal[row["environment"]] = ["order" : row["T_ORDER"]]
+	}
+	//println "Got this: ${returnVal}"
+	return returnVal
 }
 
 // #--------- UTILITY ROUTINES ------------#
