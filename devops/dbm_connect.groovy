@@ -416,11 +416,15 @@ def environment_report(){
   }
   def cnt = 0
   message_box("Task: Environment Report")
+  println "Args: ${arg_map}"
   html = read_file(base_path,"env_report_template.html" )
   def query = contents["queries"][0]
   ver_query = query["query"]
   ver_query = ver_query.replaceAll('ARG1', pipeline)
   def conn = sql_connection("repo")
+  def ipos = 0
+  html = html.replaceAll('__PIPELINE__', pipeline)
+  def script_tags = get_script_tags(pipeline, conn)
   tmp_html += "<tr>\n"
   query["output"].each{arr ->
     tmp_html += "<th>${arr[0]}</th>\n"
@@ -428,11 +432,16 @@ def environment_report(){
   tmp_html += "</tr>\n"
   html = html.replaceAll('__HEADER__', tmp_html)
   tmp_html = ""
+  // pipeline, environment, VERSION, TAG_VALUE
   conn.eachRow(ver_query)
   { row ->
 	  tmp_html += "<tr>\n"
       query["output"].each{arr ->
-      def val = row.getAt(arr[1])
+	  ipos = arr[1]
+      def val = row.getAt(ipos)
+	  if(ipos == 5 && script_tags.containsKey(row["VERSION"])){
+		val == null ? val = "${script_tags[row["VERSION"]].join(",")}" : "${val},${script_tags[row["VERSION"]].join(",")}"
+	  }
       tmp_html += "<td>${val.toString().trim()}</td>\n"
     }
 	tmp_html += "</tr>\n"
@@ -442,6 +451,24 @@ def environment_report(){
   conn.close()
    println " Processed Query: ${query["query"]}"
    create_file(output_path, "env_report.html", html)
+}
+
+def get_script_tags(pipeline, cxn){
+  def returnVal = [:]
+  def contents = file_contents["script_tags"]
+  def query = contents["queries"][0]
+  def ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  cxn.eachRow(ver_query)
+  { row ->
+	println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+     if(row["TAG_VALUE"] != null){
+	  if(!returnVal.containsKey(row["version"])){returnVal[row["version"]] = []}
+	  returnVal[row["version"]] << row["TAG_VALUE"]
+	 }
+  }
+  println "Got this: ${returnVal}"
+  return returnVal
 }
 
 // #--------- UTILITY ROUTINES ------------#
