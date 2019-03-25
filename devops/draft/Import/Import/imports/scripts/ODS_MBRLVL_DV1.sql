@@ -1,0 +1,2562 @@
+--------------------------------------------------------------------------
+-- ODS_MBRLVL_DV1@DOMDMA schema extracted by user BE82947
+--------------------------------------------------------------------------
+-- "Set define off" turns off substitution variables.
+Set define off;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER
+(
+  CLT_GRP_MEM_NK        VARCHAR2(60 CHAR)       NOT NULL,
+  SRC_CD                VARCHAR2(12 CHAR)       NOT NULL,
+  SRC_NK                VARCHAR2(60 CHAR)       NOT NULL,
+  PRTY_TYPE_VID         NUMBER(12),
+  PRTY_GRP_TYPE_VID     NUMBER(12),
+  CLT_GRP_TYPE_VID      NUMBER(12),
+  PRTY_NAME             VARCHAR2(100 CHAR),
+  CDI_LGCL_SRC_CAT_VID  NUMBER(12),
+  ATT_CD                VARCHAR2(12 CHAR)       NOT NULL,
+  ATT_STATUS            CHAR(1 CHAR)            NOT NULL,
+  EVT_TIME              TIMESTAMP(6)            NOT NULL,
+  EVT_USER_ID           VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME     TIMESTAMP(6)            DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY     VARCHAR2(100 CHAR)      NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER IS 'This table contains the client group attributes with one active value.  Usually we integrate those attributes in the Initiate solution, but since we do not do any matching of party groups, and since there is no survivorship on these attributes (single source is FCC), it was decided to integrate them in the extension because it is easier.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.CDI_LGCL_SRC_CAT_VID IS 'Surrogate key of a value of the value domain CDI Logical Source Category.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.ATT_STATUS IS 'A: Active, when the relationship between the client and the agreement is active
+I: Inactive, when the relationship between the client and the agreement is inactive';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.CLT_GRP_MEM_FK ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CLIENT_GROUP_MEMBER ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER
+(CLT_GRP_MEM_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER
+ ADD CONSTRAINT PK_CLIENT_GROUP_MEMBER
+  PRIMARY KEY
+  (CLT_GRP_MEM_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_CLIENT_GROUP_MEMBER;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND
+(
+  CLIENT_SPE_COND_NK  VARCHAR2(60 CHAR)         NOT NULL,
+  SRC_CD              VARCHAR2(12 CHAR)         NOT NULL,
+  SRC_NK              VARCHAR2(60 CHAR)         NOT NULL,
+  LINES_CONTENT       VARCHAR2(255 CHAR),
+  ATT_CD              VARCHAR2(12 CHAR)         NOT NULL,
+  ATT_STATUS          CHAR(1 CHAR)              NOT NULL,
+  EVT_TIME            TIMESTAMP(6)              NOT NULL,
+  EVT_USER_ID         VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME   TIMESTAMP(6)              DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY   VARCHAR2(100 CHAR)        NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND IS 'This is free text describing special conditions that are applicable to a client.  From FCC, we only have one set of specific conditions.  When we will add other sources, we may have other sets of specific conditions. We should survive all the specific conditions that are applicable to a client.  Since a client can have potentially multiple specific conditions, this information is stored in the CDI extension.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.SRC_CD IS 'INDFCC
+INDOSS
+ORGFCC
+ORGOSS
+INFOCAN
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.SRC_NK IS 'FCC client number, OSS client number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.LINES_CONTENT IS 'Free text description of the client specific conditions.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.CLIENT_SPE_COND_MEM_FK ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CLIENT_SPECIFIC_COND ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND
+(CLIENT_SPE_COND_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND
+ ADD CONSTRAINT PK_CLIENT_SPECIFIC_COND
+  PRIMARY KEY
+  (CLIENT_SPE_COND_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_CLIENT_SPECIFIC_COND;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION
+(
+  IND_OCC_NK                   VARCHAR2(60 CHAR) NOT NULL,
+  SRC_CD                       VARCHAR2(12 CHAR) NOT NULL,
+  SRC_NK                       VARCHAR2(60 CHAR) NOT NULL,
+  IND_OCC_TYPE_VID             NUMBER(12),
+  IND_OCC_DESC                 VARCHAR2(255 CHAR),
+  EMPL_STATUS_TYPE_VID         NUMBER(12),
+  EMPLOYER_NAME                VARCHAR2(100 CHAR),
+  EMPLOYER_NAICS_2DUS2007_VID  NUMBER(12),
+  EMPLOYEE_NUM                 VARCHAR2(30 CHAR),
+  IND_OCC_EFF_DT               DATE,
+  IND_OCC_END_DT               DATE,
+  ATT_CD                       VARCHAR2(12 CHAR) NOT NULL,
+  ATT_STATUS                   CHAR(1 CHAR)     NOT NULL,
+  EVT_TIME                     TIMESTAMP(6)     NOT NULL,
+  EVT_USER_ID                  VARCHAR2(30 CHAR),
+  EVT_LOCATION                 VARCHAR2(32 CHAR),
+  REC_LAST_UPD_TIME            TIMESTAMP(6)     DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY            VARCHAR2(100 CHAR) NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.IND_OCC_DESC IS 'Description of the individual occupation.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.EMPLOYER_NAME IS 'The name of the employer of the individual.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.EMPLOYEE_NUM IS 'An identifier by which the Employee is known to the Organization he is working in.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.IND_OCC_EFF_DT IS 'The date from which the individual occupation is effective.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.IND_OCC_END_DT IS 'The calendar date after which the individual occupation is no longer valid.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.ATT_CD IS 'Fixed value:
+IOCC: for an individual occupation
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.EVT_LOCATION IS 'Event location identifier (defined by external application). Identify the source system in which the event occured.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.IND_OCC_MEM_FK ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_IND_OCC ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION
+(IND_OCC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION
+ ADD CONSTRAINT PK_IND_OCC
+  PRIMARY KEY
+  (IND_OCC_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_IND_OCC;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_LOCK
+(
+  SRC_CD     VARCHAR2(12 CHAR)                  NOT NULL,
+  SRC_NK     VARCHAR2(60 CHAR)                  NOT NULL,
+  LOCK_TIME  TIMESTAMP(6)                       DEFAULT SYSTIMESTAMP          NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   10
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CEX_LOCK ON ODS_MBRLVL_DV1.CEX_LOCK
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_LOCK
+ ADD CONSTRAINT PK_CEX_LOCK
+  PRIMARY KEY
+  (SRC_CD, SRC_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_CEX_LOCK;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER
+(
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  MEM_STATUS         CHAR(1 CHAR)               NOT NULL,
+  DELETE_STATUS      CHAR(1 CHAR)               NOT NULL,
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER ON ODS_MBRLVL_DV1.CEX_MEMBER
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER
+ ADD CONSTRAINT PK_MEMBER
+  PRIMARY KEY
+  (SRC_CD, SRC_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL
+(
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  ENT_TYPE           VARCHAR2(12 CHAR)          NOT NULL,
+  CUR_EID            NUMBER(19),
+  EVT_TYPE           VARCHAR2(32 CHAR),
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  ACTVTY_LEVEL       NUMBER(2)                  NOT NULL,
+  PROCESSED          CHAR(1 CHAR)               NOT NULL,
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL IS 'Activity level of a party member. ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.SRC_CD IS 'The code that identifies the logical source of the member information.
+PGFCC: A party group member from FCC
+INDFCC: An individual member from FCC
+INDOSS: An individual member from OSS
+ORGFCC: An organization member from FCC
+ORGOSS: An organization member from OSS
+INFOCAN: An organization member from Info Canada ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.SRC_NK IS 'The identifier of the member in the source system.
+FCC client number, OSS client number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.ENT_TYPE IS 'The code of the entity type.
+id: Individual
+og: Organization
+ide: Individual External
+oge: Organization External';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.CUR_EID IS 'The current enterprise id of the member.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.EVT_TYPE IS 'The code of the type of event.
+ADD
+CHG
+MRG
+DEL';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.EVT_TIME IS 'When the event is triggered. ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.EVT_USER_ID IS 'The userid of the user who triggered the event. ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.ACTVTY_LEVEL IS 'The activity level of the party member. ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.PROCESSED IS 'Specify if the the event has been processed by Initiate.
+0: Not processed
+1: Processed ';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.IX_MEMBER_ACTVT_LVL_01 ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL
+(CUR_EID)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_ACTVT_LVL_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_ACTVT_LVL ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL
+(SRC_CD, SRC_NK, ENT_TYPE)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL
+ ADD CONSTRAINT PK_MEMBER_ACTVT_LVL
+  PRIMARY KEY
+  (SRC_CD, SRC_NK, ENT_TYPE)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_ACTVT_LVL;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS
+(
+  MEM_ADD_NK                    VARCHAR2(60 CHAR) NOT NULL,
+  SRC_CD                        VARCHAR2(12 CHAR) NOT NULL,
+  SRC_NK                        VARCHAR2(60 CHAR) NOT NULL,
+  ADD_NK                        VARCHAR2(60 CHAR),
+  MEM_ADD_RLTNP_TYPE_VID        NUMBER(12),
+  MEM_ADD_EFF_DT                DATE,
+  MEM_ADD_END_DT                DATE,
+  PRTY_WRONG_ADD_FLAG_VID       NUMBER(12),
+  OAS_CIVIC_NUM                 VARCHAR2(30 CHAR),
+  OAS_CIVIC_NUM_SUFFIX          VARCHAR2(10 CHAR),
+  OAS_UNIT_DESIGNATOR           VARCHAR2(100 CHAR),
+  OAS_UNIT_NUM                  VARCHAR2(30 CHAR),
+  OAS_STREET_TYPE               VARCHAR2(100 CHAR),
+  OAS_STREET_NAME               VARCHAR2(100 CHAR),
+  OAS_STREET_DIRECTION          VARCHAR2(100 CHAR),
+  OAS_RURAL_ROUTE_NUM           VARCHAR2(30 CHAR),
+  OAS_RURAL_ROUTE_SYMBOL        VARCHAR2(10 CHAR),
+  OAS_MUNICIPALITY_NAME         VARCHAR2(100 CHAR),
+  OAS_POSTAL_BOX_NUM            VARCHAR2(30 CHAR),
+  OAS_STATION_TYPE              VARCHAR2(10 CHAR),
+  OAS_STATION_NAME              VARCHAR2(20 CHAR),
+  OAS_GENERAL_DLVR_ABBR         VARCHAR2(10 CHAR),
+  OAS_POSTAL_CD_UNFORMATTED     VARCHAR2(30 CHAR),
+  OAS_PROVINCE_CNTR_STANDARD    VARCHAR2(20 CHAR),
+  OAS_CANADA_POST_INT_DEST_CD   VARCHAR2(10 CHAR),
+  OAS_CANADA_POST_INT_DEST      VARCHAR2(50 CHAR),
+  OAL_RURAL_ROUTE_ADD_LINE_1    VARCHAR2(100 CHAR),
+  OAL_RURAL_ROUTE_ADD_LINE_2    VARCHAR2(100 CHAR),
+  OAL_RURAL_ROUTE_ADD_LINE_3    VARCHAR2(100 CHAR),
+  OAL_RURAL_ROUTE_ADD_LINE_4    VARCHAR2(100 CHAR),
+  OAL_ADDTNL_DLVR_INFO_TYPE     VARCHAR2(100 CHAR),
+  OAL_ADDTNL_DLVR_INFO_LINE_1   VARCHAR2(100 CHAR),
+  OAL_ADDTNL_DLVR_INFO_LINE_2   VARCHAR2(100 CHAR),
+  OAL_ADDTNL_DLVR_INFO_LINE_3   VARCHAR2(100 CHAR),
+  OAL_ADDTNL_DLVR_INFO_LINE_4   VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_1                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_2                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_3                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_4                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_5                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_6                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_7                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_8                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_9                VARCHAR2(100 CHAR),
+  OAL_ADD_LINE_10               VARCHAR2(100 CHAR),
+  OAC_ADD_COMPLETE              VARCHAR2(255 CHAR),
+  SAS_ORG_NAME                  VARCHAR2(100 CHAR),
+  SAS_ORG_DEPARTMENT            VARCHAR2(100 CHAR),
+  SAS_CONTACT_COMPLETE          VARCHAR2(100 CHAR),
+  SAS_BUILDING_COMPLETE         VARCHAR2(100 CHAR),
+  SAS_BUILDING_DESCRIPTOR       VARCHAR2(10 CHAR),
+  SAS_BUILDING_NUM              VARCHAR2(30 CHAR),
+  SAS_BUILDING_NAME             VARCHAR2(100 CHAR),
+  SAS_SUB_BUILDING_COMPLETE     VARCHAR2(100 CHAR),
+  SAS_SUB_BUILDING_DESCRIPTOR   VARCHAR2(100 CHAR),
+  SAS_SUB_BUILDING_NUM          VARCHAR2(100 CHAR),
+  SAS_STREET_COMPLETE           VARCHAR2(100 CHAR),
+  SAS_STREET_NAME               VARCHAR2(100 CHAR),
+  SAS_STREET_POST_DESCRIPTOR    VARCHAR2(25 CHAR),
+  SAS_STREET_PRE_DIRECTIONAL    VARCHAR2(10 CHAR),
+  SAS_STREET_POST_DIRECTIONAL   VARCHAR2(25 CHAR),
+  SAS_STREET_PRE_DESCRIPTOR     VARCHAR2(10 CHAR),
+  SAS_NUM_COMPLETE              VARCHAR2(50 CHAR),
+  SAS_DLVR_SRV_ADD_INFO         VARCHAR2(100 CHAR),
+  SAS_DLVR_SRV_COMPLETE         VARCHAR2(100 CHAR),
+  SAS_DLVR_SRV_DESCRIPTOR       VARCHAR2(100 CHAR),
+  SAS_DLVR_SRV_NUM              VARCHAR2(100 CHAR),
+  SAS_LOCALITY_COMPLETE         VARCHAR2(100 CHAR),
+  SAS_LOCALITY_SORTING_CD       VARCHAR2(50 CHAR),
+  SAS_POSTAL_CD_UNFORMATTED     VARCHAR2(50 CHAR),
+  SAS_PROVINCE_ABBR             VARCHAR2(100 CHAR),
+  SAS_PROVINCE_EXTENDED         VARCHAR2(100 CHAR),
+  SAS_PROVINCE_CNTR_STANDARD    VARCHAR2(20 CHAR),
+  SAS_CNTR_NAME                 VARCHAR2(100 CHAR),
+  SAS_CNTR_ISO2                 VARCHAR2(100 CHAR),
+  SAS_CNTR_ISO3                 VARCHAR2(100 CHAR),
+  SAS_RESIDUE_SUPERFLUOUS       VARCHAR2(255 CHAR),
+  SAS_RESIDUE_UNRECOGNIZED      VARCHAR2(255 CHAR),
+  SAC_ADD_COMPLETE              VARCHAR2(255 CHAR),
+  SAL_FORMATTED_ADD_LINE_1      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_2      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_3      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_4      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_5      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_6      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_7      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_8      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_9      VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_10     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_11     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_12     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_13     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_14     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_15     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_16     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_17     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_18     VARCHAR2(100 CHAR),
+  SAL_FORMATTED_ADD_LINE_19     VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_1           VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_2           VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_3           VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_4           VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_5           VARCHAR2(100 CHAR),
+  SAL_DLVR_ADD_LINE_6           VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_1          VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_2          VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_3          VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_4          VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_5          VARCHAR2(100 CHAR),
+  SAL_RECIPIENT_LINE_6          VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_1  VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_2  VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_3  VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_4  VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_5  VARCHAR2(100 CHAR),
+  SAL_CNTR_SPE_LOCALITY_LINE_6  VARCHAR2(100 CHAR),
+  MAILABILITY_SCORE_VID         NUMBER(12),
+  RESULT_NUM                    VARCHAR2(10 CHAR),
+  RESULT_PERCENTAGE             VARCHAR2(14 CHAR),
+  GEOCODING_COMPLETE            VARCHAR2(100 CHAR),
+  GEOCODING_LATITUDE            VARCHAR2(10 CHAR),
+  GEOCODING_LONGITUDE           VARCHAR2(10 CHAR),
+  GEOCODING_LAT_LONG_UNIT       VARCHAR2(10 CHAR),
+  GEOCODING_STATUS_VID          NUMBER(12),
+  HOLD_MAIL_TYPE_VID            NUMBER(12),
+  PROCESS_STATUS_VID            NUMBER(12),
+  COMPLETE_TELPH_NUM            VARCHAR2(50 CHAR),
+  ATT_CD                        VARCHAR2(12 CHAR) NOT NULL,
+  ATT_STATUS                    CHAR(1 CHAR)    NOT NULL,
+  EVT_TIME                      TIMESTAMP(6)    NOT NULL,
+  EVT_USER_ID                   VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME             TIMESTAMP(6)    DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY             VARCHAR2(100 CHAR) NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SRC_NK IS 'Identifier of the client member in the source system:
+FCC client number, OSS client number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.MEM_ADD_EFF_DT IS 'The date this address becomes effective for the member.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.MEM_ADD_END_DT IS 'The date this is not an address anymore for the member.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.PRTY_WRONG_ADD_FLAG_VID IS 'The unique identifier of the Wrong Address Flag.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.OAS_CIVIC_NUM_SUFFIX IS 'When a civic number suffix is present, there is no space when it is alpha (123A), and there is one space when it is a fraction (123 1/2).';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.OAS_MUNICIPALITY_NAME IS 'The official municipality name, as provided to Canada Post.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_ORG_NAME IS 'Company or Organization name including a
+company type descriptor such as Inc., AG,
+or GmbH.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_CONTACT_COMPLETE IS 'My addition to the international address format.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_BUILDING_COMPLETE IS 'Building name. Frequently used in the United Kingdom.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_SUB_BUILDING_COMPLETE IS 'Information that further subdivides a
+Building, e.g. the floor, the suite and/or apartment number: Suite 4400, # 145, App 805, Bureau 200.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_SUB_BUILDING_DESCRIPTOR IS 'Information that further subdivides a
+Building, e.g. the floor, the suite and/or apartment
+number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_SUB_BUILDING_NUM IS 'The number in the sub building information.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_DLVR_SRV_DESCRIPTOR IS 'Code of the respective post office in charge
+of delivery: PO Box, Stn Main, RR, Po, Ss, Succ Bureau-Chef, Bdp.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_DLVR_SRV_NUM IS 'Post Box descriptor (POBox, Postfach, Case
+Postale etc.) and number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_LOCALITY_SORTING_CD IS 'Speeds up delivery in certain countries for
+large localities, like for example Prague or
+Dublin.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_PROVINCE_CNTR_STANDARD IS 'Store the state, province, canton,
+prefecture or other sub-division of a
+country.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_CNTR_NAME IS 'Optionally needed if required for display. It
+is recommended to just store the ISO code
+so that the country name can be displayed
+in any language.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAS_CNTR_ISO2 IS 'ISO alpha2 code according to ISO 3166.
+Can be used to generate the name of a
+country in any language.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAC_ADD_COMPLETE IS 'The complete address as one string, lines are separated by delimiters';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_1 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_2 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_3 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_4 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_5 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_DLVR_ADD_LINE_6 IS 'Building, SubBuilding, Street, House Number';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_1 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_2 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_3 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_4 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_5 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_RECIPIENT_LINE_6 IS 'Organization, Department, Contact';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_1 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_2 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_3 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_4 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_5 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.SAL_CNTR_SPE_LOCALITY_LINE_6 IS 'Locality (Cities)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.MAILABILITY_SCORE_VID IS 'The mailability score (0..5)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.RESULT_NUM IS 'The number of the result (1..20)';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.RESULT_PERCENTAGE IS 'The percentage of the result';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.GEOCODING_LATITUDE IS 'The latitude in the format';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.GEOCODING_LONGITUDE IS 'The longitude in the format';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.GEOCODING_LAT_LONG_UNIT IS 'The unit of both latitude and longitude, i.e. "WGS84"';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.GEOCODING_STATUS_VID IS 'The geocoding status (EGC0..EGC8)
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.HOLD_MAIL_TYPE_VID IS 'Unique identifier of the Hold Mail Type Value.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.PROCESS_STATUS_VID IS 'Unique identifier of the Process Status Value.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.ATT_STATUS IS 'A: Active, when the relationship between the client and the address is active
+I: Inactive, when the relationship between the client and the address is inactive';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.EVT_TIME IS 'The event timestamp of the change';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_ADD_MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_ADDRESS ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS
+(MEM_ADD_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS
+ ADD CONSTRAINT PK_MEMBER_ADDRESS
+  PRIMARY KEY
+  (MEM_ADD_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_ADDRESS;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT
+(
+  MEM_AGR_NK              VARCHAR2(60 CHAR)     NOT NULL,
+  SRC_CD                  VARCHAR2(12 CHAR)     NOT NULL,
+  SRC_NK                  VARCHAR2(60 CHAR)     NOT NULL,
+  AGR_NK                  VARCHAR2(60 CHAR)     NOT NULL,
+  MEM_AGR_RLTNP_TYPE_VID  NUMBER(12),
+  CDI_AGR_TYPE_VID        NUMBER(12),
+  AGR_NUM                 VARCHAR2(60 CHAR),
+  AGR_TRANSIT             VARCHAR2(30 CHAR),
+  FIN_LEGAL_ENT_VID       NUMBER(12),
+  END_DT                  DATE,
+  ATT_CD                  VARCHAR2(12 CHAR)     NOT NULL,
+  ATT_STATUS              CHAR(1 CHAR)          NOT NULL,
+  EVT_TIME                TIMESTAMP(6)          NOT NULL,
+  EVT_USER_ID             VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME       TIMESTAMP(6)          DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY       VARCHAR2(100 CHAR)    NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT IS 'Party Member / Agreement Relationship identifies the role a Party plays with respect to a specific Agreement. In the CDI solution, such relationships is defined by relating a member id with an agreement id.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT.ATT_STATUS IS 'A: Active, when the relationship between the client and the agreement is active
+I: Inactive, when the relationship between the client and the agreement is inactive';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_AGMT_MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_AGREEMENT ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT
+(MEM_AGR_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT
+ ADD CONSTRAINT PK_MEMBER_AGREEMENT
+  PRIMARY KEY
+  (MEM_AGR_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_AGREEMENT;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT
+(
+  MEM_DISC_CAT_NK    VARCHAR2(60 CHAR)          NOT NULL,
+  SRC_CD             VARCHAR2(12 CHAR),
+  SRC_NK             VARCHAR2(60 CHAR),
+  CLEG_CD            VARCHAR2(10 CHAR),
+  PRTY_DISC_CAT_VID  NUMBER(12)                 NOT NULL,
+  ATT_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  ATT_STATUS         CHAR(1 CHAR)               NOT NULL,
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  EVT_LOCATION       VARCHAR2(32 CHAR),
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT IS 'This table contains the disclosure consent of the BNGF clients. A consent must exist for each legal entity group a client is client of.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.ATT_CD IS 'Fixed value:
+IDISCLCAT for an Individual client
+ODISCLCAT for an Organization client';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.EVT_LOCATION IS 'Event location identifier (defined by external application). Identify the source system in which the event occured.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_DISC_CAT_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CEX_MEM_DISC_CAT ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT
+(MEM_DISC_CAT_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT
+ ADD CONSTRAINT PK_CEX_MEM_DISC_CAT
+  PRIMARY KEY
+  (MEM_DISC_CAT_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_CEX_MEM_DISC_CAT;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT
+(
+  MEM_IDENT_NK                    VARCHAR2(60 CHAR) NOT NULL,
+  SRC_CD                          VARCHAR2(12 CHAR) NOT NULL,
+  SRC_NK                          VARCHAR2(60 CHAR) NOT NULL,
+  IDENT_ITEM_DOC_NO               VARCHAR2(50 CHAR),
+  IDENT_ITEM_DOC_TYPE_VID         NUMBER(12),
+  IDENT_ITEM_DOC_DESC             VARCHAR2(100 CHAR),
+  IDENT_ITEM_DOC_EXP_DT           DATE,
+  IDENT_ITEM_ISS_GEO_TYPE_VID     NUMBER(12),
+  IDENT_ITEM_ISS_GEO_VID          NUMBER(12),
+  IDENT_ITEM_ISS_GEO_DESC         VARCHAR2(100 CHAR),
+  IDENT_DT                        DATE,
+  IDENT_METHOD_VID                NUMBER(12),
+  CHECKED_BY_LOB_VID              NUMBER(12),
+  CHECKED_BY_EMPLOYEE_NO          VARCHAR2(50 CHAR),
+  CHECKED_BY_DIST_NO              VARCHAR2(50 CHAR),
+  CHECKED_BY_DIST_OFFICE_NO       VARCHAR2(50 CHAR),
+  CRED_BUREAU_VID                 NUMBER(12),
+  CRED_BUREAU_RISK_RATING_DT      DATE,
+  CRED_BUREAU_DESC                VARCHAR2(100 CHAR),
+  IDENT_PRODUCT_VID               NUMBER(12),
+  IDENT_PRODUCT_REQ_REF_NO        VARCHAR2(50 CHAR),
+  IDENT_PRODUCT_REQ_RETURNED_DT   DATE,
+  IDENT_PRODUCT_DESC              VARCHAR2(100 CHAR),
+  DEP_ACCT_FIN_INST_NO            VARCHAR2(10 CHAR),
+  DEP_ACCT_BRANCH                 VARCHAR2(10 CHAR),
+  DEP_ACCT_NO                     VARCHAR2(50 CHAR),
+  DEP_ACCT_DT_CONFIRMED           DATE,
+  OFFSET_CHK_CHKACCT_FIN_INST_NO  VARCHAR2(10 CHAR),
+  OFFSET_CHK_CHKACCT_BRANCH_NO    VARCHAR2(10 CHAR),
+  OFFSET_CHK_CHKACCT_NO           VARCHAR2(50 CHAR),
+  OFFSET_CHK_DEPACCT_FIN_INST_NO  VARCHAR2(10 CHAR),
+  OFFSET_CHK_DEPACCT_BRANCH_NO    VARCHAR2(10 CHAR),
+  OFFSET_CHK_DEPACCT_NO           VARCHAR2(50 CHAR),
+  OFFSET_CHK_DEP_DT               DATE,
+  OFFSET_CHK_AMT                  NUMBER(15,2),
+  PRTY_IDENT_LFCLS_TYPE_ID        NUMBER(12),
+  PRTY_IDENT_LFCLS_TYPE_EFF_DT    TIMESTAMP(6),
+  ATT_CD                          VARCHAR2(12 CHAR) NOT NULL,
+  ATT_STATUS                      CHAR(1 CHAR)  NOT NULL,
+  EVT_TIME                        TIMESTAMP(6)  NOT NULL,
+  EVT_USER_ID                     VARCHAR2(30 CHAR),
+  EVT_LOCATION                    VARCHAR2(32 CHAR),
+  REC_LAST_UPD_TIME               TIMESTAMP(6)  DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY               VARCHAR2(100 CHAR) NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_ITEM_DOC_NO IS 'The number which uniquely identifies the Party identification document.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_ITEM_DOC_DESC IS 'Used when we just have the name of the identification item.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_ITEM_DOC_EXP_DT IS 'The expiration date of the identification document.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_ITEM_ISS_GEO_DESC IS 'Used when we just have the name of the issuing geographic area of the identification document.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_DT IS 'The date the party identification was performed.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.CHECKED_BY_EMPLOYEE_NO IS 'The number of the employee who checked the party identification.  This can be a BNC employee or a distributor employee number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.CHECKED_BY_DIST_NO IS 'The number of the distibutor who checked the party identification.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.CHECKED_BY_DIST_OFFICE_NO IS 'The office number of the distibutor who checked the party identification.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.CRED_BUREAU_RISK_RATING_DT IS 'Date of the request for the credit bureau risk rating.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.CRED_BUREAU_DESC IS 'Used when we just have the name of the credit bureau, and no domain value.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_PRODUCT_REQ_REF_NO IS 'The reference number of the identification request.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_PRODUCT_REQ_RETURNED_DT IS 'The date the identification request is returned.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.IDENT_PRODUCT_DESC IS 'Used when we just have the name of the identification product used.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.DEP_ACCT_FIN_INST_NO IS 'Financial institution number of the deposit account.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.DEP_ACCT_BRANCH IS 'Transit number of the deposit account.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.DEP_ACCT_NO IS 'Account number of the deposit account.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.DEP_ACCT_DT_CONFIRMED IS 'Date the existence of the account is confirmed.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_CHKACCT_FIN_INST_NO IS 'Financial institution number of the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_CHKACCT_BRANCH_NO IS 'Transit number of the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_CHKACCT_NO IS 'Account number of the offset check.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_DEPACCT_FIN_INST_NO IS 'Financial institution number for the deposit account of the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_DEPACCT_BRANCH_NO IS 'Transit of the deposit account for the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_DEPACCT_NO IS 'Account number for the deposit account of the offset check.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_DEP_DT IS 'Deposit date of the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.OFFSET_CHK_AMT IS 'Amount of the offset check.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.EVT_LOCATION IS 'Event location identifier (defined by external application). Identify the source system in which the event occured.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_IDENT_EVT_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CEX_MEMBER_IDENT_EVENT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT
+(MEM_IDENT_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT
+ ADD CONSTRAINT PK_CEX_MEMBER_IDENT_EVENT
+  PRIMARY KEY
+  (MEM_IDENT_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_CEX_MEMBER_IDENT_EVENT;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY
+(
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  ENT_TYPE           VARCHAR2(12 CHAR)          NOT NULL,
+  CUR_EID            NUMBER(19),
+  PRV_EID            NUMBER(19),
+  EVT_TYPE           VARCHAR2(32 CHAR),
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY IS 'The mapping table between the enterprise IDs and the member IDs. This mapping is created by the Initiate solution matching engine.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY.CUR_EID IS 'The current enterprise id of the member.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY.PRV_EID IS 'The previous enterprise id of the member.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.IX_MEMBER_IDENTITY_01 ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY
+(CUR_EID)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_IDENTITY ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY
+(SRC_CD, SRC_NK, ENT_TYPE)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY
+ ADD CONSTRAINT PK_MEMBER_IDENTITY
+  PRIMARY KEY
+  (SRC_CD, SRC_NK, ENT_TYPE)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_IDENTITY;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP
+(
+  MEM_MEM_RLTNP_NK   VARCHAR2(60 CHAR)          NOT NULL,
+  LEFT_SRC_CD        VARCHAR2(12 CHAR)          NOT NULL,
+  LEFT_SRC_NK        VARCHAR2(60 CHAR)          NOT NULL,
+  RIGHT_SRC_CD       VARCHAR2(12 CHAR)          NOT NULL,
+  RIGHT_SRC_NK       VARCHAR2(60 CHAR)          NOT NULL,
+  RLTNP_TYPE_VID     NUMBER(12),
+  LEFT_ROLE_VID      NUMBER(12),
+  RIGHT_ROLE_VID     NUMBER(12),
+  EFF_START_DT       DATE,
+  EFF_END_DT         DATE,
+  RLTNP_TYPE_CD      VARCHAR2(12 CHAR)          NOT NULL,
+  RLTNP_STATUS       CHAR(1 CHAR)               NOT NULL,
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.EFF_START_DT IS 'Effective start date of the relationship.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.EFF_END_DT IS 'Effective end date of the relationship.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.EVT_TIME IS 'The event timestamp of the change.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_MEMBER_RLTNP ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP
+(MEM_MEM_RLTNP_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.RLTNP_LEFT_MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP
+(LEFT_SRC_CD, LEFT_SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.RLTNP_RIGHT_MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP
+(RIGHT_SRC_CD, RIGHT_SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP
+ ADD CONSTRAINT PK_MEMBER_MEMBER_RLTNP
+  PRIMARY KEY
+  (MEM_MEM_RLTNP_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_MEMBER_RLTNP;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT
+(
+  MEM_ORG_UNIT_NK              VARCHAR2(60 CHAR) NOT NULL,
+  SRC_CD                       VARCHAR2(12 CHAR) NOT NULL,
+  SRC_NK                       VARCHAR2(60 CHAR) NOT NULL,
+  ORG_UNIT_NK                  VARCHAR2(60 CHAR),
+  MEM_ORG_UNIT_RLTNP_TYPE_VID  NUMBER(12),
+  ORG_UNIT_TYPE_VID            NUMBER(12),
+  ORG_UNIT_CD                  VARCHAR2(30 CHAR),
+  ORGU_IND_NAME                VARCHAR2(100 CHAR),
+  ORGU_IND_MEM_RLTNP_TYPE_VID  NUMBER(12),
+  ORGU_IND_USERID              VARCHAR2(30 CHAR),
+  ORGU_IND_EMPLOYEE_NUM        VARCHAR2(30 CHAR),
+  ATT_CD                       VARCHAR2(12 CHAR) NOT NULL,
+  ATT_STATUS                   CHAR(1 CHAR)     NOT NULL,
+  EVT_TIME                     TIMESTAMP(6)     NOT NULL,
+  EVT_USER_ID                  VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME            TIMESTAMP(6)     DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY            VARCHAR2(100 CHAR) NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.SRC_NK IS 'FCC client number, OSS client number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.ORG_UNIT_CD IS 'The organization unit code.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.ORGU_IND_NAME IS 'The name of the individual of the administrative unit having a relationship with the member.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.ORGU_IND_USERID IS 'The userid of the individual of the administrative unit having a relationship with the member.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.ORGU_IND_EMPLOYEE_NUM IS 'The employee number of the individual of the administrative unit having a relationship with the member.
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.ATT_CD IS 'Fixed value:
+CGORGUNITRL: for a client group organization unit relationship
+IORGUNITRL: for an individual organization unit relationship';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_ORG_UNIT_MEM_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_ORG_UNIT ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT
+(MEM_ORG_UNIT_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT
+ ADD CONSTRAINT PK_MEMBER_ORG_UNIT
+  PRIMARY KEY
+  (MEM_ORG_UNIT_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_ORG_UNIT;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE
+(
+  SRC_CD                 VARCHAR2(12 CHAR)      NOT NULL,
+  SRC_NK                 VARCHAR2(60 CHAR)      NOT NULL,
+  MEM_PREF_DOMAIN_CD     VARCHAR2(10 CHAR)      NOT NULL,
+  MEM_PREF_TYPE_CD       VARCHAR2(10 CHAR)      NOT NULL,
+  MEM_PREF_VAL           VARCHAR2(200 CHAR)     NOT NULL,
+  MEM_PREF_START_DT      TIMESTAMP(3)           NOT NULL,
+  MEM_PREF_END_DT        TIMESTAMP(3),
+  LAST_EVT_TM            TIMESTAMP(3),
+  LAST_EVT_USER_ID       VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TM        TIMESTAMP(3)           DEFAULT systimestamp          NOT NULL,
+  REC_LAST_UPD_USER_ID   VARCHAR2(30 CHAR),
+  REC_LAST_UPD_BATCH_ID  NUMBER(12)
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEMBER_PREFERENCE ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE
+(SRC_CD, SRC_NK, MEM_PREF_DOMAIN_CD, MEM_PREF_TYPE_CD, MEM_PREF_END_DT)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE
+ ADD CONSTRAINT PK_MEMBER_PREFERENCE
+  PRIMARY KEY
+  (SRC_CD, SRC_NK, MEM_PREF_DOMAIN_CD, MEM_PREF_TYPE_CD, MEM_PREF_END_DT)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEMBER_PREFERENCE;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION
+(
+  SRC_NK           VARCHAR2(60 CHAR)            NOT NULL,
+  SRC_CD           VARCHAR2(12 CHAR)            NOT NULL,
+  APPLICATION_CD   VARCHAR2(25 CHAR)            NOT NULL,
+  REGROUPEMENT_CD  VARCHAR2(100 CHAR)           NOT NULL,
+  STATUS_CD        VARCHAR2(100 CHAR)           NOT NULL,
+  REC_LAST_UPD_TM  TIMESTAMP(6)                 DEFAULT systimestamp
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT
+(
+  MEM_SOL_CAT_NK     VARCHAR2(60 CHAR)          NOT NULL,
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  CLEG_CD            VARCHAR2(10 CHAR),
+  COM_MEDIUM_VID     NUMBER(12),
+  MEM_SOL_CAT_VID    NUMBER(12),
+  ATT_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  ATT_STATUS         CHAR(1 CHAR)               NOT NULL,
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  EVT_LOCATION       VARCHAR2(32 CHAR),
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.SRC_NK IS 'FCC client number, OSS client number.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.ATT_CD IS 'Fixed value:
+ISOLCAT for an Individual client
+OSOLCAT for an Organization client';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.EVT_LOCATION IS 'Event location identifier (defined by external application). Identify the source system in which the event occured.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE INDEX ODS_MBRLVL_DV1.MEM_SOL_CAT_FK ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_MEM_SOL_CAT ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT
+(MEM_SOL_CAT_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT
+ ADD CONSTRAINT PK_MEM_SOL_CAT
+  PRIMARY KEY
+  (MEM_SOL_CAT_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_MEM_SOL_CAT;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON
+(
+  MEM_MEM_RLTNP_NK            VARCHAR2(60 CHAR) NOT NULL,
+  RELATED_PERSON_TITLE_VID    NUMBER(12),
+  RELATED_PERSON_TITLE_DESC   VARCHAR2(255 CHAR),
+  RELATED_PERSON_ROLE_VID     NUMBER(12),
+  RELATED_PERSON_ROLE_DESC    VARCHAR2(255 CHAR),
+  SIGNATURE_AUTHRZTN_CAT_VID  NUMBER(12),
+  ORG_CNTRL_TYPE_VID          NUMBER(12),
+  PERC_OF_OWNERSHIP           NUMBER(8,5),
+  EVT_TIME                    TIMESTAMP(6)      NOT NULL,
+  EVT_USER_ID                 VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME           TIMESTAMP(6)      DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY           VARCHAR2(100 CHAR) NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.RELATED_PERSON_TITLE_DESC IS 'The description of the title of a related person of an enterprise.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.RELATED_PERSON_ROLE_DESC IS 'The description of the role of a related person of an enterprise.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.PERC_OF_OWNERSHIP IS 'Pourcentage de détention ou de contrôle, directement ou indirectement d''une entité légale.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.EVT_TIME IS 'The event timestamp of the change.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER
+(
+  PRTY_LIST_MEM_NK   VARCHAR2(60 CHAR)          NOT NULL,
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  PRTY_LIST_VID      NUMBER(12)                 NOT NULL,
+  ATT_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  ATT_STATUS         CHAR(1 CHAR)               NOT NULL,
+  EVT_TIME           TIMESTAMP(6)               NOT NULL,
+  EVT_USER_ID        VARCHAR2(30 CHAR),
+  REC_LAST_UPD_TIME  TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER.PRTY_LIST_VID IS '
+';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER.EVT_TIME IS 'The event timestamp of the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER.EVT_USER_ID IS 'The userid of the user who did the change in the source system.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER.REC_LAST_UPD_TIME IS 'The timestamp of the last update of the record.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_PARTY_LIST_MEMBER ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER
+(PRTY_LIST_MEM_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.PRTY_LIST_MEM_MEM_FK ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER
+(SRC_CD, SRC_NK)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER
+ ADD CONSTRAINT PK_PARTY_LIST_MEMBER
+  PRIMARY KEY
+  (PRTY_LIST_MEM_NK)
+  USING INDEX ODS_MBRLVL_DV1.PK_PARTY_LIST_MEMBER;
+
+CREATE TABLE ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE
+(
+  RLTNP_TYPE_CD      VARCHAR2(12 CHAR)          NOT NULL,
+  LEFT_ENT_TYPE      VARCHAR2(12 CHAR)          NOT NULL,
+  RIGHT_ENT_TYPE     VARCHAR2(12 CHAR)          NOT NULL,
+  MDM_DATA_CATEGORY  VARCHAR2(100 CHAR)         NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE.RLTNP_TYPE_CD IS 'A code which identifies the type of relationship.  There should be a different type for each combination of entity type.';
+
+COMMENT ON COLUMN ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE.MDM_DATA_CATEGORY IS 'This values domain represents a MDM-CDI information category. e.g. An information Profile can either be Internal or external.';
+
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_CEX_RELATIONSHIP_TYPE ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE
+(RLTNP_TYPE_CD)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE
+ ADD CONSTRAINT PK_CEX_RELATIONSHIP_TYPE
+  PRIMARY KEY
+  (RLTNP_TYPE_CD)
+  USING INDEX ODS_MBRLVL_DV1.PK_CEX_RELATIONSHIP_TYPE;
+
+CREATE TABLE ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE
+(
+  SRC_CD             VARCHAR2(12 CHAR)          NOT NULL,
+  SRC_NK             VARCHAR2(60 CHAR)          NOT NULL,
+  STATUS_CD          VARCHAR2(30 CHAR),
+  FAULT_STRING       VARCHAR2(255 CHAR),
+  LAST_EVT_USER_ID   VARCHAR2(30 CHAR),
+  REC_ORIG_CREAT_TM  TIMESTAMP(6)               NOT NULL,
+  REC_LAST_UDPT_TM   TIMESTAMP(6)               DEFAULT SYSDATE               NOT NULL
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+CREATE UNIQUE INDEX ODS_MBRLVL_DV1.PK_PGR_ON_DEMAND_BUILD_QUEUE ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE
+(SRC_NK, SRC_CD)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+CREATE INDEX ODS_MBRLVL_DV1.PK_POBQ_STATUS_CD ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE
+(STATUS_CD)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            INITIAL          64K
+            NEXT             1M
+            MAXSIZE          UNLIMITED
+            MINEXTENTS       1
+            MAXEXTENTS       UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE
+ ADD CONSTRAINT PK_PGR_ON_DEMAND_BUILD_QUEUE
+  PRIMARY KEY
+  (SRC_NK, SRC_CD)
+  USING INDEX ODS_MBRLVL_DV1.PK_PGR_ON_DEMAND_BUILD_QUEUE;
+
+CREATE SEQUENCE ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ
+  START WITH 1
+  MAXVALUE 999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+  NOKEEP
+  GLOBAL;
+
+CREATE SEQUENCE ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY
+  START WITH 1000057842
+  MAXVALUE 999999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+  NOKEEP
+  GLOBAL;
+
+CREATE SEQUENCE ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ
+  START WITH 1
+  MAXVALUE 999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+  NOKEEP
+  GLOBAL;
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_DISCLOSURE_CAT'
+    ,policy_name           => 'CEX_MEMBER_DISCL_CAT_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_ORG_RELATED_PERSON'
+    ,policy_name           => 'CEX_ORG_REL_PERSON_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_RELATIONSHIP_TYPE'
+    ,policy_name           => 'CEX_RELATIONSHIP_TYPE_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_PARTY_LIST_MEMBER'
+    ,policy_name           => 'CEX_PARTY_LIST_MEMBER_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_SOLICITATION_CAT'
+    ,policy_name           => 'CEX_MEMBER_SOLICI_CAT_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_ORGANIZATION_UNIT'
+    ,policy_name           => 'CEX_MEMBER_ORG_UNIT_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_MEMBER_RELATIONSHIP'
+    ,policy_name           => 'CEX_MEMBER_MEMBER_REL_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_IDENT_EVENT'
+    ,policy_name           => 'CEX_MEMBER_IDENT_EVENT_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_IDENTITY'
+    ,policy_name           => 'CEX_MEMBER_IDENTITY_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_AGREEMENT'
+    ,policy_name           => 'CEX_MEMBER_AGREEMENT_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER_ADDRESS'
+    ,policy_name           => 'CEX_MEMBER_ADDRESS_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_MEMBER'
+    ,policy_name           => 'CEX_MEMBER_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_INDIVIDUAL_OCCUPATION'
+    ,policy_name           => 'CEX_INDIV_OCCUPATTION_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_CLIENT_SPECIFIC_COND'
+    ,policy_name           => 'CEX_CLIENT_SPEC_COND_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+BEGIN
+  SYS.DBMS_RLS.ADD_POLICY     (
+    object_schema          => 'ODS_MBRLVL_DV1'
+    ,object_name           => 'CEX_CLIENT_GROUP_MEMBER'
+    ,policy_name           => 'CEX_CLIENT_GROUP_MEMBER_POLICY'
+    ,function_schema       => 'ODS'
+    ,policy_function       => 'MDM_EXTERNAL_POLICY'
+    ,statement_types       => 'SELECT,INSERT,UPDATE,DELETE'
+    ,policy_type           => dbms_rls.dynamic
+    ,long_predicate        => FALSE
+    ,update_check          => FALSE
+    ,static_policy         => FALSE
+    ,enable                => TRUE );
+END;
+/
+
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO CC48741J3;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO CC48741J4;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO ODS_ETL;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO ODS_ETL_DV1;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO PRTYPREFSOA3044_BAT;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO PRTYPREFSOA3044_USR_DV1;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_LOCK TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ TO RL_ODS_MBRLVL_DV1_READONLY;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_LOCK TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ TO RL_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RO_ODS_MBRLVL_DV1_READONLY;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ TO RO_ODS_MBRLVL_DV1_READWRITE;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RO_ODS_MBRLVL_READONLY;
+
+GRANT SELECT ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RO_ODS_MBRLVL_READONLY;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ACTIVITY_LEVEL TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_QUALIFICATION TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ TO RO_ODS_MBRLVL_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_GROUP_MEMBER TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_CLIENT_SPECIFIC_COND TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_INDIVIDUAL_OCCUPATION TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_LOCK TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ADDRESS TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_AGREEMENT TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_DISCLOSURE_CAT TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENT_EVENT TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_IDENTITY TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_MEMBER_RELATIONSHIP TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_ORGANIZATION_UNIT TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_PREFERENCE TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_MEMBER_SOLICITATION_CAT TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_ORG_RELATED_PERSON TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_PARTY_LIST_MEMBER TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.CEX_RELATIONSHIP_TYPE TO WAS_USR_DV1;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.LANGUAGE_LANGUAGE_ID_SEQ TO WAS_USR_DV1;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_MBRLVL_DV1.PGR_ONDEMAND_BUILD_QUEUE TO WAS_USR_DV1;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.SEQ_CEX_MEMBER_IDENTITY TO WAS_USR_DV1;
+
+GRANT ALTER, SELECT ON ODS_MBRLVL_DV1.VALUE_VALUE_ID_SEQ TO WAS_USR_DV1;

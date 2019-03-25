@@ -1,0 +1,634 @@
+--------------------------------------------------------------------------
+-- ODS_STG_DV1@DOMDMA schema extracted by user BE82947
+--------------------------------------------------------------------------
+-- "Set define off" turns off substitution variables.
+Set define off;
+
+CREATE TABLE ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP
+(
+  REC_INS_TM           TIMESTAMP(6)             DEFAULT SYSDATE               NOT NULL,
+  REC_LAST_UPD_TM      TIMESTAMP(6)             DEFAULT SYSDATE,
+  REC_LAST_UPD_SRC_CD  VARCHAR2(4 BYTE),
+  EV_NATRL_KEY_SBJ     VARCHAR2(70 BYTE)        NOT NULL,
+  EV_SRC_CD_SBJ        VARCHAR2(10 BYTE)        NOT NULL,
+  EV_DT_SBJ            TIMESTAMP(6),
+  EV_ID_SBJ            NUMBER(12),
+  EV_NATRL_KEY_OBJ     VARCHAR2(70 BYTE)        NOT NULL,
+  EV_SRC_CD_OBJ        VARCHAR2(10 BYTE)        NOT NULL,
+  EV_DT_OBJ            TIMESTAMP(6),
+  EV_ID_OBJ            NUMBER(12),
+  EVEVTP_ID            VARCHAR2(10 BYTE)        NOT NULL,
+  SEVEV_COMPLTN_FLAG   CHAR(1 BYTE)
+)
+NOCOMPRESS 
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            BUFFER_POOL      DEFAULT
+           )
+/*
+		   PARTITION BY RANGE (REC_INS_TM)
+INTERVAL( NUMTODSINTERVAL(1,'DAY'))
+(  
+  PARTITION PART_TB_S_S_E_E_R_01 VALUES LESS THAN (TIMESTAMP' 2011-01-01 00:00:00')
+    NOLOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-06-19 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-06-22 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-06-23 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-06-24 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-06-25 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-01 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-02 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-03 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-06 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-07 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-08 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-09 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-10 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-13 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-14 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-15 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-16 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-17 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-20 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-21 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-22 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-23 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               ),  
+  PARTITION VALUES LESS THAN (TIMESTAMP' 2016-07-24 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               )
+)
+*/
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP IS 'table ODS_STG.de stagging pour le traitement batch des relations "Event-Event".
+
+L''objectif de cette table ODS_STG.est de conserver toutes les données nécessaires à l''établissement de relations entre transactions d''une même source (renversée/renversante de la source CO batch) ou de différentes sources (par exemple NRT/Batch) dans l''attente de la création de ces mêmes transactions avec un EV_ID.
+Le traitement des données de cette table ODS_STG.TB_STG_EVNT_EVNT_RLTNP pour l''insertion des relations dans la table ODS_STG.cible TBEVEV_EVNT_EVNT_RLTNP se fait après le traitement des sources batch en fin de journée.
+Cette table ODS_STG.devra conserver ses données au minimum 5 jours afin de laisser le temps à la source Intria de fournir toutes les informations permettant de compléter les relations. Pour les autres sources, 1 à 2 journées peuvent être nécessaire pour compléter les informations. Il faut donc prévoir un paramètre permettant de supprimer les données plus vieilles que n jours.
+Cette table ODS_STG.sera donc partitionnée sur la date d''insertion de l''enregistrement REC_INS_TM qui servira au critère de nettoyage des données de la table.
+Un indicateur EVEV_COMPLTN_FLAG servira à identifier les enregistrements non complétés (à traiter) et ceux qui ont été insérés dans leur table ODS_STG.cible.
+
+P. Rinfret 2016-01-14 (from G. Tessier)';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.REC_INS_TM IS 'The timestamp of the insert of the record in this table.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.REC_LAST_UPD_TM IS 'The timestamp of the last update of the record in this table.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.REC_LAST_UPD_SRC_CD IS 'The update source code of the last update of the record in this table. Domain : BNGF system code from Casewise.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_NATRL_KEY_SBJ IS 'The unique identifier of the subject event. Represent the combinaison of the Event source code and the Event source key. Accross time the key is not unique. Need the event date to be unique.
+
+
+IBM Unique ID:BDW13469';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_SRC_CD_SBJ IS 'Code identifying the source system where the subject event comes from. Domain : casewise application number and extension for non BNC application (example : Intria)';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_DT_SBJ IS 'Event date provided by the source system. If not should use a system date.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_ID_SBJ IS 'The unique identifier of an Event. Generated by an Oracle sequence for join between tables
+
+
+IBM Unique ID:BDW13469
+';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_NATRL_KEY_OBJ IS 'The unique identifier of the subject event. Represent the combinaison of the Event source code and the Event source key. Accross time the key is not unique. Need the event date to be unique.
+
+
+IBM Unique ID:BDW13469';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_SRC_CD_OBJ IS 'Code identifying the source system where the subject event comes from. Domain : casewise application number and extension for non BNC application (example : Intria)';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_DT_OBJ IS 'Event date provided by the source system. If not should use a system date.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EV_ID_OBJ IS 'The unique identifier of an Event. Generated by an Oracle sequence for join between tables
+
+
+IBM Unique ID:BDW13469
+';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.EVEVTP_ID IS 'The unique identifier of the Event / Event Rltnp Type.
+
+
+IBM Unique ID:BDW13560
+';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP.SEVEV_COMPLTN_FLAG IS 'Flag indentifying the relation completion. Values: "N" for not completed, "Y" for completed and inserted in the table ODS_STG.TBEVEV_EVNT_EVNT_RLTNP.';
+
+
+CREATE UNIQUE INDEX ODS_STG_DV1.PK_SEVEV_EVNT ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP
+(EV_NATRL_KEY_SBJ, EV_SRC_CD_SBJ, EV_NATRL_KEY_OBJ, EV_SRC_CD_OBJ, EVEVTP_ID)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP
+ ADD CONSTRAINT PK_SEVEV_EVNT
+  PRIMARY KEY
+  (EV_NATRL_KEY_SBJ, EV_SRC_CD_SBJ, EV_NATRL_KEY_OBJ, EV_SRC_CD_OBJ, EVEVTP_ID)
+  USING INDEX ODS_STG_DV1.PK_SEVEV_EVNT;
+
+CREATE TABLE ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ
+(
+  REC_LAST_UPD_TM      TIMESTAMP(6)             DEFAULT SYSDATE,
+  REC_LAST_UPD_SRC_CD  VARCHAR2(4 BYTE),
+  AMQ_ID               NUMBER(19)               NOT NULL,
+  AMQ_MESSG_TYP_CD     VARCHAR2(10 BYTE),
+  AMQ_XML_DATA         CLOB
+)
+LOB (AMQ_XML_DATA) STORE AS SECUREFILE (
+  TABLESPACE  TSD_ODS_TRX
+  ENABLE      STORAGE IN ROW
+  CHUNK       8192
+  NOCACHE
+  LOGGING)
+NOCOMPRESS 
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            BUFFER_POOL      DEFAULT
+           )
+/*
+PARTITION BY RANGE (REC_LAST_UPD_TM)
+INTERVAL( NUMTODSINTERVAL(1,'DAY'))
+(  
+  PARTITION PART_SOA_AMQ_01 VALUES LESS THAN (TIMESTAMP' 2011-01-01 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    LOB (AMQ_XML_DATA) STORE AS SECUREFILE (
+      TABLESPACE  TSD_ODS_TRX
+      ENABLE      STORAGE IN ROW
+      CHUNK       8192
+      RETENTION
+      NOCACHE
+      LOGGING)
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               )
+)
+*/
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+COMMENT ON TABLE ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ IS 'Table de stagging pour les messages XML en provenance des flux SOA.
+
+Les messages sont conserver dans leurs formats original. Un type exsite pour différencier facilement les types de message.
+
+Number est par jour. Multiliier par la période de rétention des données qui est normalement de 30 jours. Voir tables utilitaires.
+
+P. Rinfret 2015-09-24';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ.REC_LAST_UPD_TM IS 'The timestamp of the last update of the record in this table.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ.REC_LAST_UPD_SRC_CD IS 'The update source code';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ.AMQ_ID IS 'Audit message queue id';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ.AMQ_MESSG_TYP_CD IS 'Type sous forme de Code typant le message reçu.';
+
+COMMENT ON COLUMN ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ.AMQ_XML_DATA IS 'The complete message in binary XML format.';
+
+
+CREATE UNIQUE INDEX ODS_STG_DV1.PK_SOA_AMQ ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ
+(AMQ_ID)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ
+ ADD CONSTRAINT PK_SOA_AMQ
+  PRIMARY KEY
+  (AMQ_ID)
+  USING INDEX ODS_STG_DV1.PK_SOA_AMQ;
+
+CREATE TABLE ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ
+(
+  REC_LAST_UPD_TM      TIMESTAMP(6),
+  REC_LAST_UPD_SRC_CD  VARCHAR2(4 BYTE),
+  RMQ_ID               NUMBER(19)               NOT NULL,
+  RMQ_MESSG_TYP_CD     VARCHAR2(10 BYTE),
+  AMQ_ID               NUMBER(19)
+)
+NOCOMPRESS 
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            BUFFER_POOL      DEFAULT
+           )
+/*PARTITION BY RANGE (REC_LAST_UPD_TM)
+INTERVAL( NUMTODSINTERVAL(1,'DAY'))
+(  
+  PARTITION PART_SOA_RMQ_01 VALUES LESS THAN (TIMESTAMP' 2011-01-01 00:00:00')
+    LOGGING
+    NOCOMPRESS 
+    TABLESPACE TSD_ODS
+    PCTFREE    10
+    INITRANS   1
+    MAXTRANS   255
+    STORAGE    (
+                MAXSIZE          UNLIMITED
+                BUFFER_POOL      DEFAULT
+               )
+)
+*/
+NOCACHE
+NOPARALLEL
+MONITORING;
+
+
+CREATE UNIQUE INDEX ODS_STG_DV1.PK_SOA_REJECT ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ
+(RMQ_ID)
+LOGGING
+TABLESPACE TSD_ODS
+PCTFREE    10
+INITRANS   2
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+NOPARALLEL;
+
+ALTER TABLE ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ
+ ADD CONSTRAINT PK_SOA_REJECT
+  PRIMARY KEY
+  (RMQ_ID)
+  USING INDEX ODS_STG_DV1.PK_SOA_REJECT;
+
+CREATE TABLE ODS_STG_DV1.TB_STG_UPD_BOOK
+(
+  REC_INS_TM            TIMESTAMP(6)            NOT NULL,
+  REC_LAST_UPD_TM       TIMESTAMP(6),
+  REC_LAST_UPD_USER_ID  VARCHAR2(30 CHAR),
+  EV_ALTRNT_SRC_CD      VARCHAR2(10 CHAR)       NOT NULL,
+  EV_ALTRNT_SRC_KEY     VARCHAR2(60 CHAR)       NOT NULL,
+  TXN_BOOK_DT           TIMESTAMP(6)
+)
+TABLESPACE TSD_ODS
+PCTUSED    0
+PCTFREE    10
+INITRANS   1
+MAXTRANS   255
+STORAGE    (
+            MAXSIZE          UNLIMITED
+            PCTINCREASE      0
+            BUFFER_POOL      DEFAULT
+           )
+LOGGING 
+NOCOMPRESS 
+NOCACHE
+PARALLEL ( DEGREE 16 INSTANCES 1 )
+MONITORING;
+
+CREATE SEQUENCE ODS_STG_DV1.SEQ_AMQ_ID
+  START WITH 1
+  MAXVALUE 9999999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+  NOKEEP
+  GLOBAL;
+
+CREATE SEQUENCE ODS_STG_DV1.SEQ_RMQ_ID
+  START WITH 1
+  MAXVALUE 9999999999999999999999999999
+  MINVALUE 1
+  NOCYCLE
+  CACHE 20
+  NOORDER
+  NOKEEP
+  GLOBAL;
+
+/*
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO ODS_ETL;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO ODS_ETL;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO ODS_ETL;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_UPD_BOOK TO ODS_ETL;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO ODS_ETL_DV1;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO ODS_ETL_DV1;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO ODS_ETL_DV1;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_UPD_BOOK TO ODS_ETL_DV1;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_AMQ_ID TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_RMQ_ID TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_UPD_BOOK TO RL_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_AMQ_ID TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_RMQ_ID TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_UPD_BOOK TO RL_ODS_STG_DV1_READWRITE;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_AMQ_ID TO RO_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.SEQ_RMQ_ID TO RO_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO RO_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO RO_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO RO_ODS_STG_DV1_READONLY;
+
+GRANT SELECT ON ODS_STG_DV1.TB_STG_UPD_BOOK TO RO_ODS_STG_DV1_READONLY;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SEVEV_EVNT_EVNT_RLTNP TO RO_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SOA_AMQ_AUDT_MQ TO RO_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_SOA_RMQ_REJCT_MQ TO RO_ODS_STG_DV1_READWRITE;
+
+GRANT DELETE, INSERT, SELECT, UPDATE ON ODS_STG_DV1.TB_STG_UPD_BOOK TO RO_ODS_STG_DV1_READWRITE;
+*/
