@@ -74,7 +74,7 @@ def parse_arguments(args){
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
 def process_db_changes(pipeline,environment,version, dbType){
-	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle"
+	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle${sep}${params["FlowDetails"]["FlowName"]}"
 	def schema_name = params["Schemas"][0]["name"]
 	def path = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
@@ -128,7 +128,7 @@ def update_git(commit_msg = ""){
 	  System.exit(1)
 	}
 	if(commit_msg == ""){
-		commit_txt = "Adding repository changes from automation - Pipeline: ${pipeline}, Environment: ${environment}, Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
+		commit_txt = "Adding repository changes from automation - Pipeline: ${pipeline}, Environment: ${environment}, Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreationTime"]}"
 	}
 	cmd = "cd ${base_path} && git status"
 	result = shell_execute(cmd)

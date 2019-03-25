@@ -623,7 +623,7 @@ def sortable(inum){
   ans = "00"
   def icnt = inum.toInteger()
   //incoming int
-  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
+  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
   def iter = (icnt/36).toInteger()
   def remain = icnt % 36
   return "${seq.get(iter)}${seq.get(remain)}"
@@ -865,9 +865,9 @@ def add_schemas_to_source_control() {
 	for(env in envs){
     println "EnvironmentRaw:${env}"
     sid_ident = "SERVICE_NAME"
-	if(env["is_managed"] == "true"){
-		separator()
-		println "Environment: ${env["environment"]}"
+		if(env["is_managed"] == "true"){
+			separator()
+			println "Environment: ${env["environment"]}"
       if(env["service_name"] == env["sid_service"]){
         sid_ident = "SID"
       }
@@ -875,10 +875,10 @@ def add_schemas_to_source_control() {
       println "Executing: ${dbm_cmd}"
       result = shell_execute(dbm_cmd)
       println result
-    }
+	  }
   }
 }
-}
+
 
 def import_projects() {
   message_box("Adding Projects", "title")
@@ -894,14 +894,14 @@ def import_projects() {
     println "Project: ${proj["Pipeline"]}"
     filepath = "${base_path}\\output_${proj["Pipeline"]}.json"
   	separator()
-      dbm_cmd = "${java_cmd} -ImportProject -FilePath ${filepath} -Server ${server} ${credential}"
-      println "Executing: ${dbm_cmd}"
-      result = shell_execute(dbm_cmd)
-      println result
-    }
-  }	
+    dbm_cmd = "${java_cmd} -ImportProject -FilePath ${filepath} -Server ${server} ${credential}"
+    println "Executing: ${dbm_cmd}"
+    result = shell_execute(dbm_cmd)
+    println result
+   }
+}	
 
-}
+
 
 def init_pipelines() {
   message_box("Init Projects with dummy package", "title")

@@ -185,6 +185,39 @@
 		}
 	]
 },
+  "environment_tags" : {
+  "name" : "Package history for Environments with tags",
+  "usage" : "dbm_api.bat action=environment_tags pipeline=<pipeline> path=<path to report>, ",
+	"queries" : 
+	[
+		{ "connection" : "repo",
+		  "query": "select f.FLOWNAME as pipeline, f.FLOWID, e.LSNAME as environment, e.LSID, v.NAME as VERSION, tag.TAG_VALUE, To_CHAR(a.DEPLOYED_TIME, 'MM-DD-YY HH24:MI') as FINISH from TWMANAGEDB.TBL_SMG_DEPLOYED_VERSION_HIST a INNER JOIN TWMANAGEDB.TBL_LS e ON a.ENV_ID = e.LSID INNER JOIN TWMANAGEDB.TBL_FLOW f ON a.PROJECT_ID = f.FLOWID JOIN  TWMANAGEDB.TBL_SMG_VERSION v on v.ID = a.VERSION_ID LEFT JOIN TWmanagedb.TBL_TAGS tag join TWmanagedb.TBL_TAGS_TYPES y on y.ID = tag.TAG_TYPE_ID join TWmanagedb.TBL_OBJECT_TYPES_MAPPING m on m.ID = tag.OBJECT_MAPPING_ID ON m.OBJECT_TYPE_ID = 1 and m.OBJECT_ID = v.ID where f.FLOWNAME = 'ARG1' ORDER BY f.FLOWNAME, e.LSNAME, a.DEPLOYED_TIME",
+			"output": [
+	      ["Pipeline",0,18],
+	      ["Environment",2,15],
+		    ["Version",4,20],
+		    ["Tag",5,25],
+	      ["Finish",6,15]
+		  ]
+		}
+	]
+},
+  "script_tags" : {
+  "name" : "Script history for Environments with tags",
+  "usage" : "dbm_api.bat action=script_tags pipeline=<pipeline> path=<path to report>, ",
+	"queries" : 
+	[
+		{ "connection" : "repo",
+		  "query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY') as created_at, tag.TAG_VALUE, s.name as script, s.SCRIPT_ID, v.IS_ENABLED as enabled, v.WAS_DEPLOYED as deployed from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id LEFT JOIN TWmanagedb.TBL_TAGS tag join TWmanagedb.TBL_TAGS_TYPES y on y.ID = tag.TAG_TYPE_ID join TWmanagedb.TBL_OBJECT_TYPES_MAPPING m on m.ID = tag.OBJECT_MAPPING_ID ON m.OBJECT_TYPE_ID = 2 and m.OBJECT_ID = s.SCRIPT_ID where p.FLOWNAME = 'HR_Tasks' AND v.IS_ENABLED = 1 order by v.name, jt.excution_order",
+			"output": [
+	      ["Version",1,20],
+	      ["Finish",2,15],
+		  ["Tag",3,25],
+	      ["Script",4,15]
+		  ]
+		}
+	]
+},
   "revisions_in_label" : {
     "name" : "DDL Revisions for all objects in a label",
     "usage" : "dbm_api.bat action=revisions_in_label ARG1=<pipeline> ARG2=<label_name>",

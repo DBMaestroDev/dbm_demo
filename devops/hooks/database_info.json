@@ -1,0 +1,89 @@
+{
+  "### Instructions ###": 
+    "Enter the local settings items for the parser",
+    "general" : {
+      "base_path" : "C:\\Automation",
+      "base_path_mac" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
+      "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBmaestro\" && git push origin master",
+	  "default_branch" : "master",
+      "repository_name" : "REPO",
+			"postgres_path_mac" : "/Library/PostgreSQL/9.3/bin",
+			"postgres_path" : "c:\\Program Files\\PostgreSQL\\10\\bin"
+	},
+	"connections" : {
+		"northwind" : {
+			"platform" : "mssql",
+			"code_separator" : "GO",
+			"user" : "dbm_user",
+			"password" : "POc.123!",
+			"connect" : "localhost:1433;databaseName=Northwind_N2A"
+		},
+		"repository" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "twmanagedb",
+			"password" : "manage#2009",
+			"connect" : "localhost:1521/orcl"
+		 },
+		"hr" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "HR",
+			"password" : "hr",
+			"connect" : "localhost:1521/orcl"
+		 },
+		"rlm" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "localhost",
+			"password_enc" : "ITY1NDMyMWxhaXJUNzkzZmtmayMwYmtqMTNqa2c5MDVqa2prYXM=",
+			"database" : "rlm48_rs",
+			"connect" : "localhost:5432/rlm48_rs"
+		 },
+		"Fantasy" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "localhost",
+			"password" : "bugsy",
+			"database" : "rbc48_fantasy",
+			"connect" : "localhost:5432/rbc48_fantasy"
+		 },
+		"DesignDocs" : {
+			"platform" : "postgres",
+			"code_separator" : "-- Name: ",
+			"username" : "deploy",
+			"host" : "localhost",
+			"password" : "bugsy",
+			"database" : "design_docs_production",
+			"connect" : "teamwork2012:1521/orcl"
+		 }
+    },
+	"mssql_map" : {
+		"objects" : {
+		  "CREATE VIEW" : "VIEWS",
+		  "CREATE TABLE" : "TABLES",
+		  "ALTER TABLE" : "ALTER_TABLE",
+		  "CREATE INDEX" : "INDEXES",
+		  "CREATE CLUSTERED INDEX" : "INDEXES",
+		  "CREATE NONCLUSTERED INDEX" : "INDEXES",
+		  "CREATE UNIQUE NONCLUSTERED INDEX" : "INDEXES",
+		  "CREATE UNIQUE INDEX" : "INDEXES",
+		  "CREATE FUNCTION" : "FUNCTIONS",
+		  "CREATE PROCEDURE" : "PROCEDURES",
+		  "CREATE TRIGGER" : "TRIGGERS",
+		  "prefix" : ""
+		},
+		"sub_objects" : {
+		  "ADD CONSTRAINT" : "CONSTRAINTS",
+		  "prefix" : "sub_"
+		},
+		"sub_modifiers" : {
+		  "NOCHECK CONSTRAINT" : "CONSTRAINTS",
+		  "prefix" : "mod_"
+		}
+	}
+  }
+}
+

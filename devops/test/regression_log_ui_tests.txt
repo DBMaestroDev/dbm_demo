@@ -1,0 +1,6 @@
+	Regression Test Log - UI WATIR				
+Time	Result	Test Name	details	Automation
+2018-06-13T10:17:13	Passed	login	Testing login screen (dbmguest@dbmaestro.com/<password>)	
+2018-06-13T10:17:13	Passed	dashboard_display	Directed to Dashboard	
+2018-06-13T10:17:15	Passed	Pipeline Display	Projects Screen: Dashboard	
+2018-06-13T10:17:19	Passed	Packages 	Packages Screen: Projects	

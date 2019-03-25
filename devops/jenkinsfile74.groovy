@@ -14,6 +14,7 @@ if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
 branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
+if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
 def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
@@ -34,7 +35,7 @@ def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
 def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
-local_settings = get_settings("${base_path}${sep}${settings_file}")
+local_settings = get_settings("${base_path}${sep}${settings_file}", landscape)
 def server = local_settings["general"]["server"]
 
 // Add a properties for Platform and Skip_Packaging
@@ -226,16 +227,19 @@ def ensure_dir(pth){
   }
 }
 
-def get_settings(file_path) {
+def get_settings(file_path, project = "none") {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
 	println "JSON Settings Document: ${file_path}"
+	println "Project: ${project}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
+	println "Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
+
 
 def message_box(msg, def mtype = "sep") {
   def tot = 80
