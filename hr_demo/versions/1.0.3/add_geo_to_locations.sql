@@ -1,1 +1,0 @@
-alter table locations add (geo varchar2(20));

@@ -1,0 +1,341 @@
+{
+  "ProjectGroupId": 11,
+  "ProjectName": "TSD_RELEASE",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by versions",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0,
+  "DatabaseType": "oracle",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 10,
+  "Options": {
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "ConflictAction": "3",
+    "CustomCharactersToIgnore": "",
+    "CustomDataRestructureLogic": "0",
+    "DisableConstraintsInContentScript": false,
+    "DuplicationAction": "2",
+    "IncludeSchemaNamePrefix": false,
+    "IncludeUserScripts": true,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCase": true,
+    "IsIgnoreComments": true,
+    "IsIgnoreCustomCharacters": false,
+    "IsIgnoreDoubleQuotes": false,
+    "IsIgnoreForce": true,
+    "IsIgnoreWhitespaces": true,
+    "IsSaveDataInOldStructure": true,
+    "IsSupportTypesWithTablesDependents": false,
+    "LobOracleFolder": "",
+    "OracleMappingDirectory": "",
+    "Prefix": "OLD_",
+    "ReportsOutputFolder": "",
+    "SaveEncodingCodePage": "1252",
+    "ScriptOutputFolder": "C:\\Scripts\\Scenarios\\TSD_RELEASE",
+    "SeparateScriptForEachTarget": true,
+    "SpoolOutputFolder": "",
+    "SkipPostValidation": true,
+    "SkipPreValidation": false,
+    "IsUseSpoolFolder": true,
+    "DetectDefaultCompilationErrors": false,
+    "DetectCompilationWarnings": false
+  },
+  "AdditionalOptions": [],
+  "EnvironmentTypes": [
+    {
+      "Name": "DEV",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+	    {
+	      "EnvironmentName": "PSE",
+		  "EnvironmentDescription": null,
+		  "ComparisonType": null,
+		"SuperUser":  {
+		  "Name":"tsd_uber",
+		  "SchemaCredentials":{
+			 "Port":1521,
+			 "IdentifierType":"SID",
+			 "Identifier":"orcl",
+			 "Host":"dbmjohnhancock",
+			 "UserName":"tsd_r_uber",
+			 "Password":"tsd_r_uber"
+		  },
+		  "Order":4,
+		  "SchemaId":null,
+		  "IsManaged":false,
+		  "Safe":null,
+		  "Folder":null,
+		  "Object":null,
+		  "additionalOptions":[
+
+		  ],
+		  "IsSuperUser":true
+		},
+		"Schemas": [
+			{
+			"Name": "TSD_ODS_PSE",	      
+		    "SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_ODS_PSE",
+				"Password": "tsd_ods_pse"
+			},
+			"Order": 1,
+			"IsManaged": true,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_EXRATES_PSE",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_EXRATES_PSE",
+				"Password": "tsd_exrates_pse"
+			},
+			"Order": 2,
+			"IsManaged": true,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_RATES_PSE",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_RATES_PSE",
+				"Password": "tsd_rates_pse"
+			},
+			"Order": 3,
+			"IsManaged": true,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			}
+		  ]
+		}
+	  ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "QA",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "UAT",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Pre_Prod",
+      "Environments": [
+	  	    {
+	      "EnvironmentName": "PREPROD",
+		  "EnvironmentDescription": null,
+		  "ComparisonType": null,
+		  "SuperUser": {
+		  "Name":"tsd_uber",
+		  "SchemaCredentials":{
+			 "Port":1521,
+			 "IdentifierType":"SID",
+			 "Identifier":"orcl",
+			 "Host":"dbmjohnhancock",
+			 "UserName":"tsd_r_uber",
+			 "Password":"tsd_r_uber"
+		  },
+		  "Order":4,
+		  "SchemaId":null,
+		  "IsManaged":false,
+		  "Safe":null,
+		  "Folder":null,
+		  "Object":null,
+		  "additionalOptions":[
+
+		  ],
+		  "IsSuperUser":true
+		},
+		  "Schemas": [
+			{
+			"Name": "TSD_ODS_PREPROD",	      
+		    "SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_ODS_PREPROD",
+				"Password": "tsd_ods_preprod"
+			},
+			"Order": 1,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_EXRATES_PREPROD",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_EXRATES_PREPROD",
+				"Password": "tsd_exrates_preprod"
+			},
+			"Order": 2,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_RATES_PREPROD",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_RATES_PREPROD",
+				"Password": "tsd_rates_preprod"
+			},
+			"Order": 3,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			}
+		  ]
+		}
+	  ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Prod",
+      "Environments": [
+	  	  	    {
+	      "EnvironmentName": "PROD",
+		  "EnvironmentDescription": null,
+		  "ComparisonType": null,
+		  "SuperUser": {
+		  "Name":"tsd_uber",
+		  "SchemaCredentials":{
+			 "Port":1521,
+			 "IdentifierType":"SID",
+			 "Identifier":"orcl",
+			 "Host":"dbmjohnhancock",
+			 "UserName":"tsd_r_uber",
+			 "Password":"tsd_r_uber"
+		  },
+		  "Order":4,
+		  "SchemaId":null,
+		  "IsManaged":false,
+		  "Safe":null,
+		  "Folder":null,
+		  "Object":null,
+		  "additionalOptions":[
+
+		  ],
+		  "IsSuperUser":true
+		},
+		  "Schemas": [
+			{
+			"Name": "TSD_ODS_PROD",	      
+		    "SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_ODS_PROD",
+				"Password": "tsd_ods_prod"
+			},
+			"Order": 1,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_EXRATES_PROD",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_EXRATES_PROD",
+				"Password": "tsd_exrates_prod"
+			},
+			"Order": 2,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			},
+			{
+			"Name": "TSD_RATES_PROD",
+			"SchemaCredentials": {
+				"Port": 1521,
+				"IdentifierType": "SID",
+				"Identifier": "ORCL",
+				"Host": "DBMJohnHancock",
+				"UserName": "TSD_RATES_PROD",
+				"Password": "tsd_rates_prod"
+			},
+			"Order": 3,
+			"IsManaged": false,
+			"Safe": null,
+			"Folder": null,
+			"Object": null,
+			"additionalOptions": [],
+			"IsSuperUser": false
+			}
+		  ]
+		}
+
+	  ],
+      "DriftDetection": false
+    }
+  ]
+}
