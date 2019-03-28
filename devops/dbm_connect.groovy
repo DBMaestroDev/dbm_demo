@@ -444,11 +444,13 @@ def environment_report(){
   // Now loop through deployment data
   // pipeline, environment, VERSION, TAG_VALUE
   conn.eachRow(ver_query){ row ->
-	tag = row["TAG_VALUE"] == null ? "" : row["TAG_VALUE"]
 	ver = row["VERSION"]
-	String dep_at = row["FINISH"]
-	grid[ver]["tags"] = tag
-	grid[ver][row["environment"]] = "${dep_at.split(" ")[0]}<br>${dep_at.split(" ")[1]}"
+	if(grid.containsKey(ver)){
+		tag = row["TAG_VALUE"] == null ? "" : row["TAG_VALUE"]
+		String dep_at = row["FINISH"]
+		grid[ver]["tags"] = tag
+		grid[ver][row["environment"]] = "${dep_at.split(" ")[0]}<br>${dep_at.split(" ")[1]}"
+	}
   }
   
   
