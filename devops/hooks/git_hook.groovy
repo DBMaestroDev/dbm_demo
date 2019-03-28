@@ -128,7 +128,7 @@ def update_git(commit_msg = ""){
 	  System.exit(1)
 	}
 	if(commit_msg == ""){
-		commit_txt = "Adding repository changes from automation - Pipeline: ${pipeline}, Environment: ${environment}, Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
+		commit_txt = "Adding repository changes from automation - Pipeline: ${pipeline}, Environment: ${environment}, Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreationTime"]}"
 	}
 	cmd = "cd ${base_path} && git status"
 	result = shell_execute(cmd)
