@@ -3,15 +3,45 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <title>DBmaestro Environment Report</title>
     <style type="text/css">
-        body { background-color: #e4e4e4; color: #333; text-align: center; font-family: arial, sans-serif; font-size: 12px}
+
+        body { 
+		background-color: #e4e4e4; 
+		color: #333; 
+		text-align: center; 
+		font-family: arial, sans-serif; 
+		font-size: 12px
+		  margin: 0px;
+		padding: 0px;
+		min-height: 100%;
+		height: 100%;
+
+		}
+		
         div.main_frame{ border: 1px solid #ccc; text-align: left; background-color: #FFF;}
+		
+		wrapper {
+			background-color: #e3f2fd;
+			min-height: 100%;
+			height: auto !important;
+			margin-bottom: -50px; /* the bottom margin is the negative value of the footer's total height */
+		}
+
+		wrapper:after {
+			content: "";
+			display: block;
+			height: 50px; /* the footer's total height */
+		}
+
+		content {
+			height: 100%;
+		}
+
         table{
-            font-size:11px;
-            padding-left: 2pt;
-            padding-right: 2pt;
-			cellspacing: 0pt;
+            font-size:13px;
+            cellspacing: 0pt;
 			cellpadding: 0pt;
-            border: 1pt solid #ccc;
+			margin: 0 auto;
+            /* border: 1pt solid #ccc; */
         }
         td{
                 border-right:1pt solid #ccc;
@@ -35,18 +65,31 @@
                 border:1pt solid #ccc; background-color: #e4e4e4;
             }
         th{
-            /* border-top: 2pt solid #ccc;
-            border-left: 1pt solid #ccc;
-            border-right: 1pt solid #ccc; */
+            /* border-top: 2pt solid #ccc; */
+			padding-left: 2pt;
+			padding-right: 4pt;
             font-weight: bold;
 			color: #3CF;
 			background-color: #333;
             }
 		.filename{ font-weight: bold; color: #004376; }
+		
+		footer {
+			height: 60px; /* the footer's total height */
+		}
+
+		footer-content {
+			background-color: #f3e5f5;
+			border: 1px solid #ab47bc;
+			height: 52px; /* height + top/bottom paddding + top/bottom border must add up to footer height */
+			padding: 8px;
+		}
     </style>
 </head>
 
 <body>
+<div id="wrapper">
+<div id="content">
 <div class='main_frame'>
   <div style='text-align: center'><h2>DBmaestro Environment Report</h2></div>
 <h3>
@@ -63,5 +106,11 @@ __BODY__
 </table>
 
 </div>
+</div>
+</div>
+<footer id="footer">
+  <div id="footer-content"><img src="dbm_demo/devops/Logo-DB.png"></div>
+</footer>
+
 </body>
 </html>
