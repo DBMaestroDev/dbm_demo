@@ -208,7 +208,7 @@
 	"queries" : 
 	[
 		{ "connection" : "repo",
-		  "query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY') as created_at, tag.TAG_VALUE, s.name as script, s.SCRIPT_ID, v.IS_ENABLED as enabled, v.WAS_DEPLOYED as deployed from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id LEFT JOIN TWmanagedb.TBL_TAGS tag join TWmanagedb.TBL_TAGS_TYPES y on y.ID = tag.TAG_TYPE_ID join TWmanagedb.TBL_OBJECT_TYPES_MAPPING m on m.ID = tag.OBJECT_MAPPING_ID ON m.OBJECT_TYPE_ID = 2 and m.OBJECT_ID = s.SCRIPT_ID where p.FLOWNAME = 'HR_Tasks' AND v.IS_ENABLED = 1 order by v.name, jt.excution_order",
+		  "query": "select v.id, v.name as version, TO_CHAR(s.creation_date, 'MM/DD/YYYY') as created_at, tag.TAG_VALUE, s.name as script, s.SCRIPT_ID, v.IS_ENABLED as enabled, v.WAS_DEPLOYED as deployed from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR jt ON v.ID = jt.VERSION_ID INNER JOIN TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR s ON s.script_id = jt.script_id INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id LEFT JOIN TWmanagedb.TBL_TAGS tag join TWmanagedb.TBL_TAGS_TYPES y on y.ID = tag.TAG_TYPE_ID join TWmanagedb.TBL_OBJECT_TYPES_MAPPING m on m.ID = tag.OBJECT_MAPPING_ID ON m.OBJECT_TYPE_ID = 2 and m.OBJECT_ID = s.SCRIPT_ID where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.name, jt.excution_order",
 			"output": [
 	      ["Version",1,20],
 	      ["Finish",2,15],

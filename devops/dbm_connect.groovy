@@ -13,7 +13,7 @@ import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
-import DbmSecure
+//import DbmSecure
 base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 //evaluate(new File("${base_path}\\DbmSecure.groovy"))
 def jsonSlurper = new JsonSlurper()
@@ -412,7 +412,7 @@ def environment_report(){
   def pipeline = arg_map["pipeline"]
   def output_path = base_path
   def template_path = base_path + sep + "env_report_template.html"
-  if (!arg_map.containsKey("path")) {
+  if (arg_map.containsKey("path")) {
 	output_path = arg_map["path"]
   }
   def cnt = 0
@@ -481,7 +481,9 @@ def environment_report(){
   html = html.replaceAll('__BODY__', tmp_html)
   
   conn.close()
-   println " Processed Query: ${query["query"]}"
+   println " Processed Query: ${ver_query}"
+   println " Creating: ${output_path}${sep}env_report.html"
+   //println " Content: ${html}"
    create_file(output_path, "env_report.html", html)
 }
 
