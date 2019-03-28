@@ -1,0 +1,173 @@
+{
+  "ProjectGroupId": 10,
+  "ProjectName": "Pharma",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by tasks",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0,
+  "DatabaseType": "oracle",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 10,
+  "Options": {
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "ConflictAction": "3",
+    "CustomCharactersToIgnore": "",
+    "CustomDataRestructureLogic": "0",
+    "DisableConstraintsInContentScript": false,
+    "DuplicationAction": "2",
+    "IncludeSchemaNamePrefix": false,
+    "IncludeUserScripts": true,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCase": true,
+    "IsIgnoreComments": true,
+    "IsIgnoreCustomCharacters": false,
+    "IsIgnoreDoubleQuotes": false,
+    "IsIgnoreForce": true,
+    "IsIgnoreWhitespaces": true,
+    "IsSaveDataInOldStructure": true,
+    "IsSupportTypesWithTablesDependents": false,
+    "LobOracleFolder": "",
+    "OracleMappingDirectory": "",
+    "Prefix": "OLD_",
+    "ReportsOutputFolder": "",
+    "SaveEncodingCodePage": "1252",
+    "ScriptOutputFolder": "C:\\Scripts\\JHSamples\\Pharma",
+    "SeparateScriptForEachTarget": true,
+    "SpoolOutputFolder": "",
+    "SkipPostValidation": true,
+    "SkipPreValidation": false,
+    "IsUseSpoolFolder": true,
+    "DetectDefaultCompilationErrors": false,
+    "DetectCompilationWarnings": false
+  },
+  "AdditionalOptions": [],
+  "EnvironmentTypes": [
+    {
+      "Name": "Dev",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+	  	{
+	  "EnvironmentName": "DEV_RS",
+	  "EnvironmentDescription": null,
+	  "ComparisonType": null,
+	  "SuperUser": null,
+	  "Schemas": [
+	    {
+	      "Name": "pharma_rs",
+	      "SchemaCredentials": {
+	        "Port": "1521",
+	        "IdentifierType": "SID",
+	        "Identifier": "ORCL",
+	        "Host": "DBMJohnHancock",
+	        "UserName": "pharma_rs",
+	        "Password": "pharma_rs"
+	      },
+	      "Order": 1,
+	      "IsManaged": true,
+	      "Safe": null,
+	      "Folder": null,
+	      "Object": null,
+	      "additionalOptions": [],
+	      "IsSuperUser": false
+	    }
+	  ]
+	}
+	],
+      "DriftDetection": false
+    },
+    {
+      "Name": "QA",
+      "Environments": [
+	  	{
+	  "EnvironmentName": "TEST",
+	  "EnvironmentDescription": null,
+	  "ComparisonType": null,
+	  "SuperUser": null,
+	  "Schemas": [
+	    {
+	      "Name": "pharma_test",
+	      "SchemaCredentials": {
+	        "Port": "1521",
+	        "IdentifierType": "SID",
+	        "Identifier": "ORCL",
+	        "Host": "DBMJohnHancock",
+	        "UserName": "pharma_test",
+	        "Password": "pharma_test"
+	      },
+	      "Order": 1,
+	      "IsManaged": false,
+	      "Safe": null,
+	      "Folder": null,
+	      "Object": null,
+	      "additionalOptions": [],
+	      "IsSuperUser": false
+	    }
+	  ]
+	}
+	],
+      "DriftDetection": false
+    },
+    {
+      "Name": "UAT",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Pre_Prod",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Prod",
+      "Environments": [
+	  	{
+	  "EnvironmentName": "PROD",
+	  "EnvironmentDescription": null,
+	  "ComparisonType": null,
+	  "SuperUser": null,
+	  "Schemas": [
+	    {
+	      "Name": "pharma_prod",
+	      "SchemaCredentials": {
+	        "Port": "1521",
+	        "IdentifierType": "SID",
+	        "Identifier": "ORCL",
+	        "Host": "DBMJohnHancock",
+	        "UserName": "pharma_prod",
+	        "Password": "pharma_prod"
+	      },
+	      "Order": 1,
+	      "IsManaged": false,
+	      "Safe": null,
+	      "Folder": null,
+	      "Object": null,
+	      "additionalOptions": [],
+	      "IsSuperUser": false
+
+	    }
+	  ]
+	}
+	],
+      "DriftDetection": false
+    }
+  ]
+}

@@ -1,19 +1,19 @@
 import groovy.json.*
 
-// N8 Deployment Pipeline
-// Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "HR_Tasks"
+// OPKR
+def landscape = "develop"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
-def base_path = "C:\\Automation\\dbm_demo\\devops"
+// Outboard Local Settings - set this to be able to find the settings file
+def settings_file = "local_settings.json"
+//def base_path = "C:\\AutomationScriptsMaestro\\DEVOPS"
+def base_path = "C:\\Automation\\Jenkins_pipe"
 
 rootJobName = "$env.JOB_NAME";
-//FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
+if (landscape == "job") { landscape = rootJobName.toLowerCase()}
 branchName = "master"
 branchVersion = ""
-// Outboard Local Settings
-def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
 def git_message = ""
@@ -40,6 +40,8 @@ def server = local_settings["general"]["server"]
 properties([
 	parameters([
 		//choice(name: 'Landscape', description: "Develop/Release to specify deployment target", choices: 'MP_Dev\nMP_Dev2,MP_Release'),
+		string(name: 'VersionNumber', description: "Version for package", defaultValue: '1.0.1'),
+		string(name: 'ServiceNowID', description: "Service now ticket or enhancement", defaultValue: 'ENH-1111'),
 		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes')
 	])
 ])
@@ -47,8 +49,19 @@ properties([
 def java_cmd = local_settings["general"]["java_cmd"]
 def dbmNode = ""
 def staging_path = local_settings["general"]["staging_path"]
+if ("$env.VersionNumber".length() < 2) {
+  println "Error: specify Version for package"
+  System.exit(1)
+}
+if ("$env.ServiceNowID".length() < 2) {
+  println "Error: specify service now ticket for package"
+  System.exit(1)
+}
+
 // note key off of landscape variable
 println "Matching: ${landscape} in the ${settings_file} file"
+raw_version = "$env.VersionNumber"
+snow_id = "$env.ServiceNowID"
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
@@ -66,53 +79,13 @@ staging_dir = "${staging_path}${sep}${pipeline}${sep}${base_schema}"
 #-----------------------------------------------#
 #  Stages
 */
-stage('GitParams') {
-  node (dbmNode) {
-    echo '#---------------------- Summary ----------------------#'
-    echo "#  Validating Git Commit"
-    echo "#------------------------------------------------------#"
-    echo "# Update git repo..."
-    echo "# Reset local path - original:"
-    bat "echo %PATH%"
-        echo "# Read latest commit..."
-        bat "git --version"
-        git_message = bat(
-          script: "@cd ${source_dir} && @git log -1 HEAD --pretty=format:%%s",
-          returnStdout: true
-        ).trim()
 
-    //git_message = "This is git message. [VERSION: 2.5.0]"
-    echo "# From Git: ${git_message}"
-    result = git_message.replaceFirst(reg, '$1')
-	//  dbcr_result = git_message.replaceFirst(reg, '$2')
-	//git_message = "[Version: 3.11.2.1] using [DBCR: ADVTA00292]"
-	//result = "3.11.2.1"
-  }
-}
-
-if(! branchVersion.equals("")){
-	// Both branch version and git version git wins as override!
-	if (git_message.length() != result.length()){
-		echo "# VERSION from git:" + result
-		echo "# VERSION from branch:" + branchVersion
-		echo "# git version overrides branch version!"
-	}else{
-		echo "# VERSION from branch:" + branchVersion
-		result = branchVersion
-	}
-}else if (git_message.length() == result.length()){
-	echo "No VERSION found\nResult: ${result}\nGit: ${git_message}"
-	currentBuild.result = "UNSTABLE"
-	return
+if (raw_version.startsWith("V")) {
+	version = "V" + raw_version 
 }else{
-	echo "# VERSION from git:" + result
+	version = raw_version
 }
-
-version = "V" + result // + "__" + dbcr_result
-if (dbcr_result == "" && env.Skip_Packaging != "No"){
-	version = "V" + result
-}
-
+version = "${version}_${snow_id}"
 echo message_box("${pipeline} Deployment", "title")
 echo "# FINAL PACKAGE VERSION: ${version}"
 environment = environments[0]
@@ -122,11 +95,17 @@ stage(environment) {
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     echo "#------------------- Copying files for ${version} ---------#"
     bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
-    // This is for when files are prefixed with <dbcr_result>
-    //bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
-    //bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
-    // This is for copying a whole directory
-    bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
+    bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
+    echo "#------------------- Copying DDL ---------#"
+    def tmp_path = "${source_dir}${sep}${snow_id}${sep}ddl"
+    def filelist = bat(script: "dir /B ${tmp_path}${sep}*.sql", returnStdout: true)
+    //bat "copy \"${source_dir}${sep}${snow_id}${sep}ddl${sep}*.sql\" \"${staging_dir}${sep}${version}\""
+	def icnt = prefix_files(filelist, tmp_path, "${staging_dir}${sep}${version}", 0)
+    echo "#------------------- Copying DML (${icnt}) ---------#"
+	tmp_path = "${source_dir}${sep}${snow_id}${sep}dml"
+    filelist = bat(script: "dir /B ${tmp_path}${sep}*.sql", returnStdout: true)
+    icnt = prefix_files(filelist, tmp_path, "${staging_dir}${sep}${version}", icnt)
+    //bat "copy \"${source_dir}${sep}${snow_id}${sep}dml${sep}*.sql\" \"${staging_dir}${sep}${version}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
@@ -208,6 +187,36 @@ def adhoc_package(full_package_name){
 }
 
 @NonCPS
+def prefix_files(flist, path, target, icnt = 0){
+	def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P',
+	'Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
+	def files = []
+	def new_name = ""
+	def ilen = 0
+	def sv = ""
+	def iter = 0
+	def remain = 0
+	def is_cmd = true
+	def items = flist.split("\r\n")
+	for (item in items){
+		ilen = item.length()
+		is_cmd = item.toLowerCase().contains("dir /b")
+		if(ilen > 2 && !is_cmd){
+			iter = (icnt/36).toInteger()
+			remain = icnt % 36
+			sv = "${seq.get(iter)}${seq.get(remain)}"
+			new_name = "${sv}_${item}"
+			println "copy ${path}${sep}${item} ${target}${sep}${new_name}"
+			src = new File("${path}${sep}${item}")
+			trg = new File("${target}${sep}${new_name}")
+			trg << src.text
+			icnt += 1
+		}
+	}
+	return icnt
+}
+
+@NonCPS
 def ensure_dir(pth){
   folder = new File(pth)
   if ( !folder.exists() ){
@@ -230,7 +239,7 @@ def get_settings(file_path, project = "none") {
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
-	println ""Project Configurations: ${settings["branch_map"].keySet()}"
+	println "\r\nProject Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
 
@@ -250,10 +259,23 @@ def message_box(msg, def mtype = "sep") {
     res += "#${"-" * tot}#\n"   
   }
   //println res
-  return res
+  return(res)
 }
 
 def separator( def ilength = 82){
   def dashy = "-" * (ilength - 2)
   //println "#${dashy}#"
+}
+
+def sortable(inum){
+  String ans = "00"
+  println "Process ${inum}"
+  def icnt = inum.toInteger()
+  //incoming int
+  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
+  def iter = (icnt/36).toInteger()
+  def remain = icnt % 36
+  ans = "${seq.get(iter)}${seq.get(remain)}"
+  println ans
+  return(ans)
 }

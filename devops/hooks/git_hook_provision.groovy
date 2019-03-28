@@ -16,12 +16,19 @@ log_file = "${this_path}${sep}dbm_log.txt"
 silent_log = false
 settings = [:]
 settings = get_settings(settings_file)
+	
+init_log()
+message_box("Building DDL Revisions","title")
 arg_map = [:]
 parse_arguments(this.args)
 
 if (arg_map.containsKey("action")) {
 	if (!arg_map.containsKey("connection")){
 	  message_box("ERROR: No connection argument given", "title")
+	  System.exit(1)
+	}
+	if (!arg_map.containsKey("pipeline")){
+	  message_box("ERROR: No pipeline argument given", "title")
 	  System.exit(1)
 	}
 	init_log()
@@ -52,6 +59,80 @@ if (arg_map.containsKey("action")) {
 	message_box("ERROR: enter an action argument", "title")
 	help()
 }
+ 
+def parse_arguments(args){
+  for (arg in args) {
+    //logit arg
+    pair = arg.split("=")
+    if(pair.size() == 2) {
+      arg_map[pair[0].trim()] = pair[1].trim()
+    }else{
+      arg_map[arg] = ""
+    }
+  }
+  
+}
+//  Oracle Methods
+// REPO/ORACLE/SCHEMA
+
+def process_oracle(){
+	def connection = arg_map["connection"]
+	def base_path = settings["general"]["base_path"]
+	def delim = settings["connections"][connection]["code_separator"]
+	def schema_name = settings["connections"][connection]["user"]
+	def oracle_src = "repo"
+	def pipeline = arg_map["pipeline"]
+	def label_name = ""
+	if (arg_map.containsKey("oracle_source")){
+	  oracle_src = arg_map["oracle_source"]
+	}
+	if (oracle_src == "repo"){
+		if(arg_map.containsKey("labelname")){
+			label_name = arg_map["labelname"]
+		}else{
+			logit message_box("ERROR: No labelname argument given", "title")
+			System.exit(1)
+		}
+	}
+	def sql = oracle_object_ddl_query(oracle_src)
+	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle${sep}${pipeline}"
+	def path = ''; def hdr = ''
+	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+	def content = ""
+	java.sql.Clob clob = null
+	message_box("Oracle - DDL Processor", "title")
+	logit "=> Processes either raw ddl or DBmaestro revisions to files."
+	logit "Using Connection: ${connection}"
+	logit "  Pipeline: ${pipeline}"
+	logit "  Platform: ${settings["connections"][connection]["platform"]}"
+	logit "  Database: ${schema_name}"
+	def conn = sql_connection(connection)
+	sql = sql.replaceAll("__LABELNAME__", label_name)
+	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
+	logit "Query: ${sql}\n"
+	conn.eachRow(sql){ row ->
+		cur_date = new Date()
+		hdr = ""
+		path = "${base_path}${sep}${row.SCHEMANAME}${sep}${row.OBJECT_TYPE}"
+		ensure_dir(path)
+		clob = (java.sql.Clob) row.DDL
+	    content = clob.getAsciiStream().getText()
+		content = hdr + content
+		name = "${row.OBJECT_NAME}.sql"    
+		def hnd = new File("${path}${sep}${name}")
+		logit "Saving: ${path}${sep}${name}", "DEBUG", true
+		hnd.write content
+	}
+	separator(100)
+}
+
+def oracle_object_ddl_query(src = "repo") {
+	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
+	if(src == "raw"){
+		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
+	}
+	return sql
+}
 
 def process_mssql(){
 	def connection = arg_map["connection"]
@@ -69,7 +150,7 @@ def process_mssql(){
 	logit "  Database: ${settings["connections"][connection]["connect"]}"
 	def file_name = arg_map["dacpac_file"]
 	logit "  DACPAC: ${file_name}"
-	file_path = "${base_path}${sep}${file_name}"
+	file_path = file_name.contains(sep) ? file_name : "${base_path}${sep}${file_name}"
 	// FIXME - build routine to unpack the dacpac file
 	// "C:\Program Files (x86)\Microsoft SQL Server\120\DAC\bin\DacUnpack.exe" "%1"
 	// unpack_file(file_name)
@@ -80,7 +161,7 @@ def process_mssql(){
 	    //skip it
 	  }else if(line == delim && last_line == ""){
 	    obj_dll += "\n" + line + "\n"
-	    save_object(obj_dll)
+	    mssql_save_object(obj_dll)
 	    obj_dll = ""
 	    rpt = true
 	  }else{
@@ -187,6 +268,7 @@ def postgres_all(){
 		process_postgres()
 		update_git()
 }
+
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
 def process_oracle(){
@@ -276,9 +358,10 @@ def pg_save_object(content, declaration){
 }
 
 // MSSQL Parsing
-def save_object(content){
+def mssql_save_object(content){
 	def connection = arg_map["connection"]
-	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}mssql${sep}${connection}"
+	def pipeline = arg_map["pipeline"]
+	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}mssql${sep}${pipeline}"
 	ensure_dir(base_path)
 	def pri_reg = /^.*\s?\[(.*)\]\.\[(.*)\].*/
   def pri_reg2 = /^.*\s?\[(.*)\].*/

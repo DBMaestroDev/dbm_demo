@@ -13,8 +13,8 @@ import groovy.sql.Sql
 import groovy.json.*
 import java.io.File
 import java.text.SimpleDateFormat
-import DbmSecure
-def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
+//import DbmSecure
+base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
 //evaluate(new File("${base_path}\\DbmSecure.groovy"))
 def jsonSlurper = new JsonSlurper()
 def json_file = "dbm_queries.json"
@@ -69,6 +69,9 @@ if (arg_map.containsKey("action")) {
       break
     case "transfer_packages":
       transfer_packages()
+      break
+    case "environment_report":
+      environment_report()
       break
     case "encrypt":
       password_encrypt()
@@ -190,7 +193,7 @@ def sql_connection(conn_type) {
   if (conn_type == "repo" || conn_type == "repository") {
     user = local_settings["connections"]["repository"]["user"]
     if (local_settings["connections"]["repository"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
+      //password = password_decrypt(local_settings["connections"]["repository"]["password_enc"])
     }else{
       password = local_settings["connections"]["repository"]["password"]
     }
@@ -199,7 +202,7 @@ def sql_connection(conn_type) {
     // FIXME find instance for named environment and build it
     user = local_settings["connections"]["remote"]["user"]
     if (local_settings["remote"].containsKey("password_enc")) {
-      password = password_decrypt(local_settings["connections"]["remote"]["password_enc"])
+     // password = password_decrypt(local_settings["connections"]["remote"]["password_enc"])
     }else{
       password = local_settings["connections"]["remote"]["password"]
     }
@@ -335,6 +338,201 @@ def disable_package() {
   conn.close()
 }
 
+def empty_package(){
+  def contents = file_contents["package_content"]
+  def version = arg_map["ARG2"]
+  def pipeline = arg_map["ARG1"]
+  def cnt = 0
+  message_box("Task: Empty Package - ")
+  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
+  def query = contents["queries"][0]
+  ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  ver_query = ver_query.replaceAll('ARG2', version)
+  query["query"] = ver_query
+  def results = result_query(query, ["SCRIPT_ID","script","SCRIPT_SORCE_DATA_REFERENCE"])
+  println " Processed Query: ${query["query"]}"
+  def conn = sql_connection("repo")
+  results["SCRIPT_ID"].each {script_id -> 
+    println "Removing script_id = ${script_id}"
+    conn.call("{call PKG_RM.DELETE_SCRIPT(?,?)}", [script_id, Sql.VARCHAR]) { was_deleted ->
+		if (was_deleted == 'TRUE') {println "Deleted Successfully (${was_deleted})"}
+	}
+    println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
+	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
+	fil.delete()
+	cnt += 1
+  }
+  conn.close()
+}
+
+def changeStagingDir() {
+  // Change the product staging directory
+  if (!arg_map.containsKey("pipeline")) {
+    println "Send pipeline= and path= arguments"
+    System.exit(1)
+  }
+  def flowid = 0
+  def old_path = ""
+  def pipeline = arg_map["pipeline"]
+  def query = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
+  println message_box("Change Staging Folder", "title")
+  def new_path = arg_map["path"]
+  println "Pipeline: ${pipeline}"
+  def conn = sql_connection("repo")
+  conn.eachRow(query) { rec ->
+    old_path = rec["SCRIPTOUTPUTFOLDER"]
+    println "Existing: ${old_path}"
+    flowid = rec["FLOWID"]
+  }
+  ensure_dir()
+  println "New: ${new_path}"
+  println ""
+  println "=> Update Flow Record"
+  query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
+  println "=> Update Script Import Records"
+  query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
+  conn.execute(query)
+}
+
+def environment_report(){
+	// Reports on environments versions and tags
+  if (!arg_map.containsKey("pipeline")) {
+    println "Send pipeline= and path= arguments"
+    System.exit(1)
+  }
+  def html = ""
+  def grid = [:]
+  def tmp_html = ""
+  def contents = file_contents["environment_tags"]
+  def pipeline = arg_map["pipeline"]
+  def output_path = base_path
+  def template_path = base_path + sep + "env_report_template.html"
+  if (arg_map.containsKey("path")) {
+	output_path = arg_map["path"]
+  }
+  def cnt = 0
+  message_box("Task: Environment Report")
+  println "Args: ${arg_map}"
+  html = read_file(base_path,"env_report_template.html" )
+  def query = contents["queries"][0]
+  ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  def conn = sql_connection("repo")
+  def ipos = 0
+  sdf = new SimpleDateFormat("MM/dd/yyyy")
+  sdft = new SimpleDateFormat("HH:mm:ss")
+  html = html.replaceAll('__PIPELINE__', pipeline)
+  def package_list = get_packages(pipeline, conn)
+  def script_tags = get_script_tags(pipeline, conn)
+  def environments = get_environments(pipeline, conn)
+  // Build master dictionary
+  package_list.keySet().each{ ver ->
+	stf = [:]
+	stf["tags"] = ""
+	environments.each{ env,v -> 
+		stf[env] = ""
+	}
+	println "Ver: ${ver}"
+	grid[ver] = stf
+	
+  }
+  // Now loop through deployment data
+  // pipeline, environment, VERSION, TAG_VALUE
+  conn.eachRow(ver_query){ row ->
+	tag = row["TAG_VALUE"] == null ? "" : row["TAG_VALUE"]
+	ver = row["VERSION"]
+	String dep_at = row["FINISH"]
+	grid[ver]["tags"] = tag
+	grid[ver][row["environment"]] = "${dep_at.split(" ")[0]}<br>${dep_at.split(" ")[1]}"
+  }
+  
+  
+	tmp_html += "<tr>\n"
+	tmp_html += "<th>Version</th>\n"
+	tmp_html += "<th>Tags</th>\n"
+	
+	environments.each{ env,v -> 
+		tmp_html += "<th>${env}</th>\n"	
+	}
+  tmp_html += "</tr>\n"
+  html = html.replaceAll('__HEADER__', tmp_html)
+  tmp_html = ""
+  // pipeline, environment, VERSION, TAG_VALUE
+	grid.each{ ver,vals ->
+		tag = vals["tags"]
+		tmp_html += "<tr>\n"
+		tmp_html += "<td>${ver}</td>\n"
+		if(script_tags.containsKey(ver)){
+			println "Found ver: ${ver}"
+			tag == "" ? tag = "${script_tags[ver].join(",")}" : "${tag},${script_tags[ver].join(",")}"
+		}
+
+		tmp_html += "<td>${tag}</td>\n"
+		environments.each{ env,v -> 
+			tmp_html += "<td>${vals[env].toString().trim()}</td>\n"	
+		}
+    }
+	tmp_html += "</tr>\n"
+  html = html.replaceAll('__BODY__', tmp_html)
+  
+  conn.close()
+   println " Processed Query: ${ver_query}"
+   println " Creating: ${output_path}${sep}env_report.html"
+   //println " Content: ${html}"
+   create_file(output_path, "env_report.html", html)
+}
+
+def get_script_tags(pipeline, cxn){
+  def returnVal = [:]
+  def contents = file_contents["script_tags"]
+  def query = contents["queries"][0]
+  def ver_query = query["query"]
+  ver_query = ver_query.replaceAll('ARG1', pipeline)
+  cxn.eachRow(ver_query)
+  { row ->
+	//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+     if(row["TAG_VALUE"] != null){
+	  if(!returnVal.containsKey(row["version"])){returnVal[row["version"]] = []}
+	  returnVal[row["version"]] << row["TAG_VALUE"]
+	 }
+  }
+  return returnVal
+}
+
+def get_packages(pipeline, cxn){
+	def sql = "select p.FLOWNAME, v.id, v.name as version, v.IS_ENABLED as enabled from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.ID"
+	def returnVal = [:]
+	def ver_query = sql
+	ver_query = ver_query.replaceAll('ARG1', pipeline)
+	cxn.eachRow(ver_query)
+	{ row ->
+		//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal[row["version"]] = ["id" : row["ID"]]
+	}
+	return returnVal
+}
+
+def get_environments(pipeline, cxn){
+	def sql = "select p.FLOWNAME, e.LSNAME as environment, e.LSID, e.ENV_TYPE, et.T_ORDER from TWMANAGEDB.TBL_LS e INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = e.FLOWID INNER JOIN TWMANAGEDB.TBL_SMG_ENV_TYPES et on et.ID = e.ENV_TYPE where p.FLOWNAME = 'ARG1' AND e.ENV_TYPE <> 8 order by et.T_ORDER"
+	def returnVal = [:]
+	def ver_query = sql
+	ver_query = ver_query.replaceAll('ARG1', pipeline)
+	cxn.eachRow(ver_query)
+	{ row ->
+		//println "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal[row["environment"]] = ["order" : row["T_ORDER"]]
+	}
+	//println "Got this: ${returnVal}"
+	return returnVal
+}
+
+// #--------- UTILITY ROUTINES ------------#
+
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
   conn.eachRow(query_string)
@@ -345,8 +543,6 @@ def show_object_ddl(query_string, conn) {
     println bodyText
   }
 }
-
-// #--------- UTILITY ROUTINES ------------#
 
 def get_export_json_file(target, path_only = false){
   def jsonSlurper = new JsonSlurper()
@@ -476,67 +672,6 @@ def read_file(pth, name){
   return fil.text
 }
 
-def empty_package(){
-  def contents = file_contents["package_content"]
-  def version = arg_map["ARG2"]
-  def pipeline = arg_map["ARG1"]
-  def cnt = 0
-  message_box("Task: Empty Package - ")
-  println " Description: ${contents["name"]}\nARGS: ${arg_map}"
-  def query = contents["queries"][0]
-  ver_query = query["query"]
-  ver_query = ver_query.replaceAll('ARG1', pipeline)
-  ver_query = ver_query.replaceAll('ARG2', version)
-  query["query"] = ver_query
-  def results = result_query(query, ["SCRIPT_ID","script","SCRIPT_SORCE_DATA_REFERENCE"])
-  println " Processed Query: ${query["query"]}"
-  def conn = sql_connection("repo")
-  results["SCRIPT_ID"].each {script_id -> 
-    println "Removing script_id = ${script_id}"
-    conn.call("{call PKG_RM.DELETE_SCRIPT(?,?)}", [script_id, Sql.VARCHAR]) { was_deleted ->
-		if (was_deleted == 'TRUE') {println "Deleted Successfully (${was_deleted})"}
-	}
-    println "Remove from file system: ${results["SCRIPT_SORCE_DATA_REFERENCE"][cnt]}"
-	def fil = new File(results["SCRIPT_SORCE_DATA_REFERENCE"][cnt])
-	fil.delete()
-	cnt += 1
-  }
-  conn.close()
-}
-
-def changeStagingDir() {
-  // Change the product staging directory
-  if (!arg_map.containsKey("pipeline")) {
-    println "Send pipeline= and path= arguments"
-    System.exit(1)
-  }
-  def flowid = 0
-  def old_path = ""
-  def pipeline = arg_map["pipeline"]
-  def query = "select s.flowid, s.SCRIPTOUTPUTFOLDER from TWMANAGEDB.TBL_FLOW_SETTINGS s INNER JOIN TBL_FLOW f on f.FLOWID = s.FLOWID WHERE FLOWNAME = '${pipeline}'"
-  println message_box("Change Staging Folder", "title")
-  def new_path = arg_map["path"]
-  println "Pipeline: ${pipeline}"
-  def conn = sql_connection("repo")
-  conn.eachRow(query) { rec ->
-    old_path = rec["SCRIPTOUTPUTFOLDER"]
-    println "Existing: ${old_path}"
-    flowid = rec["FLOWID"]
-  }
-  ensure_dir()
-  println "New: ${new_path}"
-  println ""
-  println "=> Update Flow Record"
-  query = "update TWMANAGEDB.TBL_FLOW_SETTINGS set SCRIPTOUTPUTFOLDER = '${new_path}' where FLOWID = ${flowid}"
-  conn.execute(query)
-  println "=> Update Script Import Records"
-  query = "update TWMANAGEDB.TBL_SMG_MANAGED_DYNAMIC_SCR set SCRIPT_SORCE_DATA_REFERENCE = REPLACE(SCRIPT_SORCE_DATA_REFERENCE, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
-  conn.execute(query)
-  println "=> Update Script Import Records"
-  query = "update TWMANAGEDB.TBL_SMG_BRANCH set DATA_SOURCE_PATH = REPLACE(DATA_SOURCE_PATH, '${old_path}', '${new_path}') where SCRIPT_ID IN (SELECT SCRIPT_ID from TWMANAGEDB.TBL_SMG_MANAGED_STATIC_SCR s INNER JOIN TWMANAGEDB.TBL_VERSION v ON v.ID = s.VERSION_ID WHERE v.FLOW_ID = '${flowid}' )"
-  conn.execute(query)
-}
-
 def getNextVersion(optionType){
   //Get version from currentVersion.txt file D:\\repo\\N8
   // looks like this:
@@ -598,7 +733,7 @@ def sortable(inum){
   ans = "00"
   def icnt = inum.toInteger()
   //incoming int
-  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
+  def seq = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
   def iter = (icnt/36).toInteger()
   def remain = icnt % 36
   return "${seq.get(iter)}${seq.get(remain)}"
@@ -610,6 +745,7 @@ def transfer_packages(){
   
 }
 
+/*
 def password_encrypt(pwd_enc = ""){
 	def pwdTools = new DbmSecure()
 	if(pwd_enc == "") {pwd_enc = arg_map["password"] }
@@ -623,3 +759,4 @@ def password_decrypt(pwd_enc = ""){
 	result = pwdTools.decrypt(["password" : pwd_enc])
 	return result
 }
+*/

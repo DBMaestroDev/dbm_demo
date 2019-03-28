@@ -9,6 +9,7 @@ sep = "\\"
 def base_path = "C:\\Automation\\dbm_demo\\devops"
 
 rootJobName = "$env.JOB_NAME";
+if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
 //FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
 branchName = "master"
 branchVersion = ""
@@ -34,7 +35,7 @@ def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
 def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
-local_settings = get_settings("${base_path}${sep}${settings_file}")
+local_settings = get_settings("${base_path}${sep}${settings_file}", landscape)
 def server = local_settings["general"]["server"]
 
 // Add a properties for Platform and Skip_Packaging
@@ -108,9 +109,9 @@ if(! branchVersion.equals("")){
 	echo "# VERSION from git:" + result
 }
 
-version = "V" + result // + "__" + dbcr_result
-if (dbcr_result == "" && env.Skip_Packaging != "No"){
-	version = "V" + result
+if( !version.startsWith("V")) { version = "V" + result }
+if (dbcr_result != ""){
+	version = version + "__" + dbcr_result
 }
 
 echo message_box("${pipeline} Deployment", "title")
@@ -135,7 +136,8 @@ stage(environment) {
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
     // Deploy to Dev
-    echo "#------------------- Performing Deploy on ${environment} -------------#"
+	execute_prerun_script(source_dir, pipeline, environment)
+	echo "#------------------- Performing Deploy on ${environment} -------------#"
     //try {
       bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	//	} catch (Exception e) {
@@ -159,9 +161,11 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server} ${credential}"
 		if (do_pair) {
+			execute_prerun_script(source_dir, pipeline, pair[1])
 			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server} ${credential}"
 		}
 	}   
@@ -177,6 +181,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
@@ -192,6 +197,7 @@ stage(environment) {
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
 		//  Deploy to QA
+		execute_prerun_script(source_dir, pipeline, environment)
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
@@ -221,16 +227,19 @@ def ensure_dir(pth){
   }
 }
 
-def get_settings(file_path) {
+def get_settings(file_path, project = "none") {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
 	println "JSON Settings Document: ${file_path}"
+	println "Project: ${project}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
+	println "Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
+
 
 def message_box(msg, def mtype = "sep") {
   def tot = 80
@@ -254,4 +263,14 @@ def message_box(msg, def mtype = "sep") {
 def separator( def ilength = 82){
   def dashy = "-" * (ilength - 2)
   //println "#${dashy}#"
+}
+
+def execute_prerun_script(source, pipeline, environment) {
+	def prerun_script = "prerun.bat"
+	fil = new File("${source}${sep}ENV${sep}${prerun_script}")
+	if( fil.exists() ) {
+		println "> Found Pre-Deploy Script - running..."
+		bat "${source}${sep}ENV${sep}${prerun_script} pipeline=${pipeline} environment=${environment}"
+	}
+    return "ok"
 }

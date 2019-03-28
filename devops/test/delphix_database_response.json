@@ -1,0 +1,92 @@
+{
+   "type":"ListResult",
+   "status":"OK",
+   "result":[
+      {
+         "type":"OracleDatabaseContainer",
+         "reference":"ORACLE_DB_CONTAINER-2",
+         "namespace":"NAMESPACE-4",
+         "name":"orasrc1",
+         "group":"GROUP-3",
+         "provisionContainer":null,
+         "creationTime":"2018-10-31T16:58:35.121Z",
+         "currentTimeflow":"ORACLE_TIMEFLOW-2",
+         "previousTimeflow":null,
+         "description":"",
+         "runtime":{
+            "type":"OracleDBContainerRuntime",
+            "logSyncActive":false,
+            "preProvisioningStatus":null,
+            "crossPlatformEligible":false,
+            "crossPlatformScriptUploaded":false,
+            "liveSourceEligible":true
+         },
+         "transformation":false,
+         "masked":false,
+         "os":"Linux",
+         "processor":"x86",
+         "sourcingPolicy":{
+            "type":"OracleSourcingPolicy",
+            "logsyncEnabled":true,
+            "logsyncMode":"ARCHIVE_REDO_MODE",
+            "logsyncInterval":5,
+            "loadFromBackup":false
+         },
+         "performanceMode":"DISABLED",
+         "diagnoseNoLoggingFaults":true,
+         "preProvisioningEnabled":false,
+         "crossPlatformReady":false,
+         "physicalStandby":false,
+         "liveSource":false,
+         "databaseFraction":false,
+         "contentType":"NON_CDB",
+         "restoration":false,
+         "endianness":"LITTLE_ENDIAN"
+      },
+      {
+         "type":"MSSqlDatabaseContainer",
+         "reference":"MSSQL_DB_CONTAINER-1",
+         "namespace":"NAMESPACE-2",
+         "name":"suitecrm_dSource",
+         "group":"GROUP-2",
+         "provisionContainer":null,
+         "creationTime":"2018-09-18T17:52:48.776Z",
+         "currentTimeflow":"MSSQL_TIMEFLOW-1",
+         "previousTimeflow":null,
+         "description":"",
+         "runtime":{
+            "type":"MSSqlDBContainerRuntime",
+            "logSyncActive":false,
+            "preProvisioningStatus":{
+               "type":"PreProvisioningRuntime",
+               "preProvisioningState":"INACTIVE",
+               "lastUpdateTimestamp":"Sun Jan 13 19:02:28 PST 2019",
+               "status":"Validated sync is inactive because the dSource is disabled.",
+               "response":null,
+               "pendingAction":null
+            },
+            "lastRestoredBackupSetUUID":"71B86D31-455B-4B30-9046-DF5764212BAF"
+         },
+         "transformation":false,
+         "masked":false,
+         "os":"Windows",
+         "processor":"x86",
+         "sourcingPolicy":{
+            "type":"SourcingPolicy",
+            "logsyncEnabled":false,
+            "loadFromBackup":false
+         },
+         "performanceMode":"DISABLED",
+         "restoration":false,
+         "delphixManaged":false
+      }
+   ],
+   "job":null,
+   "action":null,
+   "total":2,
+   "overflow":false
+}
+
+
+
+RAWResponse: {"type":"ListResult","status":"OK","result":[{"type":"OracleDatabaseContainer","reference":"ORACLE_DB_CONTAINER-2","namespace":"NAMESPACE-4","name":"orasrc1","group":"GROUP-3","provisionContainer":null,"creationTime":"2018-10-31T16:58:35.121Z","currentTimeflow":"ORACLE_TIMEFLOW-2","previousTimeflow":null,"description":"","runtime":{"type":"OracleDBContainerRuntime","logSyncActive":false,"preProvisioningStatus":null,"crossPlatformEligible":false,"crossPlatformScriptUploaded":false,"liveSourceEligible":true},"transformation":false,"masked":false,"os":"Linux","processor":"x86","sourcingPolicy":{"type":"OracleSourcingPolicy","logsyncEnabled":true,"logsyncMode":"ARCHIVE_REDO_MODE","logsyncInterval":5,"loadFromBackup":false},"performanceMode":"DISABLED","diagnoseNoLoggingFaults":true,"preProvisioningEnabled":false,"crossPlatformReady":false,"physicalStandby":false,"liveSource":false,"databaseFraction":false,"contentType":"NON_CDB","restoration":false,"endianness":"LITTLE_ENDIAN"},{"type":"MSSqlDatabaseContainer","reference":"MSSQL_DB_CONTAINER-1","namespace":"NAMESPACE-2","name":"suitecrm_dSource","group":"GROUP-2","provisionContainer":null,"creationTime":"2018-09-18T17:52:48.776Z","currentTimeflow":"MSSQL_TIMEFLOW-1","previousTimeflow":null,"description":"","runtime":{"type":"MSSqlDBContainerRuntime","logSyncActive":false,"preProvisioningStatus":{"type":"PreProvisioningRuntime","preProvisioningState":"INACTIVE","lastUpdateTimestamp":"Sun Jan 13 19:02:28 PST 2019","status":"Validated sync is inactive because the dSource is disabled.","response":null,"pendingAction":null},"lastRestoredBackupSetUUID":"71B86D31-455B-4B30-9046-DF5764212BAF"},"transformation":false,"masked":false,"os":"Windows","processor":"x86","sourcingPolicy":{"type":"SourcingPolicy","logsyncEnabled":false,"loadFromBackup":false},"performanceMode":"DISABLED","restoration":false,"delphixManaged":false}],"job":null,"action":null,"total":2,"overflow":false}

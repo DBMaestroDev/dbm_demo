@@ -1,0 +1,49 @@
+{
+    "name": "V1.7",
+    "operation": "create",
+    "type": "regular",
+    "enabled": true,
+    "closed": false,
+    "tags":
+    [
+        {
+            "tagNames": ["TTS1307", "TTS1309"],
+            "tagType": "task"
+        },
+        {
+            "tagNames": ["Build4178"],
+            "tagType": "custom"
+        }
+    ],
+    "scripts":
+    [
+        {
+            "name": "201809270027.sql",
+            "tags":
+            [
+                {
+                    "tagNames": ["TTS1307", "TTS1309"],
+                    "tagType": "task"
+                },
+                {
+                    "tagNames": ["Build4178"],
+                    "tagType": "custom"
+                }
+            ]
+        },
+        {
+            "name": "201809300021.sql",
+            "tags":
+            [
+                {
+                    "tagNames": ["TTS1303", "TTS1319"],
+                    "tagType": "task"
+                },
+                {
+                    "tagNames": ["Build4179"],
+                    "tagType": "custom"
+                }
+            ]
+        }
+    ]
+} 
