@@ -533,7 +533,93 @@ def get_environments(pipeline, cxn){
 	return returnVal
 }
 
-// #--------- UTILITY ROUTINES ------------#
+def exclusion_list() {
+	// Imports a csv file (Create and export from excel)
+	// Schema, EXCLUDE_TYPE, OBJECT_NAME
+	// HR				2							TMP_TABLE
+	// HR				1							SYNONYM
+	// Take input of SchemaName and object name
+	def valid_columns = "DBCID, EXCLUDE_TYPE, OBJECT_NAME, EXCLUDE_BUILD, EXCLUDE_VALIDATE, EXCLUDE_ROLLBACK"
+	def replace_data = false
+	def last_schema = "ZZZZZZ"
+  if (!arg_map.containsKey("filepath")) {
+    println "Send filepath= arguments"
+    System.exit(1)
+	}else{
+		filepath = arg_map["filepath"]
+  }
+  if (arg_map.containsKey("replace")) {
+    if( arg_map["replace"] == 'true') { replace_data = true }
+	}
+  message_box("Task: Update Exclusion List")
+  println "Args: ${arg_map}"
+  def contents = read_csv_file(filepath)
+  if (contents[0].join(", ") != valid_columns) {
+    println "ERROR - invalid format, bad column titles"
+		println "must be:"
+		println valid_columns
+    System.exit(1)
+	}
+	def conn = sql_connection("repo")
+  // pipeline, environment, VERSION, TAG_VALUE
+	def icnt = 0
+	def dbcid = -1
+  contents.each{ row ->
+		if( icnt > 0 ){
+			if( row[0] != last_schema) { dbcid = get_dbcid(row[0], conn) }
+			sql = "INSERT INTO TWMANAGEDB.TBL_SMG_EXCLUDE_OBJECTS (${valid_columns}) VALUES (${dbcid}, ${row[1]}, '${row[2]}', ${row[3]}, ${row[4]}, ${row[5]})"
+		}
+		icnt += 1
+	}
+	conn.close()
+}
+
+def show_schema_objects() {
+	// Builds a csv file of database objects in a schema
+  if (!arg_map.containsKey("schema_name")) {
+    println "Send schema_name= and output_path= arguments"
+    System.exit(1)
+	}
+  if (!arg_map.containsKey("output_file")) {
+    println "Send output_path= arguments"
+    System.exit(1)
+	}
+	def res = "SCHEMA_NAME, OBJECT_NAME, OBJECT_TYPE\n"
+	def arow = []
+	def schema = arg_map["schema_name"]
+	def icnt = 0
+	def sql = "SELECT OBJECT_NAME, OBJECT_TYPE, OWNER FROM DBA_OBJECTS where owner = '__SCHEMA__' AND SUBOBJECT_NAME IS NULL ORDER BY OBJECT_TYPE, OBJECT_NAME"
+	def ver_query = sql.replaceAll('__SCHEMA__', schema.toUpperCase())
+  message_box("Task: Schema Objects")
+  println "Args: ${arg_map}"
+  def conn = sql_connection("repo")
+  // OBJECT_NAME, OBJECT_TYPE, OWNER
+  conn.eachRow(ver_query){ row ->
+		arow = []
+		arow << schema
+		arow << row["OBJECT_NAME"]
+		arow << row["OBJECT_TYPE"]
+		res += arow.join(",")
+		res += "\n"
+		icnt += 1
+	}
+	println "Processed: ${icnt} objects"
+	conn.close()
+	println "Creating file: ${arg_map["output_path"]}"
+	create_file(arg_map["output_path"], "object_list.csv", res)
+}
+
+// #---------------------------- UTILITY ROUTINES ----------------------------#
+
+def get_dbcid(schema_name, conn) {
+	def res = "ERROR - No Data Returned"
+	def sql = "SELECT DBCID FROM TWMANAGEDB.TBL_DBC WHERE DBCNAME = '__SCHEMA__'"
+  def ver_query = sql.replaceAll('__SCHEMA__', schema_name.toUpperCase())
+	conn.eachRow(ver_query){ row ->
+		res = row["DBCID"]
+	}
+	res
+}
 
 def show_object_ddl(query_string, conn) {
   // Redo query and loop through records
@@ -669,8 +755,27 @@ def create_file(pth, name, content){
   return "${pth}${sep}${name}"
 }
 
-def read_file(pth, name){
-  def fil = new File(pth,name)
+def read_csv_file(pth) {
+	def result = []
+	def cnt = 0
+	def txt = read_file(pth)
+	txt.split("\n").each { line->
+		row = []
+		line.split(",").each { item-> 
+			row << item
+		}
+		result << row
+		cnt += 1
+	}
+	return result
+}
+
+def read_file(pth, name = ""){
+	if(name == "") {
+		def fil = new File(pth)
+	}else{
+		def fil = new File(pth,name)
+	}
   return fil.text
 }
 
