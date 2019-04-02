@@ -16,8 +16,8 @@ log_file = "${this_path}${sep}dbm_log.txt"
 silent_log = false
 // #---- Localize Your paths and settings" ------#
 settings = [
-	"base_path" : "C:\\Automation",
-	"repository_name" : "REPO",
+	"base_path" : "C:\\Automation\\",
+	"repository_name" : "MultiBranch",
 	"default_branch" : "master",
 	"another" : ""
 	]
