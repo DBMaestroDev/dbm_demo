@@ -2,9 +2,8 @@
   "### Instructions ###": 
     "Enter the local settings items for your installation",
     "general" : {
-      "base_path" : "C:\\Automation\\dbm_demo",
       "java_cmd" : "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
-      "staging_path" : "C:\\pipelinescript",
+      "staging_path" : "C:\\pipelinescript\\MP",
       "server" : "dbmtemplate",
   	  "username" : "dbmguest@dbmaestro.com",
   	  "token" : "2BqDtNyL7gQjp6J0Kp7HNHbB5P0WayH0"
@@ -13,11 +12,6 @@
     "repository" : {
       "user" : "twmanagedb",
       "password" : "manage#2009",
-      "connect" : "dbmtemplate:1521/orcl"
-    },
-    "remote" : {
-      "user" : "dbmaestro_teamwork",
-      "password" : "Remote#2009",
       "connect" : "dbmtemplate:1521/orcl"
     }
   },

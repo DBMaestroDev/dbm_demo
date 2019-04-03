@@ -1,12 +1,20 @@
 import groovy.json.*
 
-// N8 Deployment Pipeline
-// Set this variable to choose between Dev1 and Dev2 landscape
+// DBmaestro Jenkins Groovy Deployment Pipeline
+// Set this variable to force it to pick the pipeline
+// If it is set to job, then it will match the name of your jenkins job to the key in the branch map in the local_settings.json file.
 def landscape = "job"
+// Set this variable to point to the folder where your local_settings.json folder is if different from this file
+def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
+//def base_path = "C:\\Automation\\dbm_demo\\devops"
+// Change this if you want to point to a different local settings file
+def settings_file = "local_settings.json"
+
+// #------------------- Change anything below at your own risk -------------------#
+// #---- (but please take the time to understand what is going on in the code here ;-> ) ---#
 def live = false // FIXME just for demo
 def flavor = 0
-sep = "\\"
-def base_path = "C:\\Automation\\dbm_demo\\devops"
+sep = "\\" //FIXME Reset for unix if necessary
 
 rootJobName = "$env.JOB_NAME";
 if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
@@ -15,7 +23,6 @@ branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
 if(landscape == "job"){ landscape = rootJobName.toLowerCase() }
-def settings_file = "local_settings.json"
 def local_settings = [:]
 // Settings
 def git_message = ""
