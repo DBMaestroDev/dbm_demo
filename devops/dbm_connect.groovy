@@ -613,10 +613,13 @@ def show_schema_objects() {
 		logit "ERROR: Send output_path= arguments"
 		System.exit(1)
 	}
+	message_box("Task: Schema Objects")
+	logit "Args: ${arg_map}"
+	def conn = null
 	if (arg_map.containsKey("connection")) {
-		def conn = sql_connection("custom", arg_map["connection"])
+		conn = sql_connection("custom", arg_map["connection"])
 	}else{
-		def conn = sql_connection("repo")
+		conn = sql_connection("repo")
 	}
 	def res = "SCHEMA_NAME, OBJECT_NAME, OBJECT_TYPE\n"
 	def arow = []
@@ -624,8 +627,6 @@ def show_schema_objects() {
 	def icnt = 0
 	def sql = "SELECT OBJECT_NAME, OBJECT_TYPE, OWNER FROM DBA_OBJECTS where owner = '__SCHEMA__' AND SUBOBJECT_NAME IS NULL ORDER BY OBJECT_TYPE, OBJECT_NAME"
 	def ver_query = sql.replaceAll('__SCHEMA__', schema.toUpperCase())
-	message_box("Task: Schema Objects")
-	logit "Args: ${arg_map}"
 	// OBJECT_NAME, OBJECT_TYPE, OWNER
 	conn.eachRow(ver_query){ row ->
 		arow = []
