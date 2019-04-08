@@ -19,7 +19,8 @@
 		"release" : [
 		  {
 		  "pipeline" : "HumanResources",
-		  "base_env" : "DIT",
+      "file_strategy" : "version",
+      "base_env" : "DIT",
 		  "base_schema" : "HR_DEV",
   	  "source_dir" : "C:\\Automation\\dbm_demo\\hr_demo\\versions",
 	  	"platform" : "oracle",
@@ -40,7 +41,8 @@
 		"hrm" : [
 		  {
 		  "pipeline" : "HRMADM",
-		  "base_env" : "Day0",
+      "file_strategy" : "version",
+      "base_env" : "Day0",
 		  "base_schema" : "AH3111ODZ_DEVOPS",
 		  "source_dir" : "C:\\Automation\\dbm_demo\\hrm_demo\\3.11.2\\db_request\\SQLSRV",
 		  	"platform" : "mssql",

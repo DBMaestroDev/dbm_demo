@@ -4,9 +4,9 @@ import groovy.json.*
 // Set this variable to force it to pick the pipeline
 // If it is set to job, then it will match the name of your jenkins job to the key in the branch map in the local_settings.json file.
 def landscape = "job"
-// Set this variable to point to the folder where your local_settings.json folder is if different from this file
-def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
-//def base_path = "C:\\Automation\\dbm_demo\\devops"
+//def base_path = new File(getClass().protectionDomain.codeSource.location.path).parent
+// Set this variable to point to the folder where your local_settings.json folder
+def base_path = "C:\\Automation\\dbm_demo\\devops"
 // Change this if you want to point to a different local settings file
 def settings_file = "local_settings.json"
 
@@ -27,7 +27,6 @@ def local_settings = [:]
 // Settings
 def git_message = ""
 // message looks like this "Adding new tables [Version: V2.3.4] "
-//def reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
 def reg = ~/.*\[Version: (.*)\].*/
 def environment = ""
 def environments = []
@@ -62,11 +61,16 @@ base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
 environments = local_settings["branch_map"][landscape][flavor]["environments"]
 def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
+def file_strategy = local_settings["branch_map"][landscape][flavor]["file_strategy"]
 credential = credential.replaceFirst("_USER_", local_settings["general"]["username"])
 credential = credential.replaceFirst("_PASS_", local_settings["general"]["token"])
 source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
 local_settings = null
 
+if( file_strategy != "version"){
+	// Reset regex to filter files based on a version
+	reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
+}
  echo "Working with: ${rootJobName}\n - Branch: ${branchName}\n - Pipe: ${pipeline}\n - Env: ${base_env}\n - Schema: ${base_schema}"
 staging_dir = "${staging_path}${sep}${pipeline}${sep}${base_schema}"
 
@@ -91,6 +95,8 @@ stage('GitParams') {
 
     //git_message = "This is git message. [VERSION: 2.5.0]"
     echo "# From Git: ${git_message}"
+		echo "# Looking for a commit message structure like this:"
+		echo "#  ${reg}"
     result = git_message.replaceFirst(reg, '$1')
 	//  dbcr_result = git_message.replaceFirst(reg, '$2')
 	//git_message = "[Version: 3.11.2.1] using [DBCR: ADVTA00292]"
@@ -129,13 +135,19 @@ stage(environment) {
     //Copy from source to version folder
   if(!env.Skip_Packaging || env.Skip_Packaging == "No"){
     echo "#------------------- Copying files for ${version} ---------#"
-    bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
-    // This is for when files are prefixed with <dbcr_result>
-    //bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
-    //bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
-    // This is for copying a whole directory
-    bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
-    // trigger packaging
+		echo "# Cleaning Directory"
+		bat "if exist ${staging_dir} del /q ${staging_dir}${sep()}*"
+		bat "FOR /D %%p IN (\"${staging_dir}${sep()}*.*\") DO rmdir \"%%p\" /s /q"
+		echo "# Copying using file strategy: ${file_strategy}"
+		if(file_strategy == "version"){
+      // This is for copying a whole directory
+      bat "xcopy /s /y /i \"${source_dir}${sep()}${result}\" \"${staging_dir}${sep}${version}\""
+    }else{
+      // This is for when files are prefixed with <task>
+      tasks.split(",").each {item->
+        bat "copy \"${source_dir}${sep()}${item.trim()}*.sql\" \"${staging_dir}${sep}${version}\""
+      }
+    }
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
     // version = adhoc_package(version)
