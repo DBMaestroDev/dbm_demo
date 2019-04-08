@@ -515,6 +515,23 @@ def get_environments(pipeline, cxn){
 	return returnVal
 }
 
+def export_exclusions(fpath, cxn){
+	def sql = "select * from TWMANAGEDB.TBL_SMG_EXCLUDE_OBJECTS"
+	def returnVal = ""
+	def valid_columns = "DBCID, EXCLUDE_TYPE, OBJECT_NAME, EXCLUDE_BUILD, EXCLUDE_VALIDATE, EXCLUDE_ROLLBACK"
+		def cur = "${fpath}${sep}exclusion_list_export.csv"
+	logit "ALERT - replacing existing data in the exclusion list table"
+	logit "old data exported to: ${cur}"
+	returnVal += valid_columns + "\n"
+	cxn.eachRow(sql)
+	{ row ->
+		//logit "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal += "${row["DBCID"]},${row["EXCLUDE_TYPE"]},${row["OBJECT_NAME"]},${row["EXCLUDE_BUILD"]},${row["EXCLUDE_VALIDATE"]},${row["EXCLUDE_ROLLBACK"]}\n"
+	}
+	//logit "Got this: ${returnVal}"
+	create_file(fpath, "exclusion_list_export.csv", returnVal)
+}
+
 def exclusion_list() {
 	// dbm_api.bat action=exclusion_list file_path=c:\automation\multi_tsk_exclusion.csv
 	// Imports a csv file (Create and export from excel)
@@ -530,9 +547,13 @@ def exclusion_list() {
 		System.exit(1)
 	}else{
 		filepath = arg_map["file_path"]
+		
 	}
+	def filepath_path = new File(filepath).getParent()
 	if (arg_map.containsKey("replace")) {
-		if( arg_map["replace"] == 'true') { replace_data = true }
+		if( arg_map["replace"] == 'true') { 
+			replace_data = true
+		}
 	}
 	message_box("Task: Update Exclusion List")
 	logit "Args: ${arg_map}"
@@ -550,6 +571,9 @@ def exclusion_list() {
 	def dbcid = -1
 	int icode = 0
 	def content = ""
+	if(replace_data){
+		export_exclusions(filepath_path, conn)
+	}
 	//sql = "INSERT INTO TBL_SMG_EXCLUDE_OBJECTS (DBCID, EXCLUDE_TYPE, OBJECT_NAME, EXCLUDE_BUILD, EXCLUDE_VALIDATE, EXCLUDE_ROLLBACK) VALUES (147, 2, 'TMP_DONORS', 1, 1, 1)"
 	//sql = "select * from TWMANAGEDB.TBL_SMG_EXCLUDE_OBJECTS"
 	//res = conn.execute(sql)
@@ -663,7 +687,7 @@ def sql_connection(conn_type, connection="") {
     }
     conn = local_settings["connections"]["remote"]["connect"]
 	}else if (conn_type == "custom") {
-		if(connection = ""){
+		if(connection == ""){
 			logit "ERROR: Must pass a connection string for custom database connection.  e.g. scott/tiger@myserver.com:1521/orcl"
 			System.exit(1)
 		}

@@ -1,5 +1,5 @@
-# Test RPM4.6 Using Watir
-#  BJB 4/6/15
+# Test DBmaestro Using Watir
+#  BJB 4/6/19
 require 'rubygems'
 require 'watir'
 #require 'active_support/all'
