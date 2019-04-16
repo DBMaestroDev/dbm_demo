@@ -27,4 +27,4 @@ BJB 2/25/18 Set Version for deployment
 2/27/18 set for Oracle - 1.0.2
 Reset for SQLServ pipeline
 Test adhoc
-Heres a changebr
+Heres a change to 0.0.7
