@@ -1,7 +1,64 @@
 {
     "### Instructions ###": "Enter the local settings items for your installation",
     "branch_map": {
-        "develop": [
+         "mpproj_a": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "DEV_MP",
+                "base_schema": "MultiDev",
+                "environments": [
+                    "DEV_MP",
+                    "QA_MP"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjA",
+                "source_dir": "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+				"app_name" : "MultiMP",
+				"branch" : "MP_ProjectA"
+            }
+        ],
+         "mpproj_b": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "DEV_MP2",
+                "base_schema": "MultiDev2",
+                "environments": [
+                    "DEV_MP2",
+                    "QA_MP2"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjB",
+                "source_dir": "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+				"app_name" : "MultiMP",
+				"branch" : "MP_ProjectB"
+            }
+        ],
+         "mp_merge": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "MP_UAT",
+                "base_schema": "MultiUAT",
+                "environments": [
+                    "MP_UAT",
+                    "MP_PROD"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjA",
+                "source_dir": "C:\\Automation\\dbm_demo\\hr_demo\\versions",
+				"app_name" : "MultiMP",
+				"branch" : "MP_Merge"
+            }
+        ],
+		"develop": [
             {
                 "approvers": [
                     "none",
