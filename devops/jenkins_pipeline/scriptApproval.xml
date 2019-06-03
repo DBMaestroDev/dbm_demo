@@ -1,0 +1,21 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<scriptApproval plugin="script-security@1.56">
+  <approvedScriptHashes/>
+  <approvedSignatures>
+    <string>method java.io.File exists</string>
+    <string>method java.io.File getParent</string>
+    <string>method java.lang.Class getProtectionDomain</string>
+    <string>method java.net.URL getPath</string>
+    <string>method java.security.CodeSource getLocation</string>
+    <string>method java.security.ProtectionDomain getCodeSource</string>
+    <string>new java.io.File java.lang.String</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods getText java.io.File</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods replaceFirst java.lang.String java.util.regex.Pattern java.lang.String</string>
+    <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods toInteger java.lang.Number</string>
+  </approvedSignatures>
+  <aclApprovedSignatures/>
+  <approvedClasspathEntries/>
+  <pendingScripts/>
+  <pendingSignatures/>
+  <pendingClasspathEntries/>
+</scriptApproval>

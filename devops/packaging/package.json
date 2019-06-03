@@ -1,0 +1,25 @@
+{
+    "operation": "create",
+    "type": "regular", 	
+    "enabled": true,
+    "closed" : false,
+    "scripts": [{"name" : "CreateEmp.sql",   
+		"tags" : [ {
+			"tagNames" : ["Create_Table"],
+			"tagType" : "task"
+		}]},
+		 {"name" :"CreateFN_TR.sql"},
+		 {"name" :"Drop.sql"}
+		],
+    "tags" : [ {
+		"tagNames" : ["CreateBackUp", "Contacts"],
+		"tagType" : "custom"
+		},
+		{
+			"tagNames" : ["Jira_1715"],
+			"tagType" : "task"
+		}
+			
+		]
+ 		
+}

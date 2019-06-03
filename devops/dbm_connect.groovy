@@ -515,6 +515,23 @@ def get_environments(pipeline, cxn){
 	return returnVal
 }
 
+def export_exclusions(fpath, cxn){
+	def sql = "select * from TWMANAGEDB.TBL_SMG_EXCLUDE_OBJECTS"
+	def returnVal = ""
+	def valid_columns = "DBCID, EXCLUDE_TYPE, OBJECT_NAME, EXCLUDE_BUILD, EXCLUDE_VALIDATE, EXCLUDE_ROLLBACK"
+		def cur = "${fpath}${sep}exclusion_list_export.csv"
+	logit "ALERT - replacing existing data in the exclusion list table"
+	logit "old data exported to: ${cur}"
+	returnVal += valid_columns + "\n"
+	cxn.eachRow(sql)
+	{ row ->
+		//logit "Processing: ${row["version"]}, ${row["script"]}, ${row["TAG_VALUE"]}"
+		returnVal += "${row["DBCID"]},${row["EXCLUDE_TYPE"]},${row["OBJECT_NAME"]},${row["EXCLUDE_BUILD"]},${row["EXCLUDE_VALIDATE"]},${row["EXCLUDE_ROLLBACK"]}\n"
+	}
+	//logit "Got this: ${returnVal}"
+	create_file(fpath, "exclusion_list_export.csv", returnVal)
+}
+
 def exclusion_list() {
 	// dbm_api.bat action=exclusion_list file_path=c:\automation\multi_tsk_exclusion.csv
 	// Imports a csv file (Create and export from excel)
@@ -530,9 +547,13 @@ def exclusion_list() {
 		System.exit(1)
 	}else{
 		filepath = arg_map["file_path"]
+		
 	}
+	def filepath_path = new File(filepath).getParent()
 	if (arg_map.containsKey("replace")) {
-		if( arg_map["replace"] == 'true') { replace_data = true }
+		if( arg_map["replace"] == 'true') { 
+			replace_data = true
+		}
 	}
 	message_box("Task: Update Exclusion List")
 	logit "Args: ${arg_map}"
@@ -550,6 +571,9 @@ def exclusion_list() {
 	def dbcid = -1
 	int icode = 0
 	def content = ""
+	if(replace_data){
+		export_exclusions(filepath_path, conn)
+	}
 	//sql = "INSERT INTO TBL_SMG_EXCLUDE_OBJECTS (DBCID, EXCLUDE_TYPE, OBJECT_NAME, EXCLUDE_BUILD, EXCLUDE_VALIDATE, EXCLUDE_ROLLBACK) VALUES (147, 2, 'TMP_DONORS', 1, 1, 1)"
 	//sql = "select * from TWMANAGEDB.TBL_SMG_EXCLUDE_OBJECTS"
 	//res = conn.execute(sql)
@@ -580,6 +604,7 @@ def show_schema_objects() {
 	// dbm_api.bat action=schema_objects schema_name=multi_tsk output_path=c:\automation
 	// Builds a csv file of database objects in a schema
 	// #NOTE - may need to grant: grant select on DBA_OBJECTS to twmanagedb; for this to work
+	// #NOTE - for schema on other instances include a connection="scott/tiger@myserver.com:1521/orcl" argument
 	if (!arg_map.containsKey("schema_name")) {
 		logit "ERROR: Send schema_name= and output_path= arguments"
 		System.exit(1)
@@ -588,15 +613,20 @@ def show_schema_objects() {
 		logit "ERROR: Send output_path= arguments"
 		System.exit(1)
 	}
+	message_box("Task: Schema Objects")
+	logit "Args: ${arg_map}"
+	def conn = null
+	if (arg_map.containsKey("connection")) {
+		conn = sql_connection("custom", arg_map["connection"])
+	}else{
+		conn = sql_connection("repo")
+	}
 	def res = "SCHEMA_NAME, OBJECT_NAME, OBJECT_TYPE\n"
 	def arow = []
 	def schema = arg_map["schema_name"]
 	def icnt = 0
 	def sql = "SELECT OBJECT_NAME, OBJECT_TYPE, OWNER FROM DBA_OBJECTS where owner = '__SCHEMA__' AND SUBOBJECT_NAME IS NULL ORDER BY OBJECT_TYPE, OBJECT_NAME"
 	def ver_query = sql.replaceAll('__SCHEMA__', schema.toUpperCase())
-	message_box("Task: Schema Objects")
-	logit "Args: ${arg_map}"
-	def conn = sql_connection("repo")
 	// OBJECT_NAME, OBJECT_TYPE, OWNER
 	conn.eachRow(ver_query){ row ->
 		arow = []
@@ -636,7 +666,7 @@ def show_object_ddl(query_string, conn) {
   }
 }
 
-def sql_connection(conn_type) {
+def sql_connection(conn_type, connection="") {
   def user = ""
   def password = ""
   def conn = ""
@@ -657,6 +687,17 @@ def sql_connection(conn_type) {
       password = local_settings["connections"]["remote"]["password"]
     }
     conn = local_settings["connections"]["remote"]["connect"]
+	}else if (conn_type == "custom") {
+		if(connection == ""){
+			logit "ERROR: Must pass a connection string for custom database connection.  e.g. scott/tiger@myserver.com:1521/orcl"
+			System.exit(1)
+		}
+    // A passed connection
+		parts = connection.split("@")
+		items = parts[0].split("/")
+		user = items[0]
+		password = items[1]
+    conn = parts[1]
   }
   // Assign local settings
   logit "Querying ${conn_type} Db: ${conn}"
