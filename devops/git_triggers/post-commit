@@ -1,0 +1,6 @@
+#!/bin/sh
+echo "#--------------------------------------------#"
+echo "#      git hook executor                     #"
+echo "#--------------------------------------------#"
+PWD="/C/Automation/MultiBranch/devops"
+$PWD/githook_receiver.bat

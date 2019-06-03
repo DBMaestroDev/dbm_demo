@@ -1,0 +1,184 @@
+{
+  "ProjectGroupId": null,
+  "ProjectId": null,
+  "ProjectName": "MultiBranch",
+  "Description": null,
+  "ScriptSource": null,
+  "ProjectType": "deploy by tasks",
+  "AutoImportScript": false,
+  "AutoImportScriptInterval": 0.0,
+  "AutoPackage": false,
+  "AutoPackageInterval": 0.0,
+  "DatabaseType": "Oracle",
+  "ConnectToCMS": false,
+  "cmsId": null,
+  "cmsType": null,
+  "CMSName": null,
+  "CMSProjectName": null,
+  "EnableSuperUser": false,
+  "isTest": false,
+  "autoDriftDetectionIntervalMintues": 240,
+  "Options": {
+    "DetectDefaultCompilationErrors": false,
+    "SaveEncoding": 1255,
+    "DetectCompilationWarnings": false,
+    "ContinuousIntegrationType": "0",
+    "FileVersionControlType": "0",
+    "SkipPostValidation": true,
+    "ReportsOutputFolder": "",
+    "ScriptOutputFolder": "C:\\Automation\\MP\\MultiBranch",
+    "SkipPreValidation": false
+  },
+  "AdditionalOptions": null,
+  "AdvancedProperties": {
+    "PreRunExternalTool": "Exp \\ Imp",
+    "IsSupportTypesWithTablesDependents": false,
+    "DetectCompilationWarnings": false,
+    "IncludeSchemaNamePrefix": false,
+    "IsIgnoreWhitespaces": true,
+    "PreRunExpdpArguments": null,
+    "DuplicationAction": "Abort",
+    "LobOracleFolder": null,
+    "Prefix": "OLD_",
+    "PreRunOracleDirectoryWinPath": null,
+    "ConflictAction": "Abort",
+    "PreRunImpArguments": null,
+    "IsIgnoreComments": true,
+    "CustomDataRestructureLogic": "Dont Move Data When Missing User Script",
+    "DisableConstraintsInContentScript": false,
+    "IsCompareObjectGrants": true,
+    "IsIgnoreCustomCharacters": false,
+    "DetectDefaultCompilationErrors": false,
+    "IsIgnoreCase": false,
+    "IsIgnoreForce": true,
+    "PurgeRecycleBinBeforeExport": false,
+    "IsSaveDataInOldStructure": true,
+    "PreRunExpArguments": null,
+    "IsIgnoreDoubleQuotes": false,
+    "PreRunImpdpArguments": "transform\u003doid:n EXCLUDE\u003dUSER CONTENT\u003dALL",
+    "CustomCharactersToIgnore": null,
+    "IsUseSpoolFolder": false,
+    "PreRunOracleDirectoryName": "DBMAESTRO_DOP_DATA_PUMP_DIR",
+    "OracleMappingDirectory": null
+  },
+  "EnvironmentTypes": [
+    {
+      "Name": "Development",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "PreRun",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Release Source",
+      "Environments": [
+        {
+          "EnvironmentId": 147,
+          "EnvironmentName": "RS_TSK",
+          "ComparisonType": null,
+          "EnvironmentDescription": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "MULTI_TSK",
+              "SchemaCredentials": {
+                "identifier": "orcl",
+                "password": "",
+                "folder": null,
+                "port": "1521",
+                "host": "teamwork2012",
+                "safe": null,
+                "identifierType": "SID",
+                "userName": "MULTI_TSK",
+                "object": null
+              },
+              "Order": 1,
+              "SchemaId": 147,
+              "IsManaged": true,
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Testing",
+      "Environments": [
+        {
+          "EnvironmentId": 148,
+          "EnvironmentName": "QA_TSK",
+          "ComparisonType": null,
+          "EnvironmentDescription": null,
+          "SuperUser": null,
+          "Schemas": [
+            {
+              "Name": "MULTI_QA",
+              "SchemaCredentials": {
+                "identifier": "orcl",
+                "password": "",
+                "folder": null,
+                "port": "1521",
+                "host": "teamwork2012",
+                "safe": null,
+                "identifierType": "SID",
+                "userName": "MULTI_QA",
+                "object": null
+              },
+              "Order": 1,
+              "SchemaId": 148,
+              "IsManaged": false,
+              "IsSuperUser": false
+            }
+          ]
+        }
+      ],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Acceptance",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Staging",
+      "Environments": [],
+      "DriftDetection": false
+    },
+    {
+      "Name": "Production",
+      "Environments": [],
+      "DriftDetection": false
+    }
+  ],
+  "Hooks": [
+    {
+      "Id": 2,
+      "ParentId": 0,
+      "ModelName": "Batch Executer",
+      "ActionName": "Run Batch File",
+      "FailJobOnFailure": false,
+      "Timeout": 5,
+      "LoginDomain": null,
+      "LoginUser": null,
+      "LoginPassword": null,
+      "Events": [
+        "Package Deployment"
+      ],
+      "Step": [
+        "Success"
+      ],
+      "EnvTypes": [
+        "Release Source"
+      ],
+      "Environments": [],
+      "AdditionalOption": {
+        "BatchFile": "C:\\Automation\\dbm_demo\\devops\\hooks\\git_hook.bat",
+        "JsonFile": null
+      }
+    }
+  ]
+}

@@ -58,6 +58,33 @@
 			"password" : "bugsy",
 			"database" : "design_docs_production",
 			"connect" : "teamwork2012:1521/orcl"
+		 },
+		"MPProj_A" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "MULTIDEV",
+			"password" : "multidev",
+			"connect" : "teamwork2012:1521/orcl",
+			"app_name" : "MultiMP",
+			"branch" : "MP_ProjectA"
+		 },
+		"MPProj_B" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "MULTIDEV2",
+			"password" : "multidev2",
+			"connect" : "teamwork2012:1521/orcl",
+			"app_name" : "MultiMP",
+			"branch" : "MP_ProjectB"
+		 },
+		"MP_Merge" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "MULTIUAT",
+			"password" : "multiUAT",
+			"connect" : "teamwork2012:1521/orcl",
+			"app_name" : "MultiMP",
+			"branch" : "MP_Merge"
 		 }
     },
 	"mssql_map" : {

@@ -17,7 +17,7 @@ silent_log = false
 // #---- Localize Your paths and settings" ------#
 settings = [
 	"base_path" : "C:\\Automation\\",
-	"repository_name" : "MultiBranch",
+	"repository_name" : "REPO",
 	"default_branch" : "master",
 	"another" : ""
 	]
