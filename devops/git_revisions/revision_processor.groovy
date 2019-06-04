@@ -230,7 +230,7 @@ def process_oracle(){
 	def path = ''; def hdr = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def content = ""
-	def reg = /${schema_name}/
+	def reg = /\"${schema_name}\"\./
 	java.sql.Clob clob = null
 	message_box("Oracle - DDL Processor", "title")
 	logit "=> Processes either raw ddl or DBmaestro revisions to files."
@@ -253,7 +253,7 @@ def process_oracle(){
 		clob = (java.sql.Clob) row.DDL
 	    content = clob.getAsciiStream().getText()
 		icnt += 1
-		content = hdr + content.replaceAll(reg,"<SCHEMANAME>")
+		content = hdr + content.replaceAll(reg,"") //"<SCHEMANAME>")
 		name = "${row.OBJECT_NAME}.sql"    
 		def hnd = new File("${path}${sep}${name}")
 		logit "Saving: ${path}${sep}${name}", "DEBUG", true
