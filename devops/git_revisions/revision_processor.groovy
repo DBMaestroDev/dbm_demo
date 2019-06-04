@@ -230,6 +230,7 @@ def process_oracle(){
 	def path = ''; def hdr = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def content = ""
+	def reg = /${schema_name}/
 	java.sql.Clob clob = null
 	message_box("Oracle - DDL Processor", "title")
 	logit "=> Processes either raw ddl or DBmaestro revisions to files."
@@ -252,7 +253,7 @@ def process_oracle(){
 		clob = (java.sql.Clob) row.DDL
 	    content = clob.getAsciiStream().getText()
 		icnt += 1
-		content = hdr + content
+		content = hdr + content.replaceAll(reg,"<SCHEMANAME>")
 		name = "${row.OBJECT_NAME}.sql"    
 		def hnd = new File("${path}${sep}${name}")
 		logit "Saving: ${path}${sep}${name}", "DEBUG", true
@@ -264,7 +265,7 @@ def process_oracle(){
 }
 
 def oracle_object_ddl_query(src = "repo") {
-	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id join twmanagedb.TBL_SMG_VERSION v ON l.id = v.POST_LABEL_ID INNER JOIN twmanagedb.TBL_FLOW p ON p.FLOWID = v.PIPELINE_ID where l.name = '__LABELNAME__' AND p.FLOWNAME = '__PIPELINE__'))"
+	def sql = "SELECT p.FLOWNAME, l.name, oh.SCHEMANAME, oh.OBJECT_NAME, oh.OBJECT_TYPE,oh.OBJECTVERSION, oh.OBJECTREVISION, oh.objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script oh INNER JOIN twmanagedb.tblcontrollerobjectactionlog al ON al.objectversion = oh.objectversion and al.objectrevision = oh.objectrevision and al.EntityRepositoryId = oh.EntityRepositoryId INNER JOIN twmanagedb.twlabels_checkins lc ON al.ID = lc.action_log_id INNER JOIN twmanagedb.twlabels l on lc.label_id = l.id INNER JOIN twmanagedb.TBL_SMG_VERSION v ON l.id = v.POST_LABEL_ID INNER JOIN twmanagedb.TBL_FLOW p ON p.FLOWID = v.PIPELINE_ID AND p.FLOWDBTYPEID = 3 where l.name = '__LABELNAME__' AND p.FLOWNAME = '__PIPELINE__'"
 	if(src == "raw"){
 		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
 	}
