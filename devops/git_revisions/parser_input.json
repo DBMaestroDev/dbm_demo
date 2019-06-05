@@ -59,7 +59,7 @@
 			"database" : "design_docs_production",
 			"connect" : "teamwork2012:1521/orcl"
 		 },
-		"MPProj_A" : {
+		"MP_ProjA" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "MULTIDEV",
@@ -68,7 +68,7 @@
 			"app_name" : "MultiMP",
 			"branch" : "MP_ProjectA"
 		 },
-		"MPProj_B" : {
+		"MP_ProjB" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "MULTIDEV2",
