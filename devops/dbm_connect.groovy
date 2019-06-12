@@ -488,6 +488,10 @@ def get_script_tags(pipeline, cxn){
   return returnVal
 }
 
+def quick_queries(){
+  //Projects by type: select f.flowid, f.flowname, s.SEPARATESCRIPTFOREACHTARGET from tbl_flow f inner join tbl_flow_settings s on s.flowid = f.flowid
+}
+
 def get_packages(pipeline, cxn){
 	def sql = "select p.FLOWNAME, v.id, v.name as version, v.IS_ENABLED as enabled from TWMANAGEDB.TBL_SMG_VERSION v INNER JOIN twmanagedb.TBL_FLOW p ON p.flowid = v.pipeline_id where p.FLOWNAME = 'ARG1' AND v.IS_ENABLED = 1 order by v.ID"
 	def returnVal = [:]
