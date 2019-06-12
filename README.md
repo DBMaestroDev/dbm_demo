@@ -142,3 +142,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Disclosure
 
 The contents of the project is community built.  DBmaestro takes no responsibility for the content and usability of the code contained herein.
+

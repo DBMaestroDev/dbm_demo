@@ -88,16 +88,18 @@ def separator( def ilength = 82){
 // #---------------------- MAIN ----------------------------------#
 
 def git_trigger() {
+	def workspace = System.getenv("WORKSPACE").trim()
 	def reg = ~/.*\[DBCR: (.*)\].*/
 	def cmd = "git log -1 HEAD --pretty=format:%s"
 	def res = shell_execute(cmd)
 	def msg = res["stdout"]
-	def commit = "582c1978b34f831add50ba827efd269f398a3175" //System.getenv("GIT_COMMIT").trim()
+	def commit = System.getenv("GIT_COMMIT").trim()
 	message_box("Git Trigger")
 	println "# Commit: ${msg}"
 	println "# Revision: ${commit}"
 	//display_result(cmd,res)
 	def result = msg.replaceFirst(reg, '$1')
+	result = result.trim()
 	println "Version: ${result}"
 	//Pick new files in commit
 	/// git diff-tree --no-commit-id --name-only -r 32b0f0dd6e4bd810f3edc4bcd8a114f8f98a65ea
@@ -106,10 +108,30 @@ def git_trigger() {
 	display_result(cmd,res)
 	raw = res["stdout"].toString().trim()
 	def files = raw.split("\n")
-	println "Files: ${files}"
-	files.each{ cur-> 
-		fil = new File(cur)
-		
+	println "Git new files: ${files}"
+	def cur_version = "${base_version}${System.getenv("BUILD_NUMBER").trim()}__${result}"
+	reg = /${result}/
+	def copy_files = []
+	files.each{ 
+		fil = new File("${workspace}${sep}${it}")
+		println "Test: ${fil.getName()} like ${result}"
+		if(fil.getName() =~ reg) {
+			println "Match - ${fil.getName()}"
+			copy_files << fil
+		}
+	}
+	if(copy_files.size() > 0){
+		def target_path = "${staging_path}${sep}${base_schema}${sep}${cur_version}"
+		cmd = "mkdir ${target_path}"
+		res = shell_execute(cmd)
+		display_result(cmd,res)
+		copy_files.each{
+			println "Targ: ${target_path}, ${it.getName()}"
+			dest = new File(target_path, it.getName())
+			dest << it.text
+		}
+	}else{
+		println "#----- No files for deployment - must match pattern [DBCR: <ticket>]"
 	}
 	// copy to packaging
 	// upgrade
