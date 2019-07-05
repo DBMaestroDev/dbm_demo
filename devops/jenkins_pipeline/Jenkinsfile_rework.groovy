@@ -334,7 +334,7 @@ def shouldDeploy(cur_env) {
 
 @NonCPS
 def getNextVersion(optionType, contents){
-  //Get version from currentVersion.txt file D:\\repo\\N8
+  //Get version from currentVersion.txt file D:\\repo\\proj
   // looks like this:
   // develop=1.10.01
   // release=1.9.03

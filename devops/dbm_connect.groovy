@@ -863,13 +863,13 @@ def read_file(pth, name = ""){
 }
 
 def getNextVersion(optionType){
-  //Get version from currentVersion.txt file D:\\repo\\N8
+  //Get version from currentVersion.txt file D:\\repo\\proj
   // looks like this:
   // develop=1.10.01
   // release=1.9.03
   def newVersion = ""
   def curVersion = [:]
-  def versionFile = "D:\\n8ddu\\N8\\currentVersion.txt"
+  def versionFile = "D:\\projddu\\proj\\currentVersion.txt"
   def fil = new File(versionFile)
   def contents = fil.readLines
   contents.each{ -> cur

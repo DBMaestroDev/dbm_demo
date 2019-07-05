@@ -1,7 +1,7 @@
 # BJB - DBmaestro 2018
 # PS to compress a folder and push to Nexus
 $version = "$env:VERSION"
-$base_path = "C:\Automation\source\n8"
+$base_path = "C:\Automation\source\proj"
 $user = "admin"  
 $pwd = ConvertTo-SecureString "Trial123!" -AsPlainText -Force  
 $cred = New-Object System.Management.Automation.PSCredential ($user, $pwd)  

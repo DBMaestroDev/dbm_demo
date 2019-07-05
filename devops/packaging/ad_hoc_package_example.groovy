@@ -4,7 +4,7 @@ import groovy.json.*
 ##  The system should have a working setup of dbm_api (which also needs an update for ad_hoc)
 */
 
-// N8 Deployment Pipeline
+// proj Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
 def landscape = "hrm"
 def live = false // FIXME just for demo
