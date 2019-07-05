@@ -25,7 +25,6 @@ if(landscape.equals("release") || landscape.equals("hotfix")){
 		branchVersion = branchName.replaceFirst('.*/','')
 }
 echo "Inputs: ${rootJobName}, branch: ${branchType}, name: ${branchName}"
-automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.n8.ddu\\dbmaestroGroovyFiles"
 automationPath = "C:\\automation\\dbm_demo\\devops"
 settingsFile = "local_settings.json"
 pipeline = [:]
@@ -296,7 +295,7 @@ def dbmaestro_deploy(environment_map, option = 0) {
 		if (do_it) {
 			echo message_box("Performing Deploy on ${cur_env}", "title")
 			bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${version} -Server ${pipeline["server"]}"
-			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "AVS_DEVOPS_RELEASE_ENGINEERING@ADP.com,CAPS_Open_Systems_DBA@ADP.com" )
+			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "support@dbmaestro.com," )
 		}
 				cnt += 1
 	}
