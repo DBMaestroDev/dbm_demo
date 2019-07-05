@@ -274,7 +274,7 @@ def dbmaestro_deploy(environment_map, option = 0) {
 		if (do_it) {
 			echo message_box("Performing Deploy on ${cur_env}", "title")
 			bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${version} -Server ${pipeline["server"]}"
-			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "AVS_DEVOPS_RELEASE_ENGINEERING@ADP.com,CAPS_Open_Systems_DBA@ADP.com" )
+			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "support@dbmaestro.com" )
 		}
 				cnt += 1
 	}
@@ -334,7 +334,7 @@ def shouldDeploy(cur_env) {
 
 @NonCPS
 def getNextVersion(optionType, contents){
-  //Get version from currentVersion.txt file D:\\repo\\N8
+  //Get version from currentVersion.txt file D:\\repo\\proj
   // looks like this:
   // develop=1.10.01
   // release=1.9.03

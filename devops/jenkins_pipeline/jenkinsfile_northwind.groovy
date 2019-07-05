@@ -1,6 +1,6 @@
 import groovy.json.*
 
-// N8 Deployment Pipeline
+// proj Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
 def landscape = "Northwind"
 def live = false // FIXME just for demo
