@@ -3,51 +3,81 @@
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   <title>DBmaestro Environment Report</title>
     <style type="text/css">
-        body { background-color: #e4e4e4; color: #333; text-align: center; font-family: arial, sans-serif; font-size: 12px}
+
+        html, body { 
+		background-color: #e4e4e4; 
+		color: #333; 
+		text-align: center; 
+		font-family: arial, sans-serif; 
+		font-size: 12px
+		margin: 0;
+		padding: 0px;
+		height: 100%;
+
+		}
+		
         div.main_frame{ border: 1px solid #ccc; text-align: left; background-color: #FFF;}
+		
+.wrapper {
+    min-height: 100%;
+	margin-bottom: 66px;
+}
+
+.footer,
+.push {
+	height: 66px;
+}
+
+.footer {
+	background-color: #fff;
+}
+		content {
+			height: 100%;
+		}
+
         table{
-            font-size:11px;
-            padding-left: 2pt;
-            padding-right: 2pt;
-			cellspacing: 0pt;
-			cellpadding: 0pt;
-            border: 1pt solid #ccc;
+            font-size:13px;
+            margin: 0 auto;
+			background-color: #FFF;
+            border: 2px solid;
+			border-spacing: 0px;
         }
+		thead{
+			border: 14pt double(1,12,1);
+		}
+		tr{
+			border: .4pt solid #ccc;
+		}
+		tr.odd{
+			background: #e2e2e2;
+		}
+		
         td{
-                border-right:1pt solid #ccc;
-				border-bottom:1pt solid #ccc;
-				padding-left: 2pt;
-				padding-right: 2pt;
+                border-right: .4pt solid #ccc;
+				border-bottom: .4pt solid #ccc;
+				padding: 4pt;
+				/*padding-right: 2pt;*/
 			
             }
-        td.desc{
-         font-size: 9px;
-            }
-	    td.success{
-	      font-weight: bold;
-		  color: #3C3;
-	            }
-		td.failure{
-  	      font-weight: bold;
-  		  color: #F00;
-	  }
-        td.titlecell{
+       td.titlecell{
                 border:1pt solid #ccc; background-color: #e4e4e4;
             }
         th{
-            /* border-top: 2pt solid #ccc;
-            border-left: 1pt solid #ccc;
-            border-right: 1pt solid #ccc; */
+            border-right: .4pt solid #fff; */
+			padding-left: 2pt;
+			padding-right: 4pt;
             font-weight: bold;
 			color: #3CF;
 			background-color: #333;
             }
 		.filename{ font-weight: bold; color: #004376; }
+		
     </style>
 </head>
 
 <body>
-<div class='main_frame'>
+
+<main class="wrapper">
   <div style='text-align: center'><h2>DBmaestro Environment Report</h2></div>
 <h3>
 Project Name: __PIPELINE__
@@ -61,7 +91,11 @@ __HEADER__
 __BODY__
 	</tbody>
 </table>
+</main>
+<footer class="page-footer">
+  <img src="dbm_demo/devops/Logo-DB.png">
+</footer>
 
-</div>
 </body>
+
 </html>

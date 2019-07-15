@@ -1,4 +1,4 @@
-// N8 Error Cleanup
+// proj Error Cleanup
 //
 import groovy.json.*
 //
@@ -14,7 +14,6 @@ properties([
 // This is the Jenkins alias for the dbmaestro server
 def dbmNode = "master" //"dbmaestro"
 rootJobName = "$env.JOB_NAME";
-automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.n8.ddu\\dbmaestroGroovyFiles"
 automationPath = "C:\\Automation\\jenkins_pipe"
 libPath = "C:\\Automation\\dbm_demo\\devops"
 settingsFile = "local_settings.json"

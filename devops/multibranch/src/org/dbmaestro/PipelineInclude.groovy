@@ -11,6 +11,7 @@ def get_settings(content, landscape, flavor = 0) {
     def jsonSlurper = new JsonSlurper()
     def settings = [:]
     def pipe = [:]
+	landscape = landscape.toLowerCase()
     def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
     settings = jsonSlurper.parseText(content)
     pipe["server"] = settings["general"]["server"]
@@ -68,19 +69,20 @@ def run(Object step, pipe, env_num){
 }
 
 def execute(settings = [:]) {
-	def automationPath = "C:\\automation\\dbm_demo\\devops"
+	//def automationPath = "C:\\automation\\dbm_demo\\devops"
+	def automationPath = "C:\\automation\\dbm_demo\\devops\\git_triggers"
 	def settingsFileName = "local_settings.json"
-  def settingsFile = "${automationPath}${sep()}${settingsFileName}"
+	def settingsFile = "${automationPath}${sep()}${settingsFileName}"
 	def buildNumber = "$env.BUILD_NUMBER"
 	def dbmNode = "master"
 	def rootJobName = "$env.JOB_NAME";
 	//def branchName = rootJobName.replaceFirst('.*/.*/', '')
 	def fullBranchName = rootJobName.replaceFirst('.*/','')
 	def branchName = fullBranchName.replaceFirst('%2F', '/')
-	def landscape = branchName.replaceFirst('/.*', '')
-  def pipeline = [:]
+	def branch = branchName.replaceFirst('/.*', '')
+	def pipeline = [:]
 	def settings_content = ""
-	echo "Inputs: ${rootJobName}, branch: ${landscape}, name: ${branchName}"
+	echo "Inputs: ${rootJobName}, branch: ${branch}, name: ${branchName}"
   if( settings.containsKey("settings_file")) { 
     settingsFile = settings["settings_file"] 
   }
@@ -91,16 +93,16 @@ def execute(settings = [:]) {
 		def hnd = new File(settingsFile)
 		settings_content = hnd.text
 	}
-	pipeline = this.get_settings(settings_content, landscape)
+	pipeline = this.get_settings(settings_content, settings["pipeline"])
 	pipeline["branch_name"] = branchName
-	pipeline["branch_type"] = landscape
+	pipeline["branch_type"] = branch
 	pipeline["dbm_node"] = dbmNode
   pipeline["spool_path"] = "${pipeline["staging_dir"]}${sep()}${pipeline["pipeline"]}${sep()}reports"
   settings.each {k,v ->
     pipeline[k] = v
   }
-  echo message_box("Pipeline Deployment Using ${landscape} Process", "title")
-  echo "Working with: ${rootJobName}\n - Branch: ${landscape} V- ${branchName}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["base_env"]}\n - Schema: ${pipeline["base_schema"]}"
+  echo message_box("Pipeline Deployment Using ${branch} Process", "title")
+  echo "Working with: ${rootJobName}\n - Branch: ${branch} V- ${branchName}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["base_env"]}\n - Schema: ${pipeline["base_schema"]}"
 	def tasks = this.get_tasks(pipeline)
   pipeline["tasks"] = tasks
 	def version = this.get_version(pipeline)
@@ -111,9 +113,6 @@ def execute(settings = [:]) {
   pipeline["environments"].each { env ->
     echo "Executing Environment ${env}"
     this.run(new DeployOperation(), pipeline, env_num)
-    if (landscape == "master") {
-        println "Branch specific work"
-    }
     env_num += 1
   }
 }
@@ -121,19 +120,22 @@ def execute(settings = [:]) {
 def get_tasks(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "
 	def reg = ~/.*\[Tasks: (.*)\].*/
-  def taskResult = this.git_commit_message(pipe_info, reg)
+	def taskResult = this.git_commit_message(pipe_info, reg)
 	return taskResult
 }
 
 def get_version(pipe_info){
 	// message looks like this "Adding new tables [Version: V2.3.4] "
   if ( env.Version != null && env.Version.length() > 1 && env.Version != "V0.0.0"){
-    echo "#------- Version environment variable set: ${env.Version} - using that ---------#\r\n#-------- Ignoring git version ----"
+    echo "#------- Version environment variable set: ${env.Version} - using that ---------#\r\n#-------- Ignoring git version -------#"
     return env.Version
-  }
+  }else{
+	echo "#-------------- Using Git Version ------------------#"
 	def reg = ~/.*\[Version: (.*)\].*/
-  def versionResult = this.git_commit_message(pipe_info, reg)
+	def versionResult = this.git_commit_message(pipe_info, reg)
 	return versionResult
+  }
+
 }
 
 def git_commit_message(pipe_info, reg){
@@ -141,7 +143,7 @@ def git_commit_message(pipe_info, reg){
 	def gitMessage = ""
   def result = ""
   def branch_name = pipe_info["branch_name"]
-  def base_path = pipe_info["base_path"]
+  def base_path = pipe_info["source_dir"]
   def dbm_node = pipe_info["dbm_node"]
   def remote = pipe_info["remote_git"] != "false"
   def scm = pipe_info["source_control"]
@@ -153,8 +155,12 @@ def git_commit_message(pipe_info, reg){
   			echo "# Read latest commit..."
   			dir([path:"${base_path}"]){
   				bat "git --version"
+				try {
 				bat ([script: "git remote update && git checkout ${branch_name}${pull_stg}"])
-  				gitMessage = bat(
+  				} catch (Exception e) {
+					echo "Cannot reach remote git";
+				}
+				gitMessage = bat(
   				  script: "@cd ${base_path} && @git log -1 HEAD --pretty=format:%%s",
   				  returnStdout: true
   				).trim()
@@ -168,7 +174,7 @@ def git_commit_message(pipe_info, reg){
   	echo "# Parsed message from git:" + result
   }else{
     echo "# Commit message not fomatted properly"
-    currentBuild.result = "UNSTABLE"
+    //currentBuild.result = "UNSTABLE"
     return
   }
 	return result

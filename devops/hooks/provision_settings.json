@@ -6,7 +6,7 @@
       "base_path_mac" : "/Users/bbyrd/Documents/DbMaestro/dev/git_revisions",
       "git_cmd" : "git add REPO/* && git commit -a -m \"Update configuration from DBmaestro\" && git push origin master",
 	  "default_branch" : "master",
-      "repository_name" : "REPO",
+      "repository_name" : "MultiBranch",
 			"postgres_path_mac" : "/Library/PostgreSQL/9.3/bin",
 			"postgres_path" : "c:\\Program Files\\PostgreSQL\\10\\bin"
 	},
@@ -16,21 +16,28 @@
 			"code_separator" : "GO",
 			"user" : "dbmadmin",
 			"password" : "123456",
-			"connect" : "dbmJohnHancock:1433;databaseName=TeamWorkRepository"
+			"connect" : "teamwork2012:1433;databaseName=TeamWorkRepository"
 		},
 		"repository" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "twmanagedb",
-			"password" : "manage#2009",
-			"connect" : "dbmJohnHancock:1521/orcl"
+			"password" : "Manage#2019!",
+			"connect" : "teamwork2012:1521/orcl"
 		 },
 		"hr_dev" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
-			"user" : "HR_QA2",
-			"password" : "hr_qa2",
-			"connect" : "dbmJohnHancock:1521/orcl"
+			"user" : "hr_dev",
+			"password" : "hr_dev",
+			"connect" : "teamwork2012:1521/orcl"
+		 },
+		"mp_dev2" : {
+			"platform" : "oracle",
+			"code_separator" : "none",
+			"user" : "mp_dev2",
+			"password" : "mp_dev2",
+			"connect" : "teamwork2012:1521/orcl"
 		 },
 		"rlm" : {
 			"platform" : "postgres",
@@ -58,33 +65,6 @@
 			"password" : "bugsy",
 			"database" : "design_docs_production",
 			"connect" : "teamwork2012:1521/orcl"
-		 },
-		"MP_ProjA" : {
-			"platform" : "oracle",
-			"code_separator" : "none",
-			"user" : "MULTIDEV",
-			"password" : "multidev",
-			"connect" : "teamwork2012:1521/orcl",
-			"app_name" : "MultiMP",
-			"branch" : "MP_ProjectA"
-		 },
-		"MP_ProjB" : {
-			"platform" : "oracle",
-			"code_separator" : "none",
-			"user" : "MULTIDEV2",
-			"password" : "multidev2",
-			"connect" : "teamwork2012:1521/orcl",
-			"app_name" : "MultiMP",
-			"branch" : "MP_ProjectB"
-		 },
-		"MP_Merge" : {
-			"platform" : "oracle",
-			"code_separator" : "none",
-			"user" : "MULTIUAT",
-			"password" : "multiUAT",
-			"connect" : "teamwork2012:1521/orcl",
-			"app_name" : "MultiMP",
-			"branch" : "MP_Merge"
 		 }
     },
 	"mssql_map" : {

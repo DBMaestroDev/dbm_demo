@@ -1,8 +1,8 @@
 import groovy.json.*
 
-// N8 Deployment Pipeline
+// proj Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "HR_Tasks"
+def landscape = "Northwind"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
@@ -13,13 +13,13 @@ rootJobName = "$env.JOB_NAME";
 branchName = "master"
 branchVersion = ""
 // Outboard Local Settings
-def settings_file = "local_settings.json"
+def settings_file = "local_settings_pharma.json"
 def local_settings = [:]
 // Settings
 def git_message = ""
 // message looks like this "Adding new tables [Version: V2.3.4] "
-//def reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
-def reg = ~/.*\[Version: (.*)\].*/
+def reg = ~/.*\[Version: (.*)\].*\[DBCR: (.*)\].*/
+//def reg = ~/.*\[Version: (.*)\].*/
 def environment = ""
 def environments = []
 def approver = ""
@@ -32,9 +32,9 @@ def base_env = "Dev"
 def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
-def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
-local_settings = get_settings("${base_path}${sep}${settings_file}", landscape)
+local_settings = get_settings("${base_path}${sep}${settings_file}")
 def server = local_settings["general"]["server"]
+def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
 
 // Add a properties for Platform and Skip_Packaging
 properties([
@@ -48,15 +48,14 @@ def java_cmd = local_settings["general"]["java_cmd"]
 def dbmNode = ""
 def staging_path = local_settings["general"]["staging_path"]
 // note key off of landscape variable
-println "Matching: ${landscape} in the ${settings_file} file"
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
 environments = local_settings["branch_map"][landscape][flavor]["environments"]
 def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
+source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
 credential = credential.replaceFirst("_USER_", local_settings["general"]["username"])
 credential = credential.replaceFirst("_PASS_", local_settings["general"]["token"])
-source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
 local_settings = null
 
  echo "Working with: ${rootJobName}\n - Branch: ${branchName}\n - Pipe: ${pipeline}\n - Env: ${base_env}\n - Schema: ${base_schema}"
@@ -84,8 +83,8 @@ stage('GitParams') {
     //git_message = "This is git message. [VERSION: 2.5.0]"
     echo "# From Git: ${git_message}"
     result = git_message.replaceFirst(reg, '$1')
-	//  dbcr_result = git_message.replaceFirst(reg, '$2')
 	//git_message = "[Version: 3.11.2.1] using [DBCR: ADVTA00292]"
+	dbcr_result = git_message.replaceFirst(reg, '$2')
 	//result = "3.11.2.1"
   }
 }
@@ -108,11 +107,11 @@ if(! branchVersion.equals("")){
 	echo "# VERSION from git:" + result
 }
 
-version = "V" + result // + "__" + dbcr_result
+version = "V" + result + "__" + dbcr_result
 if (dbcr_result == "" && env.Skip_Packaging != "No"){
 	version = "V" + result
 }
-
+//echo message_box("${env.Database_Platform} Deployment", "title")
 echo message_box("${pipeline} Deployment", "title")
 echo "# FINAL PACKAGE VERSION: ${version}"
 environment = environments[0]
@@ -123,38 +122,26 @@ stage(environment) {
     echo "#------------------- Copying files for ${version} ---------#"
     bat "if exist ${staging_dir} del /q ${staging_dir}\\*"
     // This is for when files are prefixed with <dbcr_result>
-    //bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
-    //bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
-    // This is for copying a whole directory
-    bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
-    // trigger packaging
+    bat "if not exist \"${staging_dir}${sep}${version}\" mkdir \"${staging_dir}${sep}${version}\""
+    bat "copy \"${source_dir}${sep}${dbcr_result}*.sql\" \"${staging_dir}${sep}${version}\""
+      // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
     bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
-    // version = adhoc_package(version)
   }else{
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
     // Deploy to Dev
     echo "#------------------- Performing Deploy on ${environment} -------------#"
-    //try {
-      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
-	//	} catch (Exception e) {
-	//		echo e.getMessage();
-	//	}
-    
+    bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
   }
-}
-if(environments.size() < 2) {
-	currentBuild.result = "SUCCESS"
-	return
 }
 environment = environments[1]
 approver = approvers[0]
 def pair = environment.split(",")
 def do_pair = false
-if (pair.size() == 2) {environment = pair[0] }
-do_pair = (pair.size() == 2) 
-stage(environment) {
+if (pair.length == 2) {environment = pair[0] }
+do_pair = (pair.length == 2) 
+stage("QA") {
 	// FIXME checkpoint('Rerun QA')
 	input message: "Deploy to ${environment}?", submitter: approver
 	node (dbmNode) {
@@ -166,10 +153,6 @@ stage(environment) {
 		}
 	}   
 } 
-if(environments.size() < 3) {
-	currentBuild.result = "SUCCESS"
-	return
-}
 environment = environments[2]
 approver = approvers[1]
 stage(environment) {
@@ -181,31 +164,19 @@ stage(environment) {
 		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
-if(environments.size() < 4) {
-	currentBuild.result = "SUCCESS"
-	return
-}
-environment = environments[3]
-approver = approvers[2]
-stage(environment) {
-	// FIXME checkpoint('Rerun QA')
-	input message: "Deploy to ${environment}?", submitter: approver
-	node (dbmNode) {
-		//  Deploy to QA
-		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
-	}   
+if(environments.size > 3){
+	environment = environments[3]
+	approver = approvers[2]
+	stage(environment) {
+		// FIXME checkpoint('Rerun QA')
+		input message: "Deploy to ${environment}?", submitter: approver
+		node (dbmNode) {
+			//  Deploy to QA
+			echo '#------------------- Performing Deploy on ${environment} --------------#'
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
+		}   
+	}
 } 
-
-def adhoc_package(full_package_name){
-	echo "Converting to AD-HOC package"
-	def parts = full_package_name.split("__")
-	def package_name = parts.length == 2 ? parts[1] : full_package_name
-	def version = parts[0]
-	def dbm_cmd = "cd C:\\Automation\\dbm_demo\\devops\r\ndbm_api.bat action=adhoc_package"
-	bat "${dbm_cmd} ARG1=${full_package_name}"
-	return package_name
-}
 
 @NonCPS
 def ensure_dir(pth){
@@ -221,16 +192,14 @@ def ensure_dir(pth){
   }
 }
 
-def get_settings(file_path, project = "none") {
+def get_settings(file_path) {
 	def jsonSlurper = new JsonSlurper()
 	def settings = [:]
 	println "JSON Settings Document: ${file_path}"
-	println "Project: ${project}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
 	  settings = jsonSlurper.parseText(json_file_obj.text)  
 	}
-	println ""Project Configurations: ${settings["branch_map"].keySet()}"
 	return settings
 }
 

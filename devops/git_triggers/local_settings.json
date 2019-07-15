@@ -1,0 +1,140 @@
+{
+    "### Instructions ###": "Enter the local settings items for your installation",
+    "branch_map": {
+         "mp_proja": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "DEV_MP",
+                "base_schema": "MultiDev",
+                "environments": [
+                    "DEV_MP",
+                    "QA_MP"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjA",
+                "source_dir": "C:\\Automation\\REPO\\Deploy",
+				"app_name" : "MultiMP",
+				"branch" : "MP_ProjectA"
+            }
+        ],
+         "mp_projb": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "DEV_MP2",
+                "base_schema": "MultiDev2",
+                "environments": [
+                    "DEV_MP2",
+                    "QA_MP2"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjB",
+                "source_dir": "C:\\Automation\\REPO\\Deploy",
+				"app_name" : "MultiMP",
+				"branch" : "MP_ProjectB"
+            }
+        ],
+         "mp_merge": [
+            {
+                "approvers": [
+                    "teamwork",
+                    "teamwork"
+                ],
+                "base_env": "MP_UAT",
+                "base_schema": "MultiUAT",
+                "environments": [
+                    "MP_UAT",
+                    "MP_PROD"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MP_ProjA",
+                "source_dir": "C:\\Automation\\REPO\\Deploy",
+				"app_name" : "MultiMP",
+				"branch" : "MP_Merge"
+            }
+        ],
+		"develop": [
+            {
+                "approvers": [
+                    "none",
+                    "dbmguest"
+                ],
+                "base_env": "DIT",
+                "base_schema": "Northwind-DEV",
+                "environments": [
+                    "DIT",
+                    "QAT"
+                ],
+                "file_strategy": "version",
+                "pipeline": "Northwind_DEV",
+                "source_dir": "C:\\Automation\\dbm_demo\\northwind\\ddl"
+            }
+        ],
+        "multibranch": [
+            {
+                "approvers": [
+                    "none",
+                    "dbmguest"
+                ],
+                "base_env": "RS_TSK",
+                "base_schema": "MULTI_TSK",
+                "environments": [
+                    "RS_TSK",
+                    "QA_TSK"
+                ],
+                "file_strategy": "version",
+                "pipeline": "MultiBranch",
+                "source_dir": "C:\\Automation\\MultiBranch\\Deploy",
+                "version": "0.0.8__Triggered"
+            }
+        ],
+        "release": [
+            {
+                "approvers": [
+                    "dbmguest",
+                    "dbmguest",
+                    "dbmguest"
+                ],
+                "base_env": "SIT",
+                "base_schema": "Northwind-SIT",
+                "environments": [
+                    "SIT",
+                    "STAGE",
+                    "PROD"
+                ],
+                "file_strategy": "version",
+                "pipeline": "Northwind_RELEASE",
+                "source_dir": "C:\\Automation\\dbm_demo\\northwind\\ddl"
+            }
+        ]
+    },
+    "connections": {
+        "remote": {
+            "connect": "dbmtemplate:1521/orcl",
+            "password": "Remote#2009",
+            "user": "dbmaestro_teamwork"
+        },
+        "repository": {
+            "connect": "dbmtemplate:1521/orcl",
+            "password": "manage#2009",
+            "user": "twmanagedb"
+        }
+    },
+    "general": {
+        "base_path": "C:\\Automation\\jenkins_pipe",
+        "java_cmd": "java -jar \"C:\\Program Files (x86)\\DBmaestro\\TeamWork\\TeamWorkOracleServer\\Automation\\DBmaestroAgent.jar\"",
+        "server": "teamwork2012:8017",
+        "source_control": {
+            "remote": "false",
+            "type": "git"
+        },
+        "staging_path": "C:\\Automation\\MP",
+        "token": "dPwTiINu153jGm3SPW4hgepySGTqMbLD",
+        "username": "automation@dbmaestro.com"
+    }
+}

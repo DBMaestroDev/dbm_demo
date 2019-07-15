@@ -2,7 +2,7 @@
 ####### SQL Revision Parser ################
 #  
 # Parses object revisions from dbm or platform dumpfiles into object ddl and pushes into git
-=> BJB 9/18/18
+=> BJB 9/18/18, 6/3/19 BJB
 */
 import java.sql.Connection
 import groovy.sql.Sql
@@ -11,11 +11,11 @@ import java.io.File
 import java.text.SimpleDateFormat
 sep = "\\" //FIXME Reset for windows
 def this_path = new File(getClass().protectionDomain.codeSource.location.path).parent
-def settings_file = "${this_path}${sep}parser_input.json"
+def settings_file = "${this_path}${sep}local_settings.json"
 log_file = "${this_path}${sep}dbm_log.txt"
 silent_log = false
 // #---- Localize Your paths and settings" ------#
-settings = [
+git_settings = [
 	"base_path" : "C:\\Automation\\",
 	"repository_name" : "REPO",
 	"default_branch" : "master",
@@ -28,14 +28,19 @@ message_box("Processing Hook for git Sync","title")
 logit "InputFile: ${input_file}"
 params = [:]
 params = get_settings(input_file)
+settings = get_settings(settings_file)
 process_hook()
 
 
 def process_hook() {
 		def pipeline = params["FlowDetails"]["FlowName"]
+		def pipeline_key = pipeline.toLowerCase()
+		def pipe_settings = settings["branch_map"][pipeline_key][0]
 		def environment = params["Environment"]["name"]
 		def version = params["Version"]["versionString"]
 		def db_type = params["FlowDetails"]["DBTypeId"]
+		def branch = "master"
+		if(pipe_settings["branch"]){ branch = pipe_settings["branch"] }
 		logit "Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
 		logit "Pipeline: ${pipeline}, Environment: ${environment}, Version: ${version}"
 		logit "#=> Scripts:"
@@ -53,8 +58,16 @@ def process_hook() {
 				platform = "postgres"
 				break
 		}
-		process_db_changes(pipeline,environment,version,platform)
-		update_git(msg)
+		def app_name = pipeline
+		if(pipe_settings["app_name"]){ app_name = pipe_settings["app_name"] }
+		base_path = "${git_settings["base_path"]}${sep}${git_settings["repository_name"]}${sep}${platform}${sep}${app_name}"
+		if(branch != "master"){ 
+			cmd = "cd ${base_path} && git checkout ${branch}"
+			result = shell_execute(cmd)
+			display_result(cmd, result)
+		}
+		process_db_changes(base_path,platform)
+		update_git(base_path, msg)
 				
 }
 
@@ -73,24 +86,25 @@ def parse_arguments(args){
 }
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
-def process_db_changes(pipeline,environment,version, dbType){
-	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle${sep}${params["FlowDetails"]["FlowName"]}"
+def process_db_changes(base_path, dbType){
 	def schema_name = params["Schemas"][0]["name"]
 	def path = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def content = ""
 	message_box("${dbType.capitalize()} - DDL Processor", "title")
 	logit "=> Processes DBmaestro revisions to files."
+	logit "  Output: ${base_path}"
 	params["ChangedObjects"].each{ schema ->
 		schema_name = schema["SchemaName"]
 		logit "  Database: ${schema_name}"
 		schema["Objects"].each { dbobj ->
-			path = "${base_path}${sep}${schema_name}${sep}${type_lookup(dbobj["Type"])}"
+			//logit "${dbobj["Name"]} - ${dbobj["Type"]}"
+			path = "${base_path}${sep}${type_lookup(dbobj["Type"])}"
 			ensure_dir(path)
 			content = dbobj["TargetCreationScript"]
 			name = "${dbobj["Name"]}.sql"    
 			def hnd = new File("${path}${sep}${name}")
-			logit "Saving: ${path}${sep}${name}", "DEBUG", true
+			logit "Saving: ${path}${sep}${name}" //, "DEBUG", true
 			hnd.write content	
 		}
     }
@@ -100,17 +114,18 @@ def process_db_changes(pipeline,environment,version, dbType){
 /*
 ####  Utility Routines
 */
-def update_git(commit_msg = ""){
+def update_git(base_path, commit_msg = ""){
 	/*
 	Check if git repo
-	add objects
-	
+	add objects	
 	*/
 	def now = new Date()
-	def base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}"
-	def branch = settings["default_branch"]
-	def cmd = "cd ${base_path} && git status"
 	def pipeline = params["FlowDetails"]["FlowName"]
+	def pipeline_key = pipeline.toLowerCase()
+	def pipe_settings = settings["branch_map"][pipeline_key][0]
+	def branch = "master"
+	if(pipe_settings["branch"]){ branch = pipe_settings["branch"] }
+	def cmd = "cd ${base_path} && git status"
 	def environment = params["Environment"]["name"]
 	def version = params["Version"]["versionString"]
 	def db_type = params["FlowDetails"]["DBTypeId"]
@@ -130,15 +145,20 @@ def update_git(commit_msg = ""){
 	if(commit_msg == ""){
 		commit_txt = "Adding repository changes from automation - Pipeline: ${pipeline}, Environment: ${environment}, Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreationTime"]}"
 	}
+	//cmd = "cd ${base_path} && git config --global user.email bradyb@dbmaestro.com"
+	//result = shell_execute(cmd)
+	//cmd = "cd ${base_path} && git config --global user.name 'Brady Deploy'"
+	//result = shell_execute(cmd)
+	//display_result(cmd, result)
 	cmd = "cd ${base_path} && git status"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git add *"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
-	cmd = "cd ${base_path} && git read-tree --reset HEAD"
-	result = shell_execute(cmd)
-	display_result(cmd, result)
+	//cmd = "cd ${base_path} && git read-tree --reset HEAD"
+	//result = shell_execute(cmd)
+	//display_result(cmd, result)
 	cmd = "cd ${base_path} && git commit -a -m \"${commit_txt}\""
 	result = shell_execute(cmd)
 	display_result(cmd, result)	
@@ -167,8 +187,11 @@ def type_lookup(typeNo){
 	case 1:
 		"VIEW"
 		break
+	case 2:
+		"PROCEDURE"
+		break
 	default:
-		"UNDEFINED"
+		"UNKNOWN"
 		break	
 	}
 }

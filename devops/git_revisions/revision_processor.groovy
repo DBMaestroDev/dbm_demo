@@ -194,8 +194,13 @@ def process_oracle(){
 	def base_path = settings["general"]["base_path"]
 	def delim = settings["connections"][connection]["code_separator"]
 	def schema_name = settings["connections"][connection]["user"]
+	def branch = settings["general"]["default_branch"]
+	if(settings["connections"][connection]["branch"]){ branch = settings["connections"][connection]["branch"] }
+	def app_name = schema_name
+	if(settings["connections"][connection]["app_name"]){ app_name = settings["connections"][connection]["app_name"] }
 	def oracle_src = "repo"
 	def label_name = ""
+	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle"
 	if (arg_map.containsKey("oracle_source")){
 	  oracle_src = arg_map["oracle_source"]
 	}
@@ -207,11 +212,25 @@ def process_oracle(){
 			System.exit(1)
 		}
 	}
+	def cmd = "cd ${base_path} && git status"
+	def result = shell_execute(cmd)
+	logit "out> " + result["stdout"]
+	logit "err> " + result["stderr"]
+	if(result["stderr"].indexOf("fatal:") > -1){
+	  message_box("ERROR: Not a git repository - please initialize", "title")
+	  System.exit(1)
+	}
+	display_result(cmd, result)
+	if(branch != "master"){ 
+		cmd = "cd ${base_path} && git checkout ${branch}"
+		result = shell_execute(cmd)
+		display_result(cmd, result)
+	}
 	def sql = oracle_object_ddl_query(oracle_src)
-	base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}oracle"
 	def path = ''; def hdr = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
 	def content = ""
+	def reg = /\"${schema_name}\"\./
 	java.sql.Clob clob = null
 	message_box("Oracle - DDL Processor", "title")
 	logit "=> Processes either raw ddl or DBmaestro revisions to files."
@@ -221,25 +240,32 @@ def process_oracle(){
 	def conn = sql_connection(connection)
 	sql = sql.replaceAll("__LABELNAME__", label_name)
 	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
-	logit "Query: ${sql}"
+	sql = sql.replaceAll("__PIPELINE__", connection)
+	logit "  Query: ${sql}"
+	logit "  Pushing to path: ${base_path}${sep}${app_name}"
+	def icnt = 0
 	conn.eachRow(sql){ row ->
+		if(app_name == "none"){ app_name = row.SCHEMANAME}
 		cur_date = new Date()
 		hdr = ""
-		path = "${base_path}${sep}${row.SCHEMANAME}${sep}${row.OBJECT_TYPE}"
+		path = "${base_path}${sep}${app_name}${sep}${row.OBJECT_TYPE}"
 		ensure_dir(path)
 		clob = (java.sql.Clob) row.DDL
 	    content = clob.getAsciiStream().getText()
-    content = hdr + content
-    name = "${row.OBJECT_NAME}.sql"    
-    def hnd = new File("${path}${sep}${name}")
-    logit "Saving: ${path}${sep}${name}", "DEBUG", true
-    hnd.write content
+		icnt += 1
+		content = hdr + content.replaceAll(reg,"") //"<SCHEMANAME>")
+		name = "${row.OBJECT_NAME}.sql"    
+		def hnd = new File("${path}${sep}${name}")
+		logit "Saving: ${path}${sep}${name}", "DEBUG", true
+		hnd.write content
 	}
+	
+	logit "  Processed: ${icnt} objects"
 	separator(100)
 }
 
 def oracle_object_ddl_query(src = "repo") {
-	def sql = "SELECT SCHEMANAME, OBJECT_NAME, OBJECT_TYPE, objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script where objectrevision in (select objectrevision from twmanagedb.tblcontrollerobjectactionlog where id in (select action_log_id from twmanagedb.twlabels_checkins lc join twmanagedb.twlabels l on lc.label_id = l.id where l.name = '__LABELNAME__'))"
+	def sql = "SELECT p.FLOWNAME, l.name, oh.SCHEMANAME, oh.OBJECT_NAME, oh.OBJECT_TYPE,oh.OBJECTVERSION, oh.OBJECTREVISION, oh.objectcreationscript as DDL FROM twmanagedb.view_ctrl_objshistory_script oh INNER JOIN twmanagedb.tblcontrollerobjectactionlog al ON al.objectversion = oh.objectversion and al.objectrevision = oh.objectrevision and al.EntityRepositoryId = oh.EntityRepositoryId INNER JOIN twmanagedb.twlabels_checkins lc ON al.ID = lc.action_log_id INNER JOIN twmanagedb.twlabels l on lc.label_id = l.id INNER JOIN twmanagedb.TBL_SMG_VERSION v ON l.id = v.POST_LABEL_ID INNER JOIN twmanagedb.TBL_FLOW p ON p.FLOWID = v.PIPELINE_ID AND p.FLOWDBTYPEID = 3 where l.name = '__LABELNAME__' AND p.FLOWNAME = '__PIPELINE__'"
 	if(src == "raw"){
 		sql = "select u.OBJECT_TYPE, u.OBJECT_NAME, u.LAST_DDL_TIME, '__SCHEMA_NAME__' as SCHEMANAME, DBMS_METADATA.GET_DDL(u.OBJECT_TYPE, u.OBJECT_NAME) as DDL FROM all_objects u where owner = '__SCHEMA_NAME__'"
 	}
@@ -370,6 +396,8 @@ def update_git(){
 	def now = new Date()
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}"
 	def branch = settings["general"]["default_branch"]
+	def connection = arg_map["connection"]
+	if(settings["connections"][connection]["branch"]){ branch = settings["connections"][connection]["branch"] }
 	def cmd = "cd ${base_path} && git status"
 	def build_no = System.getenv("BUILD_NUMBER")
 	def commit_txt = System.getenv("COMMIT_TEXT")
@@ -383,10 +411,15 @@ def update_git(){
 	cmd = "cd ${base_path} && git status"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
+	//cmd = "cd ${base_path} && git read-tree --reset HEAD"
+	//result = shell_execute(cmd)
+	//display_result(cmd, result)
+	if(branch != "master"){ 
+		cmd = "cd ${base_path} && git checkout ${branch}"
+		result = shell_execute(cmd)
+		display_result(cmd, result)
+	}
 	cmd = "cd ${base_path} && git add *"
-	result = shell_execute(cmd)
-	display_result(cmd, result)
-	cmd = "cd ${base_path} && git read-tree --reset HEAD"
 	result = shell_execute(cmd)
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""

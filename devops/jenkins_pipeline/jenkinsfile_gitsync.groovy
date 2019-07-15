@@ -1,12 +1,12 @@
 import groovy.json.*
 
-// N8 Deployment Pipeline
+// proj Deployment Pipeline
 // Set this variable to choose between Dev1 and Dev2 landscape
-def landscape = "adventure"
+def landscape = "rlm"
 def live = false // FIXME just for demo
 def flavor = 0
 sep = "\\"
-def base_path = "C:\\Automation\\jenkins_pipe"
+def base_path = "C:\\Automation\\dbm_demo\\devops"
 
 rootJobName = "$env.JOB_NAME";
 //FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
@@ -32,6 +32,7 @@ def base_env = "Dev"
 def base_schema = ""
 def version = "3.11.2.1"
 def buildNumber = "$env.BUILD_NUMBER"
+def credential = "-AuthType DBmaestroAccount -UserName _USER_ -Password \"_PASS_\""
 local_settings = get_settings("${base_path}${sep}${settings_file}")
 def server = local_settings["general"]["server"]
 
@@ -39,7 +40,8 @@ def server = local_settings["general"]["server"]
 properties([
 	parameters([
 		//choice(name: 'Landscape', description: "Develop/Release to specify deployment target", choices: 'MP_Dev\nMP_Dev2,MP_Release'),
-		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes')
+		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes'),
+		choice(name: 'Git_Sync', description: "Yes/No to sync ddl with git", choices: 'No\nYes')
 	])
 ])
 
@@ -50,8 +52,11 @@ def staging_path = local_settings["general"]["staging_path"]
 base_schema = local_settings["branch_map"][landscape][flavor]["base_schema"]
 base_env = local_settings["branch_map"][landscape][flavor]["base_env"]
 pipeline = local_settings["branch_map"][landscape][flavor]["pipeline"]
+platform = local_settings["branch_map"][landscape][flavor]["platform"]
 environments = local_settings["branch_map"][landscape][flavor]["environments"]
 def approvers = local_settings["branch_map"][landscape][flavor]["approvers"]
+credential = credential.replaceFirst("_USER_", local_settings["general"]["username"])
+credential = credential.replaceFirst("_PASS_", local_settings["general"]["token"])
 source_dir = local_settings["branch_map"][landscape][flavor]["source_dir"]
 local_settings = null
 
@@ -125,16 +130,42 @@ stage(environment) {
     bat "xcopy /s /y /i \"${source_dir}${sep}${result}\" \"${staging_dir}${sep}${version}\""
     // trigger packaging
     echo "#----------------- Packaging Files for ${version} -------#"
-    bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server}"
+    bat "${java_cmd} -Package -ProjectName ${pipeline} -Server ${server} ${credential}"
     // version = adhoc_package(version)
   }else{
 	  echo "#-------------- Skipping packaging step (parameter set) ---------#"
   }
     // Deploy to Dev
     echo "#------------------- Performing Deploy on ${environment} -------------#"
-    bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+    //try {
+      bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
+	//	} catch (Exception e) {
+	//		echo e.getMessage();
+	//	}
+
   }
 }
+
+if(env.Git_Sync && env.Git_Sync == "Yes"){
+	stage("Git Sync") {
+	  node (dbmNode) {
+		def base_cmd = "${base_path}${sep}git_revisions${sep}dbm_revisions.bat"
+		def cmd = ""
+		echo "#------------------- Git Sync -------------------------#"
+		if(platform == "postgres" ) {
+			cmd = "${base_cmd} action=postgres_all connection=${landscape}"
+			echo "Updating Postgres Revisions: ${cmd}"
+			bat "${cmd}"
+			//cmd = "${base_cmd} action=process_postgres connection=${landscape}"
+			//echo "Calling revision processor: ${cmd}"
+			//bat "${cmd} action=update_git connection=${landscape}"
+			//echo "Updating git: ${cmd}"
+			//bat "${cmd}"
+		}
+	  }
+	}
+}
+
 if(environments.size() < 2) {
 	currentBuild.result = "SUCCESS"
 	return
@@ -151,9 +182,9 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[0]} -PackageName ${version} -Server ${server} ${credential}"
 		if (do_pair) {
-			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server}"
+			bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${pair[1]} -PackageName ${version} -Server ${server} ${credential}"
 		}
 	}   
 } 
@@ -169,7 +200,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
 if(environments.size() < 4) {
@@ -184,7 +215,7 @@ stage(environment) {
 	node (dbmNode) {
 		//  Deploy to QA
 		echo '#------------------- Performing Deploy on ${environment} --------------#'
-		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server}"
+		bat "${java_cmd} -Upgrade -ProjectName ${pipeline} -EnvName ${environment} -PackageName ${version} -Server ${server} ${credential}"
 	}   
 } 
 

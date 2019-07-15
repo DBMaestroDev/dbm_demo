@@ -1,4 +1,4 @@
-// N8 Deployment Pipeline
+// Deployment Pipeline
 //
 import groovy.json.*
 //
@@ -7,123 +7,101 @@ properties([
 	parameters([
 		choice(name: 'Skip_Packaging', description: "Yes/No to skip packaging step", choices: 'No\nYes'),
 		choice(name: 'Optional_Environment_Deploy', description: "Deploy to DryRun", choices: 'FIT1\nFIT2BOTH\n'),
-		choice(name: 'Optional_DryRun_Deploy', description: "Deploy to DryRun", choices: 'No\nYes')
+		choice(name: 'Optional_DryRun_Deploy', description: "Deploy to DryRun", choices: 'No\nYes'),
+		choice(name: 'Release_Type', description: "Major or Minor", choices: 'Minor\nMajor')
 	])
 ])
 
+sep = "\\"
 // This is the Jenkins alias for the dbmaestro server
-def dbmNode = "dbmaestro"
-dbmNode = ""
-def developBranch = "develop"
-rootJobName = "$env.JOB_NAME";
-//FIXME branchName = rootJobName.replaceFirst('.*/.*/','')
-branchName = rootJobName.replaceFirst('.*/','')
-branchName = branchName.replaceFirst('%2F','/')
-branchType = branchName.replaceFirst('/.*','')
-def landscape = branchType
-if(landscape.equals("release") || landscape.equals("hotfix")){
-		branchVersion = branchName.replaceFirst('.*/','')
-}
-echo "Inputs: ${rootJobName}, branch: ${branchType}, name: ${branchName}"
-automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.n8.ddu\\dbmaestroGroovyFiles"
+def dbmNode = ""
+// Set this for automatic versioning
+def assignVersion = true
+
+// This is the pattern for pulling info from git commit message
+def reg = ~/.*\[Version: (.*)\].*/
 automationPath = "C:\\automation\\dbm_demo\\devops"
-settingsFile = "local_settings.json"
-pipeline = [:]
-branchVersion = ""
-version = ""
+def flavor = 0
 def gitMessage = ""
 def versionResult = ""
-sep = "\\"
-// message looks like this "Adding new tables [Version: V2.3.4] "
-def reg = ~/.*\[Version: (.*)\].*/
-def stagingDir = ""
-def baseEnv = "Dev"
 def buildNumber = "$env.BUILD_NUMBER"
-def ddu_deploy = false
-def flavor = 0
-def sourceDir = ""
-def environment = ""
-def approver = ""
-def settings_content = ""
-def option = 0
-def altPipeline = ""
+
+// ------------- Git Branch -----------------------
+def rootJobName = "$env.JOB_NAME";
+def branchName = rootJobName.replaceFirst('.*/','')
+branchName = branchName.replaceFirst('%2F','/')
+def branchType = branchName.replaceFirst('/.*','')
+def developBranch = "develop"
+def landscape = branchType
+
+// ------------- Update Local Git -----------------------
+stage('GitParams') {
+	node (dbmNode) {
+		def local_path = "C:\\ProgramData\\Oracle\\Java\\javapath;D:\\oracle\\product\\12.2.0\\client_1\\bin;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git\\cmd"
+		withEnv(["PATH=${local_path}"]) {
+			echo "# Read latest commit..."
+			dir([path:"${automationPath}"]){
+				bat "git --version"
+				bat ([script: "git remote update && git checkout ${branchName} && git pull origin ${branchName}"])
+				gitMessage = bat(
+				  script: "@cd ${automationPath} && @git log -1 HEAD --pretty=format:%%s",
+				  returnStdout: true
+				).trim()
+      }
+		}
+		echo "# From Git: ${gitMessage}"
+		versionResult = gitMessage.replaceFirst(reg, '$1')
+	}
+}
+// Both branch version and git version git wins as override!
+if (gitMessage.length() != versionResult.length()){
+	echo "# VERSION/FOLDER from git:" + versionResult
+}else{
+  echo "# No VERSION/FOLDER found"
+  currentBuild.result = "UNSTABLE"
+  return
+}
 
 // ------------- OUTBOARD SETTINGS FILE -----------------------
+pipeline = [:]
+def settingsFile = "local_settings.json"
 node (dbmNode){
-	ddu_deploy = (env.JOB_NAME).toLowerCase().contains("ddu")
+	adHocDeploy = (env.JOB_NAME).toLowerCase().contains("dml")
 	def file_path = "${automationPath}${sep}${settingsFile}"
 	println "JSON Settings Document: ${file_path}"
 	settings_content = readFile(file_path).trim()
 }
-
 pipeline = get_settings(settings_content, landscape)
 
-if (ddu_deploy) { landscape = "ddu" }
+if (adHocDeploy) { landscape = "ddu" }
 echo message_box("Pipeline Deployment Using ${landscape} Process", "title")
+println "=> Inputs: ${rootJobName}, branch: ${branchType}, name: ${branchName}"
 
 if (landscape == "hotfix") {
 	// Hotfix will start in develop
 	pipeline = get_settings(settings_content, developBranch)
 }
 
-echo "Working with: ${rootJobName}\n - Branch: ${landscape}\n - Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["baseEnv"]}\n - Schema: ${pipeline["baseSchema"]}"
-stagingDir = "${pipeline["stagingDir"]}${sep}${pipeline["pipeline"]}${sep}${pipeline["baseSchema"]}"
+echo "=> Working with: Pipe: ${pipeline["pipeline"]}\n - Env: ${pipeline["baseEnv"]}\n - Schema: ${pipeline["baseSchema"]}"
+def stagingDir = "${pipeline["stagingDir"]}${sep}${pipeline["pipeline"]}${sep}${pipeline["baseSchema"]}"
 def spoolPath = "${stagingDir}${sep}${pipeline["pipeline"]}${sep}reports"
 // Add new ddu/ddl subdir to repo
-sourceDir = "${pipeline["sourceDir"]}${sep}${ ddu_deploy ? "ddu" : "ddl" }"
+sourceDir = "${pipeline["sourceDir"]}${sep}${ adHocDeploy ? "ddu" : "ddl" }"
+if (assignVersion) {
+  node (dbmNode){
+  	def versionContents = readFile(pipeline["general"]["version_file"]).trim()
+  	println "currentVersion Document: ${pipeline["general"]["version_file"]}"
+    
+  }
+}
+version = "V" + versionResult
+echo message_box("# FINAL VERSION: ${version}", "title")
 
 /*
 #-----------------------------------------------#
 #	 Stages
 */
-stage('GitParams') {
-	node (dbmNode) {
-		echo message_box("Validating Git Commit")
-		echo "# Update git repo..."
-		echo "# Reset local path - original:"
-		bat "echo %PATH%"
-		def local_path = "C:\\ProgramData\\Oracle\\Java\\javapath;D:\\oracle\\product\\12.2.0\\client_1\\bin;C:\\Windows\\system32;C:\\Windows;C:\\Windows\\System32\\Wbem;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\;C:\\Program Files\\Git\\cmd"
-		echo "# Now: \n${local_path}"
 
-		withEnv(["PATH=${local_path}"])
-		{
-				echo "# Read latest commit..."
-				dir([path:"${sourceDir}"])
-				{
-						bat "git --version"
-						//FIXME bat ([script: "git remote update && git checkout ${branchName} && git pull origin ${branchName}"])
-						gitMessage = bat(
-						script: "@cd ${sourceDir} && @git log -1 HEAD --pretty=format:%%s",
-						returnStdout: true
-						).trim()
-				}
-		}
-		//gitMessage = "This is git message. [VERSION: 2.5.0]"
-		echo "# From Git: ${gitMessage}"
-		versionResult = gitMessage.replaceFirst(reg, '$1')
-	}
-}
-
-if(! branchVersion.equals("")){
-	// Both branch version and git version git wins as override!
-	if (gitMessage.length() != versionResult.length()){
-		echo "# VERSION from git:" + versionResult
-		echo "# VERSION from branch:" + branchVersion
-		echo "# git version overrides branch version!"
-	}else{
-		echo "# VERSION from branch:" + branchVersion
-		versionResult = branchVersion
-	}
-}else if (gitMessage.length() == versionResult.length()){
-	echo "# No VERSION found"
-	currentBuild.result = "UNSTABLE"
-	return
-}else{
-	echo "# VERSION from git:" + versionResult
-}
-
-version = "V" + versionResult
-echo message_box("# FINAL VERSION: ${version}", "title")
 
 if( ["hotfix","ddu","develop"].contains(landscape)) {
 	stage('Packaging') {
@@ -296,16 +274,15 @@ def dbmaestro_deploy(environment_map, option = 0) {
 		if (do_it) {
 			echo message_box("Performing Deploy on ${cur_env}", "title")
 			bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${version} -Server ${pipeline["server"]}"
-			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "AVS_DEVOPS_RELEASE_ENGINEERING@ADP.com,CAPS_Open_Systems_DBA@ADP.com" )
+			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "suppotr@dbmaestro.com" )
 		}
 				cnt += 1
 	}
 }
 
 @NonCPS
-def transfer_packages(source_pipe, target_pipe, packages, consolidate_version = "none"){
-  // Take new arguments to consolidate packages
-	bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && set CONSOLIDATE_VERSION=${consolidate_version} && ${automationPath}${sep}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep}dbm_api.bat action=export_packages ARG1=${source_pipe} "
+def transfer_packages(source_pipe, target_pipe, packages){
+	bat "set SOURCE_PIPELINE=${source_pipe} && set TARGET_PIPELINE=${target_pipe} && set EXPORT_PACKAGES=${packages.join(",")} && ${automationPath}${sep}dbm_api.bat action=packages ARG1=${source_pipe} && ${automationPath}${sep}dbm_api.bat action=export_packages ARG1=${source_pipe} "
 	echo message_box("Packaging Files for ${packages.join(",")}")
 	bat "${javaCmd} -Package -ProjectName ${pipeline["pipeline"]} -Server ${server}"
 	
@@ -329,4 +306,71 @@ def message_box(msg, def mtype = "sep") {
   }
   //println res
   return res
+}
+
+@NonCPS
+
+// GetNextEnv
+def shouldDeploy(cur_env) {
+    if (cur_env.contains("FIT")) {
+        echo env.Optional_Environment_Deploy
+        echo cur_env
+        if (cur_env.contains(env.Optional_Environment_Deploy) || env.Optional_Environment_Deploy == "BOTH") {
+            do_it = true
+        } else {
+            do_it = false
+        }
+    } else if (cur_env == "DryRun") {
+        if (env.Optional_DryRun_Deploy == "Yes") {
+            do_it = true
+        } else {
+            do_it = false
+        }
+    } else {
+        do_it = true;
+    }
+    return do_it
+}
+
+@NonCPS
+def getNextVersion(optionType, contents){
+  //Get version from currentVersion.txt file D:\\repo\\proj
+  // looks like this:
+  // develop=1.10.01
+  // release=1.9.03
+  def newVersion = ""
+  def curVersion = [:]
+  for (cur in contents.split("\r\n") { 
+    def pair = cur.split("=")
+    curVersion[pair[0].trim()] = pair[1].trim()
+  }
+  switch (optionType.toLowerCase()) {
+    case "develop":
+      curVersion["develop"] = incrementVersion(curVersion["develop"])
+      break
+    case "hotfix":
+      curVersion["develop"] = incrementVersion(curVersion["develop"])
+      break
+  }
+  return curVersion
+}
+
+@NonCPS
+def incrementVersion(ver){
+  // ver = 1.9.04
+  def process = env.Release_Type == "Major" ? "normal" : "other"
+  def new_ver = ver
+  def parts = ver.split('\\.')
+  if(process == "normal"){
+      parts[2] = (parts[2].toInteger() + 1).toString()
+      new_ver = parts[0] + "." + parts[1] + "." + parts[2]
+  }else{
+      if(parts.size() > 3){
+          parts[3] = (parts[3].toInteger() + 1).toString()
+      }else{
+          parts = parts + '1'
+      }
+      new_ver = parts[0] + "." + parts[1] + "." + parts[2] "." + parts[3]
+  }
+  return new_ver
 }
