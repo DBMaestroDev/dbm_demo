@@ -1,6 +1,6 @@
 /*
 ####### SQL Revision Parser ################
-#  
+#
 # Parses object revisions from dbm or platform dumpfiles into object ddl and pushes into git
 => BJB 9/18/18
 */
@@ -19,9 +19,10 @@ settings = [
 	"base_path" : "C:\\Automation\\",
 	"repository_name" : "REPO",
 	"default_branch" : "master",
-	"another" : ""
+	"app_name" : "CustomerService",
+	"branch_map" : ["CS_RELEASE" : "master", "CS_DEV" : "development", "CS_NextGen" : "nextgen"]
 	]
-	
+
 input_file = this.args[0]
 init_log()
 message_box("Processing Hook for git Sync","title")
@@ -36,12 +37,14 @@ def process_hook() {
 		def environment = params["Environment"]["name"]
 		def version = params["Version"]["versionString"]
 		def db_type = params["FlowDetails"]["DBTypeId"]
+		def branch = settings["branch_map"][pipeline]
+		def app_name = settings["app_name"]
 		logit "Job initiated by: ${params["User"]["Name"]} on ${params["Job"]["CreatetionTime"]}"
 		logit "Pipeline: ${pipeline}, Environment: ${environment}, Version: ${version}"
 		logit "#=> Scripts:"
 		logit "${"Name".padRight(25)}| ${"Schema".padRight(15)}"
-		params["Scripts"].each{ script -> 
-			logit "${script["name"].padRight(25)}| ${script["schemaName"].padRight(15)}"  
+		params["Scripts"].each{ script ->
+			logit "${script["name"].padRight(25)}| ${script["schemaName"].padRight(15)}"
 		}
 		def platform = "oracle"
 		msg = "DBm Hook update - ${pipeline} => ${environment} for version: ${version}"
@@ -53,12 +56,12 @@ def process_hook() {
 				platform = "postgres"
 				break
 		}
-		process_db_changes(pipeline,environment,version,platform)
+		process_db_changes(pipeline,environment,version,platform, app_name)
 		update_git(msg)
-				
+
 }
 
- 
+
 def parse_arguments(args){
   for (arg in args) {
     //logit arg
@@ -69,12 +72,21 @@ def parse_arguments(args){
       arg_map[arg] = ""
     }
   }
-  
+
 }
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
-def process_db_changes(pipeline,environment,version, dbType){
-	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle${sep}${params["FlowDetails"]["FlowName"]}"
+def process_db_changes(pipeline,environment,version, dbType, app_name){
+	def path_app = pipeline
+	if(app_name != "none"){path_app = app_name}
+	logit "App: ${app_name}, PApp: ${path_app}"
+	base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}${sep}oracle${sep}${path_app}"
+	def branch = settings["branch_map"][pipeline]
+	if(branch != "none"){
+		cmd = "cd ${base_path} && git checkout ${branch}"
+		result = shell_execute(cmd)
+		display_result(cmd, result)
+	}
 	def schema_name = params["Schemas"][0]["name"]
 	def path = ''
 	def sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
@@ -83,15 +95,19 @@ def process_db_changes(pipeline,environment,version, dbType){
 	logit "=> Processes DBmaestro revisions to files."
 	params["ChangedObjects"].each{ schema ->
 		schema_name = schema["SchemaName"]
-		logit "  Database: ${schema_name}"
+		logit "  Database/App: ${schema_name}"
 		schema["Objects"].each { dbobj ->
 			path = "${base_path}${sep}${schema_name}${sep}${type_lookup(dbobj["Type"])}"
+			if(app_name != "none"){
+				path = "${base_path}${sep}${type_lookup(dbobj["Type"])}"
+			}
+
 			ensure_dir(path)
 			content = dbobj["TargetCreationScript"]
-			name = "${dbobj["Name"]}.sql"    
+			name = "${dbobj["Name"]}.sql"
 			def hnd = new File("${path}${sep}${name}")
 			logit "Saving: ${path}${sep}${name}", "DEBUG", true
-			hnd.write content	
+			hnd.write content
 		}
     }
 	separator(100)
@@ -104,13 +120,14 @@ def update_git(commit_msg = ""){
 	/*
 	Check if git repo
 	add objects
-	
+
 	*/
 	def now = new Date()
 	def base_path = "${settings["base_path"]}${sep}${settings["repository_name"]}"
 	def branch = settings["default_branch"]
-	def cmd = "cd ${base_path} && git status"
 	def pipeline = params["FlowDetails"]["FlowName"]
+	if(settings["branch_map"][pipeline]){branch = settings["branch_map"][pipeline]}
+	def cmd = "cd ${base_path} && git status"
 	def environment = params["Environment"]["name"]
 	def version = params["Version"]["versionString"]
 	def db_type = params["FlowDetails"]["DBTypeId"]
@@ -141,10 +158,10 @@ def update_git(commit_msg = ""){
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git commit -a -m \"${commit_txt}\""
 	result = shell_execute(cmd)
-	display_result(cmd, result)	
+	display_result(cmd, result)
 	cmd = "cd ${base_path} && git push origin ${branch}"
 	result = shell_execute(cmd)
-	display_result(cmd, result)	
+	display_result(cmd, result)
 }
 
 def get_settings(file_path) {
@@ -153,7 +170,7 @@ def get_settings(file_path) {
 	logit "JSON Settings Document: ${file_path}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
-	  cur_settings = jsonSlurper.parseText(json_file_obj.text)  
+	  cur_settings = jsonSlurper.parseText(json_file_obj.text)
 	}
 	return cur_settings
 }
@@ -169,7 +186,7 @@ def type_lookup(typeNo){
 		break
 	default:
 		"UNDEFINED"
-		break	
+		break
 	}
 }
 
@@ -186,7 +203,7 @@ def message_box(msg, def mtype = "sep") {
     res = "#${"-" * tot}#\n"
     start = "#${" " * (ilen/2).toInteger()} ${msg} "
     res += "${start}${" " * (tot - start.size() + 1)}#\n"
-    res += "#${"-" * tot}#\n"   
+    res += "#${"-" * tot}#\n"
   }
   logit res
   return res
@@ -245,7 +262,7 @@ def sql_connection(conn_type) {
 	}else{
 	  dbDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 	  logit "Querying MSSQL ${conn_type} Db: ${conn}"
-	  return Sql.newInstance("jdbc:sqlserver://${conn}", user, password, dbDriver)		
+	  return Sql.newInstance("jdbc:sqlserver://${conn}", user, password, dbDriver)
 	}
 }
 
