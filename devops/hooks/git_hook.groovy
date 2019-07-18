@@ -167,6 +167,9 @@ def type_lookup(typeNo){
 	case 1:
 		"VIEW"
 		break
+  case 2:
+  	"PROCEDURE"
+  	break
 	default:
 		"UNDEFINED"
 		break	
