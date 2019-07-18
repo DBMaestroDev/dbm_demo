@@ -274,7 +274,7 @@ def dbmaestro_deploy(environment_map, option = 0) {
 		if (do_it) {
 			echo message_box("Performing Deploy on ${cur_env}", "title")
 			bat "${pipeline["javaCmd"]} -Upgrade -ProjectName ${pipeline["pipeline"]} -EnvName ${cur_env} -PackageName ${version} -Server ${pipeline["server"]}"
-			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "support@dbmaestro.com" )
+			emailext( body: "See ${env.BUILD_URL}", subject: "${cur_env} Deployment Successful", to: "suppotr@dbmaestro.com" )
 		}
 				cnt += 1
 	}

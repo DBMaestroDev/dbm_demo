@@ -1,5 +1,5 @@
 {
-  "### Instructions ###": 
+  "### Instructions ###":
     "Enter the local settings items for the parser",
     "general" : {
       "base_path" : "C:\\Automation",
@@ -25,7 +25,34 @@
 			"password" : "manage#2009",
 			"connect" : "dbmJohnHancock:1521/orcl"
 		 },
-		"hr_dev" : {
+    "cs_dev" : {
+ 			"platform" : "oracle",
+ 			"code_separator" : "none",
+ 			"user" : "CS_DEV",
+ 			"password" : "bugsy",
+      "branch" : "development",
+     "app_name" : "CustomerService",
+ 			"connect" : "dbmJohnHancock:1521/orcl"
+ 		 },
+     "cs_nextgen" : {
+  			"platform" : "oracle",
+  			"code_separator" : "none",
+  			"user" : "CS_DEV1",
+  			"password" : "bugsy",
+       "app_name" : "CustomerService",
+       "branch" : "nextgen",
+  			"connect" : "dbmJohnHancock:1521/orcl"
+  		 },
+   "cs_release" : {
+  			"platform" : "oracle",
+  			"code_separator" : "none",
+  			"user" : "CS_STAGE",
+  			"password" : "bugsy",
+        "branch" : "master",
+   		  "app_name" : "CustomerService",
+  			"connect" : "dbmJohnHancock:1521/orcl"
+  		 },
+ 		"hr_dev" : {
 			"platform" : "oracle",
 			"code_separator" : "none",
 			"user" : "HR_QA2",
@@ -113,4 +140,3 @@
 	}
   }
 }
-

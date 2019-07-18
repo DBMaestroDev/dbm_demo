@@ -25,7 +25,6 @@ if(landscape.equals("release") || landscape.equals("hotfix")){
 		branchVersion = branchName.replaceFirst('.*/','')
 }
 echo "Inputs: ${rootJobName}, branch: ${branchType}, name: ${branchName}"
-automationPath = "D:\\automation\\git\\com.adp.avs.dbmaestro.proj.ddu\\dbmaestroGroovyFiles"
 automationPath = "C:\\automation\\dbm_demo\\devops"
 settingsFile = "local_settings.json"
 pipeline = [:]

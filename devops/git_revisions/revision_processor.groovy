@@ -1,8 +1,8 @@
 /*
 ####### SQL Revision Parser ################
-#  
+#
 # Parses object revisions from dbm or platform dumpfiles into object ddl and pushes into git
-=> BJB 9/18/18
+=> BJB 9/18/18, 5/14/19
 */
 import java.sql.Connection
 import groovy.sql.Sql
@@ -75,7 +75,7 @@ def process_mssql(){
 	// unpack_file(file_name)
 	def icnt = 0
 	def last_line = "ZZZ___"
-	def hand = new File(file_path).eachLine {line -> 
+	def hand = new File(file_path).eachLine {line ->
 	  if(line.length() < 1){ // || icnt > 3000){
 	    //skip it
 	  }else if(line == delim && last_line == ""){
@@ -90,13 +90,13 @@ def process_mssql(){
 	  }
 	  //logit "#=> Line: ${line}"
 	  last_line = line
-	  icnt += 1  
+	  icnt += 1
 	}
 }
 // FIXME - now add all the files to git and commit
 // update_scm
 
- 
+
 def parse_arguments(args){
   for (arg in args) {
     //logit arg
@@ -107,7 +107,7 @@ def parse_arguments(args){
       arg_map[arg] = ""
     }
   }
-  
+
 }
 
 // ### Postgres Processing
@@ -130,7 +130,7 @@ def process_postgres(){
 	def last_line = "--"
 	def dec_line = "-- Name: unknown; Type: COMMENT; Schema: -; Owner: \n"
 	obj_ddl = dec_line
-	def hand = new File(file_path).eachLine {line -> 
+	def hand = new File(file_path).eachLine {line ->
 	  if(line.length() < 1 ){ // || icnt > 3000){
 	    //skip it
 	  }else if(line.startsWith(delim) && last_line == "--"){
@@ -145,7 +145,7 @@ def process_postgres(){
 	  }
 	  //logit "#=> Line: ${line}"
 	  last_line = line
-	  icnt += 1  
+	  icnt += 1
 	}
 }
 
@@ -171,7 +171,7 @@ def generate_pg_dump(){
 	if(sep == "/"){
 		pass = "PGPASSWORD=\"${pwd}\" "
 		cmd = "${pass}${pg_dump} ${cmd}"
-	
+
 	}else{
 		pass = "set \"PGPASSWORD=${pwd}\" && "
 		cmd = "${pass}\"${pg_dump}\" ${cmd}"
@@ -190,7 +190,7 @@ def postgres_all(){
 //  Oracle Methods
 // REPO/ORACLE/SCHEMA
 def process_oracle(){
-	def connection = arg_map["connection"]
+	def connection = arg_map["connection"].toLowerCase()
 	def base_path = settings["general"]["base_path"]
 	def delim = settings["connections"][connection]["code_separator"]
 	def schema_name = settings["connections"][connection]["user"]
@@ -221,7 +221,7 @@ def process_oracle(){
 	  System.exit(1)
 	}
 	display_result(cmd, result)
-	if(branch != "master"){ 
+	if(branch != "master"){
 		cmd = "cd ${base_path} && git checkout ${branch}"
 		result = shell_execute(cmd)
 		display_result(cmd, result)
@@ -240,7 +240,7 @@ def process_oracle(){
 	def conn = sql_connection(connection)
 	sql = sql.replaceAll("__LABELNAME__", label_name)
 	sql = sql.replaceAll("__SCHEMA_NAME__", schema_name)
-	sql = sql.replaceAll("__PIPELINE__", connection)
+	sql = sql.replaceAll("__PIPELINE__", arg_map["connection"])
 	logit "  Query: ${sql}"
 	logit "  Pushing to path: ${base_path}${sep}${app_name}"
 	def icnt = 0
@@ -254,12 +254,12 @@ def process_oracle(){
 	    content = clob.getAsciiStream().getText()
 		icnt += 1
 		content = hdr + content.replaceAll(reg,"") //"<SCHEMANAME>")
-		name = "${row.OBJECT_NAME}.sql"    
+		name = "${row.OBJECT_NAME}.sql"
 		def hnd = new File("${path}${sep}${name}")
 		logit "Saving: ${path}${sep}${name}", "DEBUG", true
 		hnd.write content
 	}
-	
+
 	logit "  Processed: ${icnt} objects"
 	separator(100)
 }
@@ -274,11 +274,12 @@ def oracle_object_ddl_query(src = "repo") {
 
 //Postgres Save
 def pg_save_object(content, declaration){
-  def parts = declaration.replaceAll(/\-\-\s/,"").split(";") 
+  def parts = declaration.replaceAll(/\-\-\s/,"").split(";")
   def connection = arg_map["connection"]
+	def app = arg_map["application"]
 	def info = [:]
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}${sep}postgres"
-	
+
 	logit "Parts: ${parts}", "DEBUG", true
   parts.each{ item->
 		pair = item.split(": ")
@@ -294,11 +295,11 @@ def pg_save_object(content, declaration){
   def path = "${base_path}${sep}${connection}${sep}${obj_type}"
   ensure_dir(path)
   def name = obj_name.replaceAll(/\;/,"").trim()
-  name = "${prefix}${name}.sql"    
+  name = "${prefix}${name}.sql"
   def hnd = new File("${path}${sep}${name}")
   logit "Saving: ${path}${sep}${name}", "DEBUG", true
   hnd.write content
-  
+
 }
 
 // MSSQL Parsing
@@ -334,7 +335,7 @@ def save_object(content){
   if(obj_type != "not found"){
     def prefix = ""
     obj_schema = cur_line.replaceFirst(pri_reg, '$1')
-    obj_name = cur_line.replaceFirst(pri_reg, '$2')  
+    obj_name = cur_line.replaceFirst(pri_reg, '$2')
     if(obj_schema == cur_line){
       obj_schema = ""
       obj_name = cur_line.replaceFirst(pri_reg2, '$1')
@@ -344,7 +345,7 @@ def save_object(content){
       dec_line = lines[icnt + 1]
       def subobj_type = has_declaration(dec_line, "sub_objects")
       if(subobj_type != "not found"){
-        prefix = settings["mssql_map"]["sub_objects"]["prefix"]      
+        prefix = settings["mssql_map"]["sub_objects"]["prefix"]
         obj_type = subobj_type
         obj_name = dec_line.replaceFirst(sub_reg, '$1')
         logit "SUB: ${obj_type}: ${obj_name}", "DEBUG", true
@@ -360,7 +361,7 @@ def save_object(content){
     def path = "${base_path}${sep}${obj_type}"
     ensure_dir(path)
     def name = obj_name.replaceAll(/\;/,"").trim()
-    name = "${prefix}${name}.sql"    
+    name = "${prefix}${name}.sql"
     def hnd = new File("${path}${sep}${name}")
     logit "Saving: ${path}${sep}${name}", "DEBUG", true
     hnd.write content
@@ -391,7 +392,7 @@ def update_git(){
 	/*
 	Check if git repo
 	add objects
-	
+
 	*/
 	def now = new Date()
 	def base_path = "${settings["general"]["base_path"]}${sep}${settings["general"]["repository_name"]}"
@@ -414,7 +415,7 @@ def update_git(){
 	//cmd = "cd ${base_path} && git read-tree --reset HEAD"
 	//result = shell_execute(cmd)
 	//display_result(cmd, result)
-	if(branch != "master"){ 
+	if(branch != "master"){
 		cmd = "cd ${base_path} && git checkout ${branch}"
 		result = shell_execute(cmd)
 		display_result(cmd, result)
@@ -424,10 +425,10 @@ def update_git(){
 	display_result(cmd, result)
 	cmd = "cd ${base_path} && git commit -a -m \"Adding repository changes from automation - ${arg_map["connection"]} v${build_no} ${commit_txt}\""
 	result = shell_execute(cmd)
-	display_result(cmd, result)	
+	display_result(cmd, result)
 	cmd = "cd ${base_path} && git push origin ${branch}"
 	result = shell_execute(cmd)
-	display_result(cmd, result)	
+	display_result(cmd, result)
 }
 
 def get_settings(file_path) {
@@ -436,7 +437,7 @@ def get_settings(file_path) {
 	logit "JSON Settings Document: ${file_path}"
 	def json_file_obj = new File( file_path )
 	if (json_file_obj.exists() ) {
-	  settings = jsonSlurper.parseText(json_file_obj.text)  
+	  settings = jsonSlurper.parseText(json_file_obj.text)
 	}
 	return settings
 }
@@ -454,7 +455,7 @@ def message_box(msg, def mtype = "sep") {
     res = "#${"-" * tot}#\n"
     start = "#${" " * (ilen/2).toInteger()} ${msg} "
     res += "${start}${" " * (tot - start.size() + 1)}#\n"
-    res += "#${"-" * tot}#\n"   
+    res += "#${"-" * tot}#\n"
   }
   logit res
   return res
@@ -513,7 +514,7 @@ def sql_connection(conn_type) {
 	}else{
 	  dbDriver = "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 	  logit "Querying MSSQL ${conn_type} Db: ${conn}"
-	  return Sql.newInstance("jdbc:sqlserver://${conn}", user, password, dbDriver)		
+	  return Sql.newInstance("jdbc:sqlserver://${conn}", user, password, dbDriver)
 	}
 }
 

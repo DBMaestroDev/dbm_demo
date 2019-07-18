@@ -10,6 +10,9 @@ SET DEFINE OFF
 SET BLOCKTERMINATOR OFF
 SET SQLBLANKLINES ON
 
+EXECUTE DBMS_OUTPUT.PUT_LINE('Checking User Context');
+select sys_context( 'userenv', 'current_schema' ) from dual;
+
 -- Step 1: Creating table - 'CONTRACTORS'
 EXECUTE DBMS_OUTPUT.PUT_LINE('Step 1: Creating table - CONTRACTORS');
 CREATE TABLE "CONTRACTORS" 

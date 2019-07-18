@@ -175,7 +175,17 @@
                 "UserName": "HR_QA1",
                 "Password": null
               },
-              "Order": 1,
+        {
+              "Name": "XEXE",
+              "SchemaCredentials": {
+                "Port": 1521,
+                "IdentifierType": "SID",
+                "Identifier": "orcl",
+                "Host": "teamwork2012",
+                "UserName": "HR_QA1",
+                "Password": null
+              },
+			  "Order": 1,
               "SchemaId": 34,
               "IsManaged": false,
               "Safe": null,
